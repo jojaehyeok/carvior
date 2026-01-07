@@ -11,11 +11,6 @@ import AddressSection from '@/components/booking/AddressSelector';
 // import PaymentSection from '@/components/booking/PaymentSection';
 // import TermsSection from '@/components/booking/TermsSection';
 
-type Props = {
-  formData: BookingFormData;
-  updateField: <K extends keyof BookingFormData>(field: K, value: BookingFormData[K]) => void;
-  errors: Partial<Record<keyof BookingFormData, string>>;
-};
 
 interface BookingFormData {
   // 차량 정보
