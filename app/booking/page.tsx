@@ -11,6 +11,12 @@ import AddressSection from '@/components/booking/AddressSelector';
 // import PaymentSection from '@/components/booking/PaymentSection';
 // import TermsSection from '@/components/booking/TermsSection';
 
+type Props = {
+  formData: BookingFormData;
+  updateField: <K extends keyof BookingFormData>(field: K, value: BookingFormData[K]) => void;
+  errors: Partial<Record<keyof BookingFormData, string>>;
+};
+
 interface BookingFormData {
   // 차량 정보
   carBrand: string;
@@ -245,7 +251,7 @@ export default function BookingPage() {
         </div>
         
         {/* 예약 폼 */}
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <CarInfoSection 
             formData={formData}
             updateField={updateField}
@@ -289,7 +295,7 @@ export default function BookingPage() {
             formData={formData}
             updateField={updateField}
             errors={errors}
-          />
+          /> */}
           
           {/* 결제 버튼 */}
           <div className="pt-6 border-t border-gray-200">
@@ -326,6 +332,5 @@ export default function BookingPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
