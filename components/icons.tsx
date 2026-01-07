@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { IconSvgProps } from "@/types";
+import { IconSvgProps } from "@/types/index";
 
 export const Logo: React.FC<IconSvgProps> = ({
   size = 120,
@@ -10,6 +10,8 @@ export const Logo: React.FC<IconSvgProps> = ({
 }) => {
   const finalSize = size || width || height || 36;
 
+  const { ref, ...imgProps } = props as any;
+
   return (
     <img
       src="/logo.png"   // ✅ 누끼 딴 로고 경로
@@ -17,7 +19,7 @@ export const Logo: React.FC<IconSvgProps> = ({
       width={finalSize}
       height={finalSize}
       style={{ objectFit: 'contain' }}
-      {...props}
+      {...imgProps}
     />
   );
 };

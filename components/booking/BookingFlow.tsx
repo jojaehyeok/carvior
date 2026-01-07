@@ -157,7 +157,7 @@ export default function BookingFlow() {
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-4">4. 평가사 선택</h3>
-              <EvaluatorSelector onSelect={handleEvaluatorSelect} />
+              {/* <EvaluatorSelector onSelect={handleEvaluatorSelect} /> */}
             </div>
             <div className="flex gap-3">
               <button
@@ -180,13 +180,13 @@ export default function BookingFlow() {
       case 4:
         return (
           <BookingSummary
-            carModel={bookingData.carModel}
-            address={bookingData.address}
-            date={bookingData.date}
-            time={bookingData.time}
-            evaluator={bookingData.evaluator}
-            onConfirm={handleConfirmBooking}
-            isLoading={isSubmitting}
+            // carModel={bookingData.carModel}
+            // address={bookingData.address}
+            // date={bookingData.date}
+            // time={bookingData.time}
+            // evaluator={bookingData.evaluator}
+            // onConfirm={handleConfirmBooking}
+            // isLoading={isSubmitting}
           />
         );
       

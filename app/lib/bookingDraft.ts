@@ -1,4 +1,4 @@
-import { BookingFormData } from '@/types/booking';
+import { BookingFormData } from '@/app/types/booking';
 
 export type BookingDraft = BookingFormData;
 
