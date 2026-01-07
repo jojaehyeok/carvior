@@ -22,13 +22,17 @@ interface Evaluator {
 }
 
 interface BookingData {
-  carModel: string;
+  car: {
+    model: string;
+  };
   address: {
     main: string;
     detail: string;
   };
-  date: string;
-  time: string;
+  schedule: {
+    date: string;
+    time: string;
+  };
 }
 
 const evaluators: Evaluator[] = [
@@ -98,37 +102,35 @@ export default function EvaluatorsPage() {
   const filteredEvaluators = evaluators.filter(evaluator => {
     // 타입 필터
     if (selectedType !== "전체" && evaluator.type !== selectedType) return false;
-    
+
     // 지역 검색
     if (searchRegion && !evaluator.region.includes(searchRegion)) return false;
-    
+
     // 이름 검색
     if (searchName && !evaluator.name.includes(searchName)) return false;
-    
+
     return true;
   });
 
   useEffect(() => {
     // 저장된 예약 데이터 로드
-    const savedBooking = localStorage.getItem('currentBooking');
-    if (!savedBooking) {
-      alert('예약 정보가 없습니다. 홈페이지에서 먼저 예약 정보를 입력해주세요.');
-      router.push('/');
+    const saved = localStorage.getItem("bookingDraft");
+
+    if (!saved) {
+      alert("예약 정보가 없습니다. 홈페이지에서 먼저 입력해주세요.");
+      router.push("/");
       return;
     }
-    
-    const data = JSON.parse(savedBooking);
-    setBookingData(data);
-    
-    // URL에 날짜가 있다면 검색 필터에 적용
-    if (data.date) {
-      setSearchDate(data.date);
+
+    const raw = JSON.parse(saved) as BookingData;
+    setBookingData(raw);
+
+    if (raw.schedule?.date) {
+      setSearchDate(raw.schedule.date);
     }
-    
-    // URL에 주소가 있다면 검색 필터에 적용
-    if (data.address?.main) {
-      const region = data.address.main.split(' ')[0]; // 첫 번째 지역명만 추출
-      setSearchRegion(region);
+
+    if (raw.address?.main) {
+      setSearchRegion(raw.address.main.split(" ")[0]);
     }
   }, [router]);
 
@@ -146,7 +148,7 @@ export default function EvaluatorsPage() {
 
     try {
       const selectedEval = evaluators.find(e => e.id === selectedEvaluator);
-      
+
       if (!selectedEval) {
         throw new Error('선택한 평가사를 찾을 수 없습니다.');
       }
@@ -160,7 +162,7 @@ export default function EvaluatorsPage() {
           title: selectedEval.title,
           avatar: selectedEval.avatar,
           rating: selectedEval.rating,
-          fee: selectedEval.discountRate 
+          fee: selectedEval.discountRate
             ? Math.round(selectedEval.fee * (1 - selectedEval.discountRate / 100))
             : selectedEval.fee,
           originalFee: selectedEval.fee,
@@ -175,14 +177,15 @@ export default function EvaluatorsPage() {
 
       // API 호출 시뮬레이션
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
       // 예약 완료 데이터 저장
       localStorage.setItem('completedBooking', JSON.stringify(completeBooking));
       localStorage.removeItem('currentBooking'); // 임시 데이터 삭제
-      
+
       // 예약 완료 페이지로 이동
-      router.push(`/booking/complete?id=${completeBooking.bookingId}`);
-      
+      router.push(`/booking/payment`);
+      // router.push(`/booking/complete?id=${completeBooking.bookingId}`);
+
     } catch (error) {
       console.error('예약 실패:', error);
       alert('예약 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -232,7 +235,7 @@ export default function EvaluatorsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
             <div>
               <span className="text-gray-600">차량: </span>
-              <span className="font-medium">{bookingData.carModel}</span>
+              <span className="font-medium">{bookingData.car.model}</span>
             </div>
             <div>
               <span className="text-gray-600">장소: </span>
@@ -241,8 +244,8 @@ export default function EvaluatorsPage() {
             <div>
               <span className="text-gray-600">일시: </span>
               <span className="font-medium">
-                {new Date(bookingData.date).toLocaleDateString('ko-KR')}{' '}
-                {parseInt(bookingData.time)}시
+                {new Date(bookingData.schedule.date).toLocaleDateString('ko-KR')}{' '}
+                {parseInt(bookingData.schedule.time)}시
               </span>
             </div>
           </div>
@@ -287,7 +290,7 @@ export default function EvaluatorsPage() {
             </div>
 
             {/* 검색 버튼 */}
-            <button 
+            <button
               onClick={handleSearch}
               className="flex items-center justify-center rounded-xl bg-black px-6 text-sm font-semibold text-white hover:bg-gray-900 transition"
             >
@@ -302,11 +305,10 @@ export default function EvaluatorsPage() {
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    selectedType === type
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${selectedType === type
                       ? "bg-black text-white"
                       : "border border-gray-300 text-gray-700 hover:border-black hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {type}
                 </button>
@@ -317,11 +319,10 @@ export default function EvaluatorsPage() {
               {sortTabs.map((tab, idx) => (
                 <button
                   key={tab}
-                  className={`transition ${
-                    idx === 0
+                  className={`transition ${idx === 0
                       ? "font-semibold text-gray-900"
                       : "hover:text-gray-800"
-                  }`}
+                    }`}
                 >
                   {tab}
                 </button>
@@ -342,11 +343,10 @@ export default function EvaluatorsPage() {
           {filteredEvaluators.map((e) => (
             <article
               key={e.id}
-              className={`relative rounded-3xl bg-white pb-5 pt-9 shadow-sm ring-1 transition-all duration-300 ${
-                selectedEvaluator === e.id
+              className={`relative rounded-3xl bg-white pb-5 pt-9 shadow-sm ring-1 transition-all duration-300 ${selectedEvaluator === e.id
                   ? "ring-2 ring-blue-500 shadow-lg transform scale-[1.02]"
                   : "ring-gray-100 hover:shadow-md"
-              }`}
+                }`}
               onClick={() => handleSelectEvaluator(e.id)}
             >
               {/* 할인 배지 */}
@@ -458,11 +458,10 @@ export default function EvaluatorsPage() {
                     event.stopPropagation();
                     handleSelectEvaluator(e.id);
                   }}
-                  className={`mt-4 w-full rounded-xl py-2 text-xs font-semibold transition ${
-                    selectedEvaluator === e.id
+                  className={`mt-4 w-full rounded-xl py-2 text-xs font-semibold transition ${selectedEvaluator === e.id
                       ? "bg-blue-600 text-white"
                       : "bg-black text-white hover:bg-gray-900"
-                  }`}
+                    }`}
                 >
                   {selectedEvaluator === e.id ? "선택됨" : "이 평가사 선택하기"}
                 </button>
@@ -499,11 +498,10 @@ export default function EvaluatorsPage() {
           <button
             onClick={handleCompleteBooking}
             disabled={!selectedEvaluator || isSubmitting}
-            className={`flex-1 rounded-xl py-4 text-sm font-semibold transition ${
-              selectedEvaluator && !isSubmitting
+            className={`flex-1 rounded-xl py-4 text-sm font-semibold transition ${selectedEvaluator && !isSubmitting
                 ? "bg-blue-600 text-white hover:bg-blue-700"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">

@@ -1,291 +1,276 @@
 "use client";
-import React, { useRef, useEffect, useState } from 'react';
-import { Checkbox, Chip, Textarea } from '@nextui-org/react';
-import html2canvas from 'html2canvas'; // Import html2canvas for full-page screenshot
+import React, { useRef, useEffect, useState } from "react";
+import { Chip, Textarea, Input } from "@nextui-org/react";
+import jsPDF from "jspdf";
+import "@/public/fonts/NotoSansKR-Bold-normal";
 
-type TextOption = 'X' | 'B' | 'W' | 'A' | 'T' | 'C' | 'U' | 'OL';
-type UiColorOption = 'danger' | 'primary' | 'secondary'| 'warning';
-type ColorOption = 'red' | 'blue' | 'purple' | 'orange';
+/* ================= 타입 ================= */
+type PanelType = "외판" | "내판" | "실내" | "엔진룸";
+type TextOption = "X" | "B" | "W" | "A" | "T" | "C" | "U" | "OL";
+type Point = { x: number; y: number; text: TextOption };
+type UiColor = "red" | "blue" | "purple" | "orange";
 
-const uicolorMap: Record<UiColorOption, ColorOption> = {
-    danger: 'red',
-    primary: 'blue',
-    secondary: 'purple',
-    warning : 'orange',
+/* ================= 상수 ================= */
+const COLOR_MAP: Record<TextOption, UiColor> = {
+  X: "red",
+  B: "purple",
+  W: "blue",
+  A: "blue",
+  T: "blue",
+  C: "blue",
+  U: "blue",
+  OL: "orange",
 };
 
-const colorMap: Record<TextOption, UiColorOption> = {
-    X: 'danger',
-    B: 'secondary',
-    W: 'primary',
-    A: 'primary',
-    T: 'primary',
-    C: 'primary',
-    U: 'primary',
-    OL: 'warning',
+const PANEL_IMAGE: Record<PanelType, string> = {
+  외판: "/jindan2.jpg",
+  내판: "/jindan1.jpg",
+  실내: "/jindan3.jpg",
+  엔진룸: "/jindan4.jpg",
 };
 
-const textMap: Record<TextOption, string> = {
-    X: 'X 교환',
-    B: 'B 판금',
-    W: 'W 용접',
-    A: 'A 긁힘',
-    T: 'T 깨짐',
-    U: 'U 찌그러짐',
-    C: 'C 부식',
-    OL: 'OL 누유',
+const TEXT_OPTIONS: Record<PanelType, TextOption[]> = {
+  외판: ["X", "B", "W"],
+  내판: ["X", "B", "W", "A", "T", "C", "U"],
+  실내: ["A", "T", "C", "U"],
+  엔진룸: ["OL"],
 };
 
-const CanvasWithText: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const [points, setPoints] = useState<{ x: number; y: number; text: TextOption }[]>([]);
-    const [selectedText, setSelectedText] = useState<TextOption>('X');
-    const [disabledOptions, setDisabledOptions] = useState<Set<TextOption>>(new Set());
-    const [selectedPanel, setSelectedPanel] = useState<'외판' | '내판' | '실내' | '엔진룸'>('내판');
-    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-    const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-    const radius = 50;
+const TEXT_LABEL: Record<TextOption, string> = {
+  X: "X 교환",
+  B: "B 판금",
+  W: "W 용접",
+  A: "A 긁힘",
+  T: "T 파손",
+  C: "C 부식",
+  U: "U 찌그러짐",
+  OL: "OL 누유",
+};
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+/* ================= 컴포넌트 ================= */
+export default function CanvasWithText() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const radius = 50;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+  const [selectedPanel, setSelectedPanel] = useState<PanelType>("외판");
+  const [selectedText, setSelectedText] = useState<TextOption>("X");
+  const [inspector, setInspector] = useState("");
+  const [comment, setComment] = useState("");
 
-        const img = new Image();
-        if (selectedPanel === '외판') {
-            img.src = '/jindan1.jpg';
-        } else if (selectedPanel === '내판') {
-            img.src = '/jindan2.jpg';
-        } else if (selectedPanel === '실내') {
-            img.src = '/jindan3.jpg';
-        } else if (selectedPanel === '엔진룸'){
-            img.src = '/jindan4.jpg';
-        } else {
-            img.src = 'default.jpg'
-        }
+  const [panelPoints, setPanelPoints] = useState<Record<PanelType, Point[]>>({
+    외판: [],
+    내판: [],
+    실내: [],
+    엔진룸: [],
+  });
 
-        img.onload = () => {
-            if (!ctx) return;
+  const [redoStack, setRedoStack] = useState<Record<PanelType, Point[]>>({
+    외판: [],
+    내판: [],
+    실내: [],
+    엔진룸: [],
+  });
 
-            canvas.width = img.width;
-            canvas.height = img.height;
+  /* ================= 화면 Canvas ================= */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const img = new Image();
+    img.src = PANEL_IMAGE[selectedPanel];
 
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
 
-            points.forEach(point => {
-                ctx.fillStyle = uicolorMap[colorMap[point.text]];
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, 15, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.font = '20px Arial';
-                ctx.fillText(point.text, point.x, point.y);
-            });
-        };
-    }, [points, selectedPanel]);
+      panelPoints[selectedPanel].forEach((p) => {
+        ctx.fillStyle = COLOR_MAP[p.text];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+        ctx.fill();
 
-    const handleClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-        if (!canvasRef.current) return;
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(p.text, p.x, p.y);
+      });
+    };
+  }, [selectedPanel, panelPoints]);
 
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
+  /* ================= PDF Canvas ================= */
+  const drawCanvasForPdf = (panel: PanelType, points: Point[]) =>
+    new Promise<HTMLCanvasElement>((resolve) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const img = new Image();
+      img.src = PANEL_IMAGE[panel];
 
-        const x = (event.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (event.clientY - rect.top) * (canvas.height / rect.height);
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
 
-        setPoints(prevPoints => {
-            const newPoints = prevPoints.filter(point => {
-                const distance = Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2);
-                return distance > radius;
-            });
+        points.forEach((p) => {
+          ctx.fillStyle = COLOR_MAP[p.text];
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+          ctx.fill();
 
-            return [...newPoints, { x, y, text: selectedText }];
+          ctx.fillStyle = "white";
+          ctx.font = "20px Arial";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(p.text, p.x, p.y);
         });
-    };
 
-    const handleCheckboxChange = (value: TextOption) => {
-        setSelectedText(value);
-        setDisabledOptions(new Set([value]));
-    };
+        resolve(canvas);
+      };
+    });
 
-    const downloadCanvasAsImage = () => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+  /* ================= Canvas 클릭 ================= */
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
 
-        const imageUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.href = imageUrl;
-        link.download = 'canvas-drawing.png';
-        link.click();
-    };
+    const x = ((e.clientX - rect.left) * canvas.width) / rect.width;
+    const y = ((e.clientY - rect.top) * canvas.height) / rect.height;
 
-    const downloadFullScreenScreenshot = () => {
-        html2canvas(document.body).then(canvas => {
-            const imageUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = 'fullscreen-screenshot.png';
-            link.click();
-        });
-    };
+    setPanelPoints((prev) => ({
+      ...prev,
+      [selectedPanel]: [...prev[selectedPanel], { x, y, text: selectedText }],
+    }));
 
-    const togglePan = (panel: '내판' | '외판' | '실내' | '엔진룸') => {
-        setSelectedPanel(panel);
-        setPoints([]);
-    };
+    setRedoStack((prev) => ({ ...prev, [selectedPanel]: [] }));
+  };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files) {
-            const newImageUrls = Array.from(files).map(file => {
-                const reader = new FileReader();
-                return new Promise<string>((resolve, reject) => {
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            });
+  /* ================= Undo ================= */
+  const undo = () => {
+    setPanelPoints((prev) => {
+      const last = prev[selectedPanel].slice(-1)[0];
+      if (!last) return prev;
 
-            Promise.all(newImageUrls).then(imageUrls => {
-                setUploadedImages(prevImages => [...prevImages, ...imageUrls]);
-            });
-        }
-    };
+      setRedoStack((r) => ({
+        ...r,
+        [selectedPanel]: [...r[selectedPanel], last],
+      }));
 
-    const handleImageClick = (src: string) => {
-        setBackgroundImage(src);
-    };
+      return {
+        ...prev,
+        [selectedPanel]: prev[selectedPanel].slice(0, -1),
+      };
+    });
+  };
 
-    const getDisplayValues = (): TextOption[] => {
-        switch (selectedPanel) {
-            case '내판':
-                return ['X', 'B', 'W', 'A', 'T', 'C', 'U'];
-            case '외판':
-                return ['X', 'B', 'W'];
-            case '실내':
-                return ['A', 'T', 'C', 'U'];
-            default:
-                return ['OL'];
-        }
-    };
+  /* ================= Redo ================= */
+  const redo = () => {
+    setRedoStack((prev) => {
+      const last = prev[selectedPanel].slice(-1)[0];
+      if (!last) return prev;
 
-    const displayValues = getDisplayValues();
+      setPanelPoints((p) => ({
+        ...p,
+        [selectedPanel]: [...p[selectedPanel], last],
+      }));
 
-    // Remove the last point from the points array
-    const removeLastPoint = () => {
-        setPoints(prevPoints => prevPoints.slice(0, -1));
-    };
+      return {
+        ...prev,
+        [selectedPanel]: prev[selectedPanel].slice(0, -1),
+      };
+    });
+  };
 
-    return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-2">
-            <div className="flex flex-col items-center mb-4">
-                <div className="flex gap-2 mb-2">
-                    <Chip
-                        isDisabled={selectedPanel === '내판'}
-                        onClick={() => togglePan('내판')}
-                    >
-                        외판
-                    </Chip>
-                    <Chip
-                        isDisabled={selectedPanel === '외판'}
-                        onClick={() => togglePan('외판')}
-                    >
-                        내판
-                    </Chip>
-                    <Chip
-                        isDisabled={selectedPanel === '실내'}
-                        onClick={() => togglePan('실내')}
-                    >
-                        실내
-                    </Chip>
-                    <Chip
-                        isDisabled={selectedPanel === '엔진룸'}
-                        onClick={() => togglePan('엔진룸')}
-                    >
-                        엔진룸
-                    </Chip>
-                </div>
-                <div className="flex flex-wrap gap-2 mb-2 p-1 rounded-lg shadow-md">
-                    {displayValues.map((value) => (
-                        <label key={value} className="flex items-center gap-2">
-                            <Checkbox
-                                size="sm"
-                                isSelected={selectedText === value}
-                                color={colorMap[value]}
-                                onChange={() => handleCheckboxChange(value)}
-                                style={{
-                                    borderColor: colorMap[value],
-                                    pointerEvents: disabledOptions.has(value) ? 'none' : 'auto',
-                                }}
-                            />
-                            <span className="text-lg" style={{ color: uicolorMap[colorMap[value]] }}>
-                                {textMap[value]}
-                            </span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-            <canvas
-                ref={canvasRef}
-                className="w-full max-h-full border border-black mb-2"
-                onClick={handleClick}
-            />
-            <div className="flex items-center mb-4">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="file-input"
-                    multiple
-                />
-                <label htmlFor="file-input" className="px-4 py-2 bg-green-300 text-white rounded cursor-pointer">
-                    확인해야하는 사진
-                </label>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-                {uploadedImages.map((src, index) => (
-                    <img
-                        key={index}
-                        src={src}
-                        alt={`미리보기 ${index + 1}`}
-                        className="w-32 h-32 object-cover border border-gray-300 rounded cursor-pointer"
-                        onClick={() => handleImageClick(src)}
-                    />
-                ))}
-            </div>
-            <Textarea
-                isRequired
-                label="점검자 의견"
-                labelPlacement="outside"
-                placeholder="이미지 업로드, Description은 테스트 중입니다."
-                className="max-w-xs"
-            />
-            <div className='flex flex-wrap justify-center'>
+  /* ================= PNG ================= */
+  const downloadCurrentCanvas = () => {
+    const canvas = canvasRef.current!;
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `${selectedPanel}.png`;
+    a.click();
+  };
 
-            <button onClick={downloadCanvasAsImage} className="mt-2 px-2 py-1 bg-green-300 text-white rounded">
-                캔버스 다운로드
-            </button>
-            </div>
-            
-            {/* Floating Button for removing the last point */}
-            <button
-                onClick={removeLastPoint}
-                className="fixed bottom-4 right-4 bg-green-200 text-white rounded-full p-4 shadow-lg"
-                aria-label="Remove last point"
-            >
-                <span className="text-xl">🔙</span>
-            </button>
-        </div>
-    );
-};
+  /* ================= PDF ================= */
+  const downloadPdf = async () => {
+    const pdf = new jsPDF("p", "mm", "a4");
 
-export default CanvasWithText;
+    pdf.setFont("NotoSansKR-Bold", "normal");
+
+    pdf.text(`점검자: ${inspector}`, 15, 15);
+    pdf.text(`점검일: ${new Date().toLocaleDateString()}`, 140, 15);
+
+    let y = 25;
+    for (const panel of Object.keys(panelPoints) as PanelType[]) {
+      const canvas = await drawCanvasForPdf(panel, panelPoints[panel]);
+      pdf.text(panel, 15, y);
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 15, y + 5, 180, 90);
+      y += 105;
+      if (y > 240) {
+        pdf.addPage();
+        y = 20;
+      }
+    }
+
+    pdf.text("점검자 의견", 15, y);
+    pdf.text(comment || "-", 15, y + 8, { maxWidth: 180 });
+    pdf.save("성능점검표.pdf");
+  };
+
+  /* ================= UI ================= */
+  return (
+    <div className="p-4 space-y-4">
+      <Input label="점검자 이름" value={inspector} onChange={(e) => setInspector(e.target.value)} />
+
+      <div className="flex gap-2">
+        {(["외판", "내판", "실내", "엔진룸"] as PanelType[]).map((p) => (
+          <Chip key={p} onClick={() => setSelectedPanel(p)}>
+            {p}
+          </Chip>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {TEXT_OPTIONS[selectedPanel].map((opt) => (
+          <label
+            key={opt}
+            className="px-3 py-1 border rounded cursor-pointer"
+            style={{
+              borderColor: COLOR_MAP[opt],
+              backgroundColor: selectedText === opt ? COLOR_MAP[opt] : "transparent",
+              color: selectedText === opt ? "white" : COLOR_MAP[opt],
+            }}
+          >
+            <input type="radio" hidden checked={selectedText === opt} onChange={() => setSelectedText(opt)} />
+            {TEXT_LABEL[opt]}
+          </label>
+        ))}
+      </div>
+
+      <canvas ref={canvasRef} onClick={handleCanvasClick} className="w-full border" />
+
+      <Textarea label="점검자 의견" value={comment} onChange={(e) => setComment(e.target.value)} />
+
+      <div className="flex gap-3">
+        <button onClick={downloadCurrentCanvas} className="px-4 py-2 bg-gray-800 text-white rounded">
+          현재 패널 PNG
+        </button>
+        <button onClick={downloadPdf} className="px-4 py-2 bg-blue-600 text-white rounded">
+          4패널 PDF
+        </button>
+      </div>
+
+      {/* Undo */}
+      <button onClick={undo} className="fixed bottom-24 right-6 w-14 h-14 bg-red-600 text-white rounded-full text-xl z-50">
+        삭제
+      </button>
+
+      {/* Redo */}
+      <button onClick={redo} className="fixed bottom-6 right-6 w-14 h-14 bg-green-600 text-white rounded-full text-xl z-50">
+        복원
+      </button>
+    </div>
+  );
+}

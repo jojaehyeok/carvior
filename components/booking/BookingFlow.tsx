@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AddressSelector from './AddressSelector';
 import DateTimeSelector from './DateSelector';
-import EvaluatorSelector from '../EvaluatorSelector';
+import EvaluatorSelector from './EvaluatorSelector';
 import BookingSummary from './BookingSummary';
 
 interface BookingData {
