@@ -66,7 +66,7 @@ export default function Home() {
           <img
             src="/jindanimage.png"
             alt="hero"
-            className="max-w-full max-h-full object-contain"
+            className="object-contain max-w-full max-h-full"
           />
         </div>
 
@@ -74,7 +74,7 @@ export default function Home() {
           <div className="grid w-full grid-cols-1 gap-10 md:grid-cols-2">
             {/* 좌측 */}
             <div>
-              <h1 className="text-3xl font-bold md:text-5xl leading-tight">
+              <h1 className="text-3xl font-bold leading-tight md:text-5xl">
                 "중고차 차량구매,
                 <br />
                 정말 괜찮은 걸까?"
@@ -84,13 +84,13 @@ export default function Home() {
                 베테랑 <span className="underline">평가사</span>가 직접 알려드릴게요.
               </p>
 
-              <Card className="mt-8 max-w-xl bg-white text-black">
+              <Card className="max-w-xl mt-8 text-black bg-white">
                 <CardBody className="space-y-3">
                   <p className="text-lg font-medium">
                     “사고·수리 이력부터 현재 상태까지
                     <br />
                     꼼꼼히 설명해줘서
-                    <span className="text-emerald-500 font-semibold">
+                    <span className="font-semibold text-emerald-500">
                       {" "}안심하고 계약했어요.”
                     </span>
                   </p>
@@ -103,7 +103,7 @@ export default function Home() {
 
             {/* 우측 */}
             <div className="flex justify-center">
-              <Card className="w-full max-w-md bg-white text-black">
+              <Card className="w-full max-w-md text-black bg-white">
                 <CardBody className="space-y-5">
                   <h2 className="text-xl font-bold">
                     딱 맞는 차,
@@ -150,7 +150,7 @@ export default function Home() {
 
                   {/* 요약 */}
                   {isFormComplete && (
-                    <div className="rounded-lg border bg-gray-50 p-3 text-sm">
+                    <div className="p-3 text-sm border rounded-lg bg-gray-50">
                       <p>차량: {carModel}</p>
                       <p>장소: {address.main}</p>
                       <p>
@@ -179,6 +179,54 @@ export default function Home() {
 
       <CarLiveShortsRow />
       <ServiceSection />
+
+      {/* ✅ 추가된 푸터 영역 */}
+      <footer className="w-full py-12 bg-white border-t border-gray-200">
+        <div className="px-6 mx-auto max-w-7xl">
+          <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
+            {/* 로고 및 기본 설명 */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold text-gray-900">차량성능평가 서비스</h2>
+              <p className="text-sm leading-relaxed text-gray-500">
+                전국 어디서나 믿을 수 있는 전문가의 <br />
+                정밀한 차량 성능 진단을 경험해보세요.
+              </p>
+            </div>
+
+            {/* 사업자 정보 및 연락처 */}
+            <div className="grid grid-cols-1 gap-8 text-sm text-gray-600 sm:grid-cols-2">
+              <div className="space-y-2">
+                <p className="mb-3 text-base font-bold text-gray-900">사업자 정보</p>
+                <p><span className="text-gray-400">상호명 :</span> 카비어</p>
+                <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
+                <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
+                <p><span className="text-gray-400">통신판매업신고번호 :</span> 2026-경기안산-0474</p>
+                <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
+              </div>
+              
+              <div className="space-y-2">
+                <p className="mb-3 text-base font-bold text-gray-900">고객센터</p>
+                <p className="text-lg font-bold text-blue-600">1588-2285</p>
+                <p><span className="text-gray-400">전국대표번호 :</span> 1588-2285</p>
+                <p><span className="text-gray-400">휴대폰 :</span> 010-2285-6017</p>
+                <p className="pt-2 text-xs text-gray-400">평일 09:00 - 18:00 (주말/공휴일 휴무)</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-between gap-4 pt-8 mt-12 border-t border-gray-100 md:flex-row">
+            <p className="text-xs text-gray-400">
+              © 2026 카비어. All Rights Reserved.
+            </p>
+            <div className="flex gap-6 text-xs text-gray-500">
+              <button className="hover:text-black">이용약관</button>
+              <button className="font-bold hover:text-black">개인정보처리방침</button>
+            </div>
+          </div>
+        </div>
+      </footer>
     </main>
+
+    
   );
 }
