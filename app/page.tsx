@@ -13,6 +13,7 @@ import ServiceSection from "@/components/home/ServiceSection";
 
 import { bookingStore } from "@/app/lib/booking-store";
 import { BookingDraft } from "@/types/booking";
+import AppFooter from "@/components/footermodal";
 
 const carList = [
   { key: "avante", label: "아반떼" },
@@ -179,52 +180,7 @@ export default function Home() {
 
       <CarLiveShortsRow />
       <ServiceSection />
-
-      {/* ✅ 추가된 푸터 영역 */}
-      <footer className="w-full py-12 bg-white border-t border-gray-200">
-        <div className="px-6 mx-auto max-w-7xl">
-          <div className="flex flex-col items-start justify-between gap-8 md:flex-row">
-            {/* 로고 및 기본 설명 */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-gray-900">차량성능평가 서비스</h2>
-              <p className="text-sm leading-relaxed text-gray-500">
-                전국 어디서나 믿을 수 있는 전문가의 <br />
-                정밀한 차량 성능 진단을 경험해보세요.
-              </p>
-            </div>
-
-            {/* 사업자 정보 및 연락처 */}
-            <div className="grid grid-cols-1 gap-8 text-sm text-gray-600 sm:grid-cols-2">
-              <div className="space-y-2">
-                <p className="mb-3 text-base font-bold text-gray-900">사업자 정보</p>
-                <p><span className="text-gray-400">상호명 :</span> 카비어</p>
-                <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
-                <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
-                <p><span className="text-gray-400">통신판매업신고번호 :</span> 2026-경기안산-0474</p>
-                <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
-              </div>
-              
-              <div className="space-y-2">
-                <p className="mb-3 text-base font-bold text-gray-900">고객센터</p>
-                <p className="text-lg font-bold text-blue-600">1588-2285</p>
-                <p><span className="text-gray-400">전국대표번호 :</span> 1588-2285</p>
-                <p><span className="text-gray-400">휴대폰 :</span> 010-2285-6017</p>
-                <p className="pt-2 text-xs text-gray-400">평일 09:00 - 18:00 (주말/공휴일 휴무)</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-between gap-4 pt-8 mt-12 border-t border-gray-100 md:flex-row">
-            <p className="text-xs text-gray-400">
-              © 2026 카비어. All Rights Reserved.
-            </p>
-            <div className="flex gap-6 text-xs text-gray-500">
-              <button className="hover:text-black">이용약관</button>
-              <button className="font-bold hover:text-black">개인정보처리방침</button>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <AppFooter/>
     </main>
 
     
