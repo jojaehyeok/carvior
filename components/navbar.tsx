@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -14,6 +16,7 @@ import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
+import { usePathname } from "next/navigation"; // 경로 감지용
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -27,11 +30,23 @@ import {
 } from "@/components/icons";
 
 export const Navbar = () => {
+  const pathname = usePathname();
+
+  // 헤더를 숨기고 싶은 경로 리스트
+  const noNavbarPaths = [
+    '/marketing/simple-request', 
+    '/simple-request'
+  ];
+
+  // 마케팅 페이지 등 특정 경로에서는 Navbar를 완전히 제거
+  if (noNavbarPaths.includes(pathname)) {
+    return null;
+  }
+
   const searchInput = (
     <Input
       aria-label="Search"
       classNames={{
-        // 흰 navbar 위에 올 거라 살짝 회색 톤 + 보더
         inputWrapper: "bg-gray-100 border border-gray-300",
         input: "text-sm text-gray-800",
       }}
@@ -54,12 +69,7 @@ export const Navbar = () => {
       maxWidth="xl"
       position="static"
       isBordered={false}
-      className="
-        fixed top-0 left-0 z-50 w-full
-        bg-white text-gray-900
-        border-b border-gray-200
-        shadow-sm
-      "
+      className="fixed top-0 left-0 z-50 w-full bg-white text-gray-900 border-b border-gray-200 shadow-sm"
     >
       {/* 좌측: 로고 + 메뉴 */}
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
