@@ -3,12 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 
-// window 객체에 daum 스크립트 타입 정의
-declare global {
-    interface Window {
-        daum: any;
-    }
-}
 
 /**
  * [내부 컴포넌트] 날짜 및 시간 선택기
