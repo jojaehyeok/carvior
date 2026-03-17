@@ -13,6 +13,7 @@ import ServiceSection from "@/components/home/ServiceSection";
 
 import { bookingStore } from "@/app/lib/booking-store";
 import { BookingDraft } from "@/types/booking";
+import AppFooter from "@/components/footermodal";
 
 const carList = [
   { key: "avante", label: "아반떼" },
@@ -66,7 +67,7 @@ export default function Home() {
           <img
             src="/jindanimage.png"
             alt="hero"
-            className="max-w-full max-h-full object-contain"
+            className="object-contain max-w-full max-h-full"
           />
         </div>
 
@@ -74,7 +75,7 @@ export default function Home() {
           <div className="grid w-full grid-cols-1 gap-10 md:grid-cols-2">
             {/* 좌측 */}
             <div>
-              <h1 className="text-3xl font-bold md:text-5xl leading-tight">
+              <h1 className="text-3xl font-bold leading-tight md:text-5xl">
                 "중고차 차량구매,
                 <br />
                 정말 괜찮은 걸까?"
@@ -84,13 +85,13 @@ export default function Home() {
                 베테랑 <span className="underline">평가사</span>가 직접 알려드릴게요.
               </p>
 
-              <Card className="mt-8 max-w-xl bg-white text-black">
+              <Card className="max-w-xl mt-8 text-black bg-white">
                 <CardBody className="space-y-3">
                   <p className="text-lg font-medium">
                     “사고·수리 이력부터 현재 상태까지
                     <br />
                     꼼꼼히 설명해줘서
-                    <span className="text-emerald-500 font-semibold">
+                    <span className="font-semibold text-emerald-500">
                       {" "}안심하고 계약했어요.”
                     </span>
                   </p>
@@ -103,7 +104,7 @@ export default function Home() {
 
             {/* 우측 */}
             <div className="flex justify-center">
-              <Card className="w-full max-w-md bg-white text-black">
+              <Card className="w-full max-w-md text-black bg-white">
                 <CardBody className="space-y-5">
                   <h2 className="text-xl font-bold">
                     딱 맞는 차,
@@ -150,7 +151,7 @@ export default function Home() {
 
                   {/* 요약 */}
                   {isFormComplete && (
-                    <div className="rounded-lg border bg-gray-50 p-3 text-sm">
+                    <div className="p-3 text-sm border rounded-lg bg-gray-50">
                       <p>차량: {carModel}</p>
                       <p>장소: {address.main}</p>
                       <p>
@@ -179,6 +180,9 @@ export default function Home() {
 
       <CarLiveShortsRow />
       <ServiceSection />
+      <AppFooter/>
     </main>
+
+    
   );
 }
