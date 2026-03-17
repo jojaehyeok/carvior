@@ -98,31 +98,7 @@ export default function ServiceSection() {
           </div>
         </div>
 
-        {/* ✅ 지역 선택 (평가사 요청용 톤 변경) */}
-        <div className="mt-20">
-          <h2 className="mb-6 text-xl font-bold text-gray-900">
-            어떤 지역의 평가사를 찾으시나요?
-          </h2>
-
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {regions.map((region) => (
-              <button
-                key={region}
-                className="
-                  flex items-center justify-between
-                  rounded-xl border border-gray-300
-                  bg-white px-5 py-4
-                  text-sm font-semibold text-gray-800
-                  shadow-sm transition
-                  hover:border-black hover:bg-black hover:text-white
-                "
-              >
-                {region}
-                <span className="text-base">›</span>
-              </button>
-            ))}
-          </div>
-        </div>
+        
       </div>
     </section>
   );
