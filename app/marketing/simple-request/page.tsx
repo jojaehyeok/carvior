@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 
-
 /**
  * [내부 컴포넌트] 날짜 및 시간 선택기
  */
@@ -99,6 +98,8 @@ export default function SimpleRequestPage() {
         additionalMemo: '',
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     // 날짜/시간 선택 시 폼 데이터 업데이트
     const handleDateTimeChange = useCallback((date: string, time: string) => {
         setFormData(prev => ({
@@ -134,22 +135,53 @@ export default function SimpleRequestPage() {
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (isSubmitting) return; // 중복 클릭 방지
         if (!formData.preferredDateTime) {
             alert('방문 날짜와 시간을 선택해주세요.');
             return;
         }
 
-        const payload = {
-            ...formData,
-            source: 'SNS_PROMOTION',
-            submittedAt: new Date().toISOString(),
-        };
+        setIsSubmitting(true);
 
         try {
-            console.log('Marketing Lead Captured:', payload);
-            alert('진단 신청이 접수되었습니다!\n담당자가 연락드리겠습니다.');
+            // 1. NestJS 서버 DB 저장 (운영 서버 도메인 사용)
+            const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData,
+                    source: 'SIMPLE_FORM' // 유입 경로 구분용
+                }),
+            });
+
+            const dbResult = await dbResponse.json();
+
+            if (dbResponse.ok) {
+                // 2. DB 저장 성공 시 알림톡 발송 (Next.js 로컬 API Route 호출)
+                await fetch('/api/kakao/notify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        dealerName: formData.dealerName,
+                        contact: formData.contact,
+                        carNumber: formData.carNumber,
+                        preferredDateTime: formData.preferredDateTime,
+                    }),
+                });
+
+                alert(`✅ 신청 완료!\n${formData.dealerName}님, 접수가 성공적으로 처리되었습니다.\n카카오톡 안내 메시지를 확인해주세요.`);
+                // 성공 후 새로고침 또는 초기화
+                window.location.reload();
+            } else {
+                throw new Error(dbResult.message || '서버 저장 실패');
+            }
+
         } catch (error) {
-            alert('잠시 후 다시 시도해주세요.');
+            console.error('연동 에러:', error);
+            alert('서버와 연결이 원활하지 않습니다. 고객센터로 문의 부탁드립니다.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -169,7 +201,6 @@ export default function SimpleRequestPage() {
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
-
                     {/* 01. 차량 확인 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">01. 차량 확인</h3>
@@ -188,13 +219,10 @@ export default function SimpleRequestPage() {
                         </div>
                     </div>
 
-                    {/* 03. 장소 및 시간 (통합 섹션) */}
+                    {/* 03. 장소 및 시간 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">03. 장소 및 시간</h3>
-
-                        {/* 날짜/시간 선택 컴포넌트 */}
                         <DateTimeSelector onDateTimeSelect={handleDateTimeChange} />
-
                         <div className="pt-4 border-t border-slate-50 space-y-4">
                             <div className="flex gap-2">
                                 <input readOnly required name="address" placeholder="진단 장소 주소" className="flex-1 border-b-2 border-slate-100 p-3 bg-slate-50 text-slate-600 outline-none cursor-pointer rounded-t-lg" value={formData.address} onClick={handleAddressSearch} />
@@ -204,31 +232,33 @@ export default function SimpleRequestPage() {
                         </div>
                     </div>
 
-
-
                     {/* 특이사항 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <textarea name="additionalMemo" placeholder="추가 전달사항 (선택)" className="w-full h-24 border border-slate-100 rounded-2xl p-4 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none" onChange={handleChange} />
                     </div>
 
-                    {/* 파트너사/고객사 로고 섹션 */}
+                    {/* 파트너사/고객사 로고 */}
                     <div className="mb-10 px-2">
                         <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">
                             카비어와 함께하는 파트너사/고객사
                         </p>
-
-                        <div className="grid grid-cols-3 gap-y-8 gap-x-4 items-center justify-items-center transition-all ">
-                            {/* 제조사 */}
-                            <img src="/anyonelogo.jpg" alt="anyonemotors" className="h-16 lg:h-16 object-contain" />
-                            <img src="/carvatarlogo.jpg" alt="carvatar" className="h-16 lg:h-16 object-contain" />
+                        <div className="grid grid-cols-2 gap-4 items-center justify-items-center opacity-60 grayscale hover:grayscale-0 transition-all">
+                            <img src="/anyonelogo.jpg" alt="anyonemotors" className="h-10 object-contain" />
+                            <img src="/carvatarlogo.jpg" alt="carvatar" className="h-10 object-contain" />
                         </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-2xl text-xl font-bold shadow-xl shadow-blue-200 active:scale-[0.98] transition-all hover:bg-blue-700">
-                        지금 진단 신청하기
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className={clsx(
+                            "w-full py-5 rounded-2xl text-xl font-bold shadow-xl transition-all",
+                            isSubmitting ? "bg-slate-400 cursor-not-allowed" : "bg-blue-600 text-white shadow-blue-200 active:scale-[0.98] hover:bg-blue-700"
+                        )}
+                    >
+                        {isSubmitting ? '접수 중...' : '지금 진단 신청하기'}
                     </button>
                 </form>
-
 
                 <p className="text-center text-slate-400 text-[11px] mt-8 leading-relaxed">
                     © 2026 CARVIOR. All rights reserved. <br />

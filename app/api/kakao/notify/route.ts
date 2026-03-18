@@ -1,83 +1,34 @@
+// app/api/kakao/notify/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import { SolapiMessageService } from 'solapi';
 
-// 카카오 알림톡 발송 API
+// 솔라피 서비스 초기화 (환경변수에 키 저장 권장)
+const messageService = new SolapiMessageService(
+  "NCSKIUSGBTJ4SHP4",
+  "IEQPZD37Q7RM4XCLN90ABWZXCL1PYY9G"
+);
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      bookingId,
-      phoneNumber,
-      userName,
-      technicianName,
-      inspectionDate,
-      bookingNumber,
-    } = body;
-    
-    // 실제 카카오 알림톡 API 엔드포인트와 API 키 (환경변수에서 관리)
-    const KAKAO_API_URL = 'https://kakaoapi.example.com/alimtalk/v2/send';
-    const KAKAO_API_KEY = process.env.KAKAO_API_KEY;
-    
-    // 알림톡 템플릿 메시지 구성
-    const messages = [
-      // 1. 고객에게 발송
-      {
-        to: phoneNumber,
-        templateCode: 'BOOKING_CONFIRMATION_CUSTOMER',
-        variables: {
-          '#{고객명}': userName,
-          '#{예약번호}': bookingNumber,
-          '#{정비사}': technicianName,
-          '#{검수일시}': inspectionDate,
-          '#{차량정보}': '기아 EV4',
-        },
-      },
-      // 2. 정비사에게 발송 (딜러 번호 필요)
-      {
-        to: process.env.TECHNICIAN_PHONE, // 정비사 전화번호
-        templateCode: 'BOOKING_ASSIGNED_TECH',
-        variables: {
-          '#{정비사명}': technicianName,
-          '#{고객명}': userName,
-          '#{고객연락처}': phoneNumber,
-          '#{검수일시}': inspectionDate,
-          '#{검수장소}': body.address || '출장 검수',
-        },
-      },
-    ];
-    
-    // 실제 카카오 API 호출 (시뮬레이션)
-    const response = await fetch(KAKAO_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${KAKAO_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages,
-        senderKey: process.env.KAKAO_SENDER_KEY,
-      }),
+    const { dealerName, contact, carNumber, preferredDateTime } = body;
+
+    console.log(`[실제 발송 시도] 대상: ${dealerName}(${contact})`);
+
+    // ✅ 우선 알림톡 승인 전이므로 SMS로 테스트 발송합니다.
+    // ✅ 수정 후 (예시: 본인 인증받은 번호가 010-1234-5678 이라면)
+    const result = await messageService.sendOne({
+      to: contact,
+      from: "01022856017", // 숫자만 입력 (문자열 형태)
+      text: `[차바타] 신청확인\n${dealerName}님, ${carNumber}차량 진단이 ${preferredDateTime}에 접수되었습니다.`,
+      type: "SMS"
     });
-    
-    if (!response.ok) {
-      throw new Error('카카오 알림톡 발송 실패');
-    }
-    
-    const result = await response.json();
-    
-    return NextResponse.json({
-      success: true,
-      message: '알림톡이 발송되었습니다',
-      result,
-    });
-    
+
+    console.log('[발송 결과]', result);
+
+    return NextResponse.json({ success: true, result });
   } catch (error) {
-    console.error('카카오 알림톡 오류:', error);
-    
-    // 에러 발생시에도 예약은 진행되도록 (알림톡 실패는 치명적이지 않음)
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : '알림톡 발송 중 오류',
-      note: '예약은 정상 처리되었으나 알림 발송에 실패했습니다',
-    });
+    console.error('솔라피 발송 에러:', error);
+    return NextResponse.json({ success: false, error: '발송 실패' }, { status: 500 });
   }
 }
