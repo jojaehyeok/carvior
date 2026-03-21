@@ -94,19 +94,52 @@ export default function SimpleRequestPage() {
         contact: '',
         address: '',
         detailAddress: '',
-        preferredDateTime: '', // 날짜 + 시간 합쳐진 값
+        preferredDateTime: '',
         additionalMemo: '',
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [carError, setCarError] = useState<string | null>(null); // 차량 중복 에러 상태
 
-    // 날짜/시간 선택 시 폼 데이터 업데이트
+    // ✅ 실시간 차량 중복 체크 함수
+    const checkDuplicateCar = async (carNum: string) => {
+        if (carNum.length < 7) return;
+
+        try {
+            // 컨트롤러 경로와 맞춤: /v1/external/request/check-duplicate
+            const res = await fetch(`https://carvior.store/api/v1/external/request/check-duplicate?carNumber=${encodeURIComponent(carNum)}`);
+            const result = await res.json();
+
+            if (result.isDuplicate) {
+                setCarError('이미 신청된 차량입니다. 기존 진단이 완료된 후 신청 가능합니다.');
+            } else {
+                setCarError(null);
+            }
+        } catch (e) {
+            console.error('중복 체크 실패', e);
+        }
+    };
+
     const handleDateTimeChange = useCallback((date: string, time: string) => {
         setFormData(prev => ({
             ...prev,
             preferredDateTime: `${date} ${time}`
         }));
     }, []);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        const cleanValue = name === 'carNumber' ? value.replace(/\s/g, '') : value;
+        setFormData(prev => ({ ...prev, [name]: cleanValue }));
+
+        // 차량 번호 입력 시 에러 초기화
+        if (name === 'carNumber') setCarError(null);
+    };
+
+    // 차량 번호 입력 포커스 나갈 때 체크
+    const handleCarBlur = () => {
+        if (formData.carNumber) checkDuplicateCar(formData.carNumber);
+    };
 
     const handleAddressSearch = () => {
         if (window.daum && window.daum.Postcode) {
@@ -123,20 +156,13 @@ export default function SimpleRequestPage() {
                     document.getElementById('detailAddress')?.focus();
                 },
             }).open();
-        } else {
-            alert('주소 서비스 스크립트가 로드되지 않았습니다.');
         }
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        if (isSubmitting) return; // 중복 클릭 방지
+
+        if (isSubmitting || carError) return;
         if (!formData.preferredDateTime) {
             alert('방문 날짜와 시간을 선택해주세요.');
             return;
@@ -145,20 +171,16 @@ export default function SimpleRequestPage() {
         setIsSubmitting(true);
 
         try {
-            // 1. NestJS 서버 DB 저장 (운영 서버 도메인 사용)
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    source: 'SIMPLE_FORM' // 유입 경로 구분용
-                }),
+                body: JSON.stringify({ ...formData, source: 'SIMPLE_FORM' }),
             });
 
             const dbResult = await dbResponse.json();
 
             if (dbResponse.ok) {
-                // 2. DB 저장 성공 시 알림톡 발송 (Next.js 로컬 API Route 호출)
+                // 알림톡 발송 (성공 시)
                 await fetch('/api/kakao/notify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -170,23 +192,20 @@ export default function SimpleRequestPage() {
                     }),
                 });
 
-                alert(`✅ 신청 완료!\n${formData.dealerName}님, 접수가 성공적으로 처리되었습니다.\n카카오톡 안내 메시지를 확인해주세요.`);
-                // 성공 후 새로고침 또는 초기화
+                alert(`✅ 신청 완료!\n정상적으로 접수되었습니다.`);
                 window.location.reload();
             } else {
                 throw new Error(dbResult.message || '서버 저장 실패');
             }
-
-        } catch (error) {
-            console.error('연동 에러:', error);
-            alert('서버와 연결이 원활하지 않습니다. 고객센터로 문의 부탁드립니다.');
+        } catch (error: any) {
+            alert(error.message);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-10">
+        <div className="min-h-screen bg-slate-50 pb-10 font-sans">
             <nav className="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
                 <span className="text-2xl font-black text-blue-600 tracking-tighter">차바타</span>
                 <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">간편신청</span>
@@ -205,7 +224,20 @@ export default function SimpleRequestPage() {
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">01. 차량 확인</h3>
                         <div className="space-y-4">
-                            <input required name="carNumber" placeholder="차량번호 (예: 123가 4567)" className="w-full text-lg font-bold border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
+                            <div>
+                                <input
+                                    required
+                                    name="carNumber"
+                                    placeholder="차량번호 (예: 123가 4567)"
+                                    className={clsx(
+                                        "w-full text-lg font-bold border-b-2 p-3 outline-none transition-all",
+                                        carError ? "border-red-500" : "border-slate-100 focus:border-blue-600"
+                                    )}
+                                    onChange={handleChange}
+                                    onBlur={handleCarBlur}
+                                />
+                                {carError && <p className="text-red-500 text-xs mt-2 ml-1">{carError}</p>}
+                            </div>
                             <input required name="carOwner" placeholder="차량 소유자 성함" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
                         </div>
                     </div>
@@ -237,23 +269,21 @@ export default function SimpleRequestPage() {
                         <textarea name="additionalMemo" placeholder="추가 전달사항 (선택)" className="w-full h-24 border border-slate-100 rounded-2xl p-4 focus:ring-2 focus:ring-blue-100 outline-none transition-all resize-none" onChange={handleChange} />
                     </div>
 
-                    {/* 파트너사/고객사 로고 */}
+                    {/* 로고 섹션 */}
                     <div className="mb-10 px-2">
-                        <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">
-                            카비어와 함께하는 파트너사/고객사
-                        </p>
-                        <div className="grid grid-cols-2 gap-4 items-center justify-items-center opacity-60 grayscale hover:grayscale-0 transition-all">
+                        <p className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">카비어와 함께하는 파트너사/고객사</p>
+                        <div className="grid grid-cols-2 gap-4 items-center justify-items-center opacity-60 grayscale">
                             <img src="/anyonelogo.jpg" alt="anyonemotors" className="h-10 object-contain" />
                             <img src="/carvatarlogo.jpg" alt="carvatar" className="h-10 object-contain" />
                         </div>
                     </div>
 
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting}
+                    <button
+                        type="submit"
+                        disabled={isSubmitting || !!carError}
                         className={clsx(
                             "w-full py-5 rounded-2xl text-xl font-bold shadow-xl transition-all",
-                            isSubmitting ? "bg-slate-400 cursor-not-allowed" : "bg-blue-600 text-white shadow-blue-200 active:scale-[0.98] hover:bg-blue-700"
+                            (isSubmitting || !!carError) ? "bg-slate-400 cursor-not-allowed" : "bg-blue-600 text-white shadow-blue-200 active:scale-[0.98] hover:bg-blue-700"
                         )}
                     >
                         {isSubmitting ? '접수 중...' : '지금 진단 신청하기'}
@@ -262,7 +292,7 @@ export default function SimpleRequestPage() {
 
                 <p className="text-center text-slate-400 text-[11px] mt-8 leading-relaxed">
                     © 2026 CARVIOR. All rights reserved. <br />
-                    본 서비스는 원활한 중고차 처리를 돕는 <br />비대면/방문 진단 전문 서비스입니다.
+                    본 서비스는 원활한 중고차 처리를 돕는 비대면/방문 진단 전문 서비스입니다.
                 </p>
             </main>
         </div>
