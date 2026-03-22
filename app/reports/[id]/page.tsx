@@ -34,7 +34,7 @@ export default function CaviorVehicleReport() {
   const fetchReport = async () => {
     try {
       // 주소에 /api가 붙어있는지 꼭 확인하세요! (형님 설정에 맞춰 /api 추가함)
-      const res = await fetch(`http://localhost:4000/api/v1/external/inspection/report/${id}`);
+      const res = await fetch(`https://carvior.store/api/v1/external/inspection/report/${id}`);
       
       if (res.ok) {
         const result = await res.json();
