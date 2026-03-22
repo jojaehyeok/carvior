@@ -16,7 +16,7 @@ import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-import { usePathname } from "next/navigation"; // 경로 감지용
+import { usePathname } from "next/navigation"; 
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -32,14 +32,15 @@ import {
 export const Navbar = () => {
   const pathname = usePathname();
 
-  // 헤더를 숨기고 싶은 경로 리스트
-  const noNavbarPaths = [
-    '/marketing/simple-request', 
-    '/simple-request'
-  ];
+  // 1. 헤더를 숨기고 싶은 조건 (startsWith 사용)
+  // /reports/1, /reports/100 등 모든 리포트 상세 페이지에서 Navbar를 숨깁니다.
+  const isNoNavbarPath = 
+    pathname === '/marketing/simple-request' || 
+    pathname === '/simple-request' || 
+    pathname.startsWith('/reports'); 
 
-  // 마케팅 페이지 등 특정 경로에서는 Navbar를 완전히 제거
-  if (noNavbarPaths.includes(pathname)) {
+  // 2. 조건에 해당하면 아무것도 렌더링하지 않음 (Navbar 제거)
+  if (isNoNavbarPath) {
     return null;
   }
 
