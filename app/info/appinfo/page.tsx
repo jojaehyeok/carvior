@@ -22,13 +22,13 @@ export default function LandingPage() {
         />
         
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="inline-block px-5 py-2 mb-8 border border-blue-500 rounded-full bg-blue-600/10 backdrop-blur-sm">
+          <div className="inline-block px-5 py-2 mb-8 border border-blue-600 rounded-full bg-blue-600/10 backdrop-blur-sm">
             <span className="text-blue-200 text-sm font-bold tracking-widest uppercase">Premium Vehicle Inspection</span>
           </div>
           <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-none">
             CARVIOR
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-100 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
+          <p className="text-2xl md:text-3xl text-gray-600 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
             국가공인 진단사가 제안하는 <br className="md:hidden" /> 
             가장 완벽한 중고차 검수 솔루션
           </p>
@@ -61,7 +61,7 @@ export default function LandingPage() {
             {/* 🌟 이미지 상단 자름 처리: aspect-ratio와 object-cover/object-bottom 활용 */}
             <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-100 shadow-2xl border border-gray-100">
               <Image 
-                src="/images/inspection_scan.jpg" // 🌟 public/images/inspection_scan.jpg 파일로 교체
+                src="/images/inspection_photo.jpg" // 🌟 public/images/inspection_scan.jpg 파일로 교체
                 alt="Scanner Inspection" 
                 fill
                 className="object-cover object-bottom group-hover:scale-105 transition-transform duration-700 ease-in-out" // object-bottom으로 하단 강조 (상단 자동 자름)
@@ -78,7 +78,7 @@ export default function LandingPage() {
           <div className="group space-y-8 md:mt-16">
             <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-gray-100 shadow-2xl border border-gray-100">
               <Image 
-                src="/images/inspection_photo.jpg" // 🌟 public/images/inspection_photo.jpg 파일로 교체
+                src="/images/inspection_scan.jpg" // 🌟 public/images/inspection_photo.jpg 파일로 교체
                 alt="Real-time Report" 
                 fill
                 className="object-cover object-bottom group-hover:scale-105 transition-transform duration-700 ease-in-out" // object-bottom으로 하단 강조 (상단 자동 자름)
