@@ -10,6 +10,7 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
+import router from "next/router";
 
 export default function AppFooter() {
   const { 
@@ -38,13 +39,15 @@ export default function AppFooter() {
               </p>
             </div>
 
-            {/* 사업자 정보 */}
+            {/* 사업자 정보 (통신판매업 신고번호 추가) */}
             <div className="grid grid-cols-1 gap-8 text-sm text-gray-600 sm:grid-cols-2">
               <div className="space-y-2">
                 <p className="mb-3 text-base font-bold text-gray-900">사업자 정보</p>
                 <p><span className="text-gray-400">상호명 :</span> 카비어</p>
                 <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
                 <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
+                {/* 🌟 통신판매업 신고번호는 심사 필수 항목입니다. */}
+                <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0000호</p> 
                 <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
               </div>
 
@@ -63,6 +66,13 @@ export default function AppFooter() {
             <div className="flex gap-6 text-xs text-gray-500">
               <button onClick={onTermsOpen} className="transition-colors hover:text-black hover:underline">이용약관</button>
               <button onClick={onPrivacyOpen} className="font-bold transition-colors hover:text-black hover:underline">개인정보처리방침</button>
+              {/* 🌟 환불정책 링크 추가 (토스 심사용) */}
+              <button 
+                onClick={() => router.push('/policy/refund')} 
+                className="text-red-500 font-medium transition-colors hover:underline"
+              >
+                취소 및 환불규정
+              </button>
             </div>
           </div>
         </div>
