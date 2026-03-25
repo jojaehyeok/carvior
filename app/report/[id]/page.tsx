@@ -6,6 +6,9 @@ import LightGallery from "lightgallery/react";
 import lgZoom from "lightgallery/plugins/zoom";
 import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import PdfTemplate from "./PdfTemplate";
 
 // ─── 타입 ──────────────────────────────────────────────────────────────────────
 interface ReportData {
@@ -114,14 +117,17 @@ const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; bo
 };
 
 const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: string }[] = [
-  { key: "exterior",     label: "외관",   icon: "🚗" },
-  { key: "interior",     label: "실내",   icon: "💺" },
-  { key: "wheel",        label: "휠",     icon: "🛞" },
-  { key: "engine",       label: "엔진",   icon: "⚙️" },
-  { key: "undercarriage",label: "하부",   icon: "🔩" },
-  { key: "dashboard",    label: "계기판", icon: "🖥️" },
-  { key: "registration", label: "등록증", icon: "📄" },
-  { key: "vin",          label: "차대번호",icon: "🔢" },
+  { key: "exterior",     label: "외관", icon: "🚗" },
+  { key: "interior",     label: "실내", icon: "💺" },
+  { key: "wheel",        label: "휠",   icon: "🛞" },
+  { key: "engine",       label: "엔진", icon: "⚙️" },
+  { key: "undercarriage",label: "하부", icon: "🔩" },
+];
+
+const DOC_IMAGES: { key: keyof ReportData["images"]; label: string }[] = [
+  { key: "dashboard",   label: "계기판" },
+  { key: "registration",label: "등록증" },
+  { key: "vin",         label: "차대번호" },
 ];
 
 // ─── 타이어 게이지 ──────────────────────────────────────────────────────────────
@@ -242,12 +248,77 @@ function ImageSection({ images, label, icon }: { images: string[]; label: string
   );
 }
 
+// ─── 등급 계산 ─────────────────────────────────────────────────────────────────
+function calcGrade(data: ReportData) {
+  const { evaluation, car_status, damages } = data;
+  let score = 100;
+  const isOk = (v: string) => !v || v === "이상 없음";
+  if (!isOk(evaluation.leakDesc))    score -= 20;
+  if (!isOk(evaluation.driveDesc))   score -= 20;
+  if (!isOk(evaluation.optionsDesc)) score -= 10;
+  if (!isOk(evaluation.warningDesc)) score -= 10;
+  score -= Math.min(damages.filter(d => d.length > 0).length * 4, 30);
+  const avgTire = (car_status.tireTread.front + car_status.tireTread.back) / 2;
+  if (avgTire < 30) score -= 10;
+  else if (avgTire < 50) score -= 5;
+  if (score >= 85) return { grade:"A", color:"#16a34a", bg:"#dcfce7", desc:"상태 매우 양호" };
+  if (score >= 70) return { grade:"B", color:"#2563eb", bg:"#dbeafe", desc:"상태 양호" };
+  if (score >= 50) return { grade:"C", color:"#d97706", bg:"#fef3c7", desc:"일부 수리 필요" };
+  return               { grade:"D", color:"#dc2626", bg:"#fee2e2", desc:"정비 권장" };
+}
+
 // ─── 메인 페이지 ───────────────────────────────────────────────────────────────
 export default function PublicReportPage() {
   const { id } = useParams();
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const pdfRef = useRef<HTMLDivElement>(null);
+
+  const downloadPDF = async () => {
+    if (!pdfRef.current || !data) return;
+    setPdfLoading(true);
+    try {
+      // 1. 외부 이미지를 base64로 변환 (CORS 우회)
+      const imgEls = pdfRef.current.querySelectorAll<HTMLImageElement>("img");
+      await Promise.all(
+        Array.from(imgEls).map(async (img) => {
+          if (!img.src || img.src.startsWith("data:") || img.src.startsWith("/")) return;
+          try {
+            const res = await fetch(img.src);
+            const blob = await res.blob();
+            const dataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+            img.src = dataUrl;
+          } catch { /* 실패한 이미지는 스킵 */ }
+        })
+      );
+
+      // 2. 각 .pdf-page를 순서대로 캡처
+      const pages = pdfRef.current.querySelectorAll<HTMLElement>(".pdf-page");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i], {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+        });
+        if (i > 0) pdf.addPage();
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pdfW, pdfH);
+      }
+
+      pdf.save(`카비어_안심리포트_${data.car_info.number}.pdf`);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -342,6 +413,29 @@ export default function PublicReportPage() {
           <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-center gap-2">
             <span className="text-yellow-500">⚠️</span>
             <p className="text-sm text-yellow-800">휠 스크래치 {car_status.wheelScratch}개</p>
+          </div>
+        )}
+
+        {/* 계기판 / 등록증 / 차대번호 */}
+        {DOC_IMAGES.some((d) => images[d.key]?.length) && (
+          <div className="mt-4">
+            <p className="text-xs text-gray-400 mb-2">서류 및 계기판</p>
+            <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-3 flex-wrap">
+              {DOC_IMAGES.flatMap((d) =>
+                (images[d.key] ?? []).map((url, i) => (
+                  <div key={`${d.key}-${i}`} className="flex flex-col items-center gap-1">
+                    <a href={url} data-src={url} className="block">
+                      <img
+                        src={url}
+                        alt={d.label}
+                        className="w-[100px] h-[75px] object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity"
+                      />
+                    </a>
+                    <p className="text-xs text-gray-500">{d.label}</p>
+                  </div>
+                ))
+              )}
+            </LightGallery>
           </div>
         )}
       </div>
@@ -444,6 +538,29 @@ export default function PublicReportPage() {
       <div className="text-center text-xs text-gray-400 mt-8">
         <p>본 리포트는 진단 시점 기준으로 작성되었습니다.</p>
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
+      </div>
+
+      {/* PDF 다운로드 플로팅 버튼 */}
+      <button
+        onClick={downloadPDF}
+        disabled={pdfLoading}
+        className="fixed bottom-6 right-5 flex items-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-lg transition-colors z-50"
+      >
+        {pdfLoading ? (
+          <>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            생성 중...
+          </>
+        ) : (
+          <>⬇️ PDF 다운로드</>
+        )}
+      </button>
+
+      {/* 숨겨진 PDF 전용 템플릿 (캡처용) */}
+      <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
+        <div ref={pdfRef}>
+          <PdfTemplate data={data} grade={calcGrade(data)} />
+        </div>
       </div>
     </div>
   );
