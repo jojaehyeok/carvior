@@ -157,7 +157,7 @@ function DamageChecker({ damages }: { damages: string[][] }) {
   const wRatio = width / ORIGINAL_W;
   const hRatio = height / ORIGINAL_H;
   // 박스 크기: 원본 130 단위 → 70으로 축소, 최소 12px
-  const boxSize = Math.max(wRatio * 70, 12);
+  const boxSize = Math.max(wRatio * 120, 12);
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -178,8 +178,8 @@ function DamageChecker({ damages }: { damages: string[][] }) {
         const sym = syms[0];
         const style = SYMBOL_STYLE[sym] ?? SYMBOL_STYLE["X"];
         // 좌표 = 박스 중심점, translate로 보정
-        const left = wRatio * pos.x - boxSize / 2;
-        const top  = hRatio * pos.y - boxSize / 2;
+        const left = wRatio * (pos.x + 60) - boxSize / 2;
+        const top  = hRatio * (pos.y + 60) - boxSize / 2;
 
         return (
           <div
