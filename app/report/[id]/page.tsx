@@ -156,7 +156,8 @@ function DamageChecker({ damages }: { damages: string[][] }) {
   const height = width > 0 ? (ORIGINAL_H / ORIGINAL_W) * width : 0;
   const wRatio = width / ORIGINAL_W;
   const hRatio = height / ORIGINAL_H;
-  const boxSize = Math.max(wRatio * 130, 18);
+  // 박스 크기: 원본 130 단위 → 70으로 축소, 최소 12px
+  const boxSize = Math.max(wRatio * 70, 12);
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -169,15 +170,16 @@ function DamageChecker({ damages }: { damages: string[][] }) {
         draggable={false}
       />
 
-      {/* 손상 마커 */}
+      {/* 손상 마커: 박스 중앙을 좌표에 맞춤 */}
       {width > 0 && CHECK_POSITIONS.map((pos, i) => {
         const syms = damages[i] ?? [];
         if (syms.length === 0) return null;
 
         const sym = syms[0];
         const style = SYMBOL_STYLE[sym] ?? SYMBOL_STYLE["X"];
-        const left = wRatio * pos.x;
-        const top  = hRatio * pos.y;
+        // 좌표 = 박스 중심점, translate로 보정
+        const left = wRatio * pos.x - boxSize / 2;
+        const top  = hRatio * pos.y - boxSize / 2;
 
         return (
           <div
@@ -190,12 +192,11 @@ function DamageChecker({ damages }: { damages: string[][] }) {
               width:  boxSize,
               height: boxSize,
               backgroundColor: style.bg,
-              border: `2px solid ${style.border}`,
-              borderRadius: 6,
+              border: `1.5px solid ${style.border}`,
+              borderRadius: 4,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              transform: "translate(-50%, -50%)",
               cursor: "default",
             }}
           >
@@ -203,7 +204,7 @@ function DamageChecker({ damages }: { damages: string[][] }) {
               style={{
                 color: style.text,
                 fontWeight: "bold",
-                fontSize: boxSize * 0.48,
+                fontSize: boxSize * 0.52,
                 lineHeight: 1,
                 userSelect: "none",
               }}
