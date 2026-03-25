@@ -37,7 +37,8 @@ export const Navbar = () => {
   const isNoNavbarPath = 
     pathname === '/marketing/simple-request' || 
     pathname === '/simple-request' || 
-    pathname.startsWith('/reports'); 
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/report');
 
   // 2. 조건에 해당하면 아무것도 렌더링하지 않음 (Navbar 제거)
   if (isNoNavbarPath) {

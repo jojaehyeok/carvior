@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import LightGallery from "lightgallery/react";
 import lgZoom from "lightgallery/plugins/zoom";
 import "lightgallery/css/lightgallery.css";
@@ -57,26 +57,71 @@ const PART_NAMES = [
   "조수석 리어 사이드멤버", "조수석 리어 휠하우스", "리어 패널",
 ];
 
-const SYMBOL_MAP: Record<string, { label: string; color: string }> = {
-  X: { label: "교환", color: "bg-red-100 text-red-700 border-red-300" },
-  W: { label: "판금/도장", color: "bg-orange-100 text-orange-700 border-orange-300" },
-  M: { label: "탈부착/조정", color: "bg-yellow-100 text-yellow-700 border-yellow-300" },
-  A: { label: "흠집", color: "bg-blue-100 text-blue-700 border-blue-300" },
-  U: { label: "요철", color: "bg-purple-100 text-purple-700 border-purple-300" },
-  T: { label: "깨짐", color: "bg-gray-100 text-gray-700 border-gray-300" },
-  C: { label: "부식", color: "bg-green-100 text-green-700 border-green-300" },
-  P: { label: "도장필요", color: "bg-pink-100 text-pink-700 border-pink-300" },
+// 앱에서 가져온 원본 좌표 (SVG 원본 크기: 2109 x 4001)
+const CHECK_POSITIONS = [
+  { x: 311.83, y: 240.14 },
+  { x: 260.03, y: 892.29 },
+  { x: 509.3,  y: 762.29 },
+  { x: 86.64,  y: 1111.77 },
+  { x: 508.86, y: 1142.25 },
+  { x: 260.03, y: 1333.65 },
+  { x: 512.24, y: 1648.91 },
+  { x: 374.88, y: 1910.12 },
+  { x: 983.46, y: 458.1 },
+  { x: 983.46, y: 1212.79 },
+  { x: 983.46, y: 1816.54 },
+  { x: 1667.97, y: 240.48 },
+  { x: 1469.7,  y: 762.29 },
+  { x: 1718.76, y: 892.63 },
+  { x: 1892.36, y: 1111.77 },
+  { x: 1470.94, y: 1142.58 },
+  { x: 1718.76, y: 1333.98 },
+  { x: 1466.56, y: 1648.24 },
+  { x: 1604.92, y: 1910.45 },
+  { x: 988.04,  y: 2101.36 },
+  { x: 988.04,  y: 2241.4 },
+  { x: 723.78,  y: 2411.14 },
+  { x: 866.79,  y: 2488.66 },
+  { x: 1099.87, y: 2488.4 },
+  { x: 1244.45, y: 2411.14 },
+  { x: 727.0,   y: 2622.66 },
+  { x: 1237.35, y: 2622.66 },
+  { x: 991.04,  y: 2784.37 },
+  { x: 991.04,  y: 2922.09 },
+  { x: 991.04,  y: 3153.39 },
+  { x: 995.47,  y: 3403.48 },
+  { x: 710.25,  y: 3552.65 },
+  { x: 849.93,  y: 3590.53 },
+  { x: 987.15,  y: 3590.53 },
+  { x: 1124.26, y: 3590.53 },
+  { x: 1264.94, y: 3550.65 },
+  { x: 992.15,  y: 3764.23 },
+];
+
+const ORIGINAL_W = 2109;
+const ORIGINAL_H = 4001;
+
+const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  X: { label: "교환",      bg: "rgba(239,68,68,0.25)",   text: "#dc2626", border: "#ef4444" },
+  W: { label: "판금/도장", bg: "rgba(249,115,22,0.25)",  text: "#ea580c", border: "#f97316" },
+  M: { label: "탈부착",    bg: "rgba(234,179,8,0.25)",   text: "#ca8a04", border: "#eab308" },
+  A: { label: "흠집",      bg: "rgba(59,130,246,0.25)",  text: "#2563eb", border: "#3b82f6" },
+  U: { label: "요철",      bg: "rgba(168,85,247,0.25)",  text: "#9333ea", border: "#a855f7" },
+  T: { label: "깨짐",      bg: "rgba(107,114,128,0.25)", text: "#4b5563", border: "#6b7280" },
+  C: { label: "부식",      bg: "rgba(34,197,94,0.25)",   text: "#16a34a", border: "#22c55e" },
+  P: { label: "도장필요",  bg: "rgba(236,72,153,0.25)",  text: "#db2777", border: "#ec4899" },
+  B: { label: "판금",      bg: "rgba(139,92,246,0.25)",  text: "#7c3aed", border: "#8b5cf6" },
 };
 
 const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: string }[] = [
-  { key: "exterior", label: "외관", icon: "🚗" },
-  { key: "interior", label: "실내", icon: "💺" },
-  { key: "wheel", label: "휠", icon: "🛞" },
-  { key: "engine", label: "엔진", icon: "⚙️" },
-  { key: "undercarriage", label: "하부", icon: "🔩" },
-  { key: "dashboard", label: "계기판", icon: "🖥️" },
+  { key: "exterior",     label: "외관",   icon: "🚗" },
+  { key: "interior",     label: "실내",   icon: "💺" },
+  { key: "wheel",        label: "휠",     icon: "🛞" },
+  { key: "engine",       label: "엔진",   icon: "⚙️" },
+  { key: "undercarriage",label: "하부",   icon: "🔩" },
+  { key: "dashboard",    label: "계기판", icon: "🖥️" },
   { key: "registration", label: "등록증", icon: "📄" },
-  { key: "vin", label: "차대번호", icon: "🔢" },
+  { key: "vin",          label: "차대번호",icon: "🔢" },
 ];
 
 // ─── 타이어 게이지 ──────────────────────────────────────────────────────────────
@@ -89,6 +134,85 @@ function TireGauge({ value, label }: { value: number; label: string }) {
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
       <p className="text-sm font-bold">{value}%</p>
+    </div>
+  );
+}
+
+// ─── 차량 손상 다이어그램 ────────────────────────────────────────────────────────
+function DamageChecker({ damages }: { damages: string[][] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setWidth(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const height = width > 0 ? (ORIGINAL_H / ORIGINAL_W) * width : 0;
+  const wRatio = width / ORIGINAL_W;
+  const hRatio = height / ORIGINAL_H;
+  const boxSize = Math.max(wRatio * 130, 18);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      {/* SVG 배경 */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/car-damage-bg.svg"
+        alt="차량 도면"
+        className="w-full h-auto block"
+        draggable={false}
+      />
+
+      {/* 손상 마커 */}
+      {width > 0 && CHECK_POSITIONS.map((pos, i) => {
+        const syms = damages[i] ?? [];
+        if (syms.length === 0) return null;
+
+        const sym = syms[0];
+        const style = SYMBOL_STYLE[sym] ?? SYMBOL_STYLE["X"];
+        const left = wRatio * pos.x;
+        const top  = hRatio * pos.y;
+
+        return (
+          <div
+            key={i}
+            title={`${PART_NAMES[i]}: ${syms.map(s => SYMBOL_STYLE[s]?.label ?? s).join(", ")}`}
+            style={{
+              position: "absolute",
+              left,
+              top,
+              width:  boxSize,
+              height: boxSize,
+              backgroundColor: style.bg,
+              border: `2px solid ${style.border}`,
+              borderRadius: 6,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transform: "translate(-50%, -50%)",
+              cursor: "default",
+            }}
+          >
+            <span
+              style={{
+                color: style.text,
+                fontWeight: "bold",
+                fontSize: boxSize * 0.48,
+                lineHeight: 1,
+                userSelect: "none",
+              }}
+            >
+              {sym}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -156,12 +280,9 @@ export default function PublicReportPage() {
 
   const { car_info, evaluation, car_status, damages, images } = data;
   const totalKeys =
-    car_status.keys.smart +
-    car_status.keys.folding +
-    car_status.keys.general +
-    car_status.keys.special;
+    car_status.keys.smart + car_status.keys.folding +
+    car_status.keys.general + car_status.keys.special;
 
-  // 손상 있는 부위만 필터링
   const damagedParts = damages
     .map((syms, i) => ({ name: PART_NAMES[i], symbols: syms }))
     .filter((p) => p.symbols.length > 0);
@@ -208,16 +329,14 @@ export default function PublicReportPage() {
           </div>
         </div>
 
-        {/* 타이어 잔존량 */}
         <div className="mt-4 bg-gray-50 rounded-xl p-4">
           <p className="text-xs text-gray-400 mb-3">타이어 잔존량</p>
           <div className="grid grid-cols-2 gap-4">
             <TireGauge value={car_status.tireTread.front} label="앞 타이어" />
-            <TireGauge value={car_status.tireTread.back} label="뒤 타이어" />
+            <TireGauge value={car_status.tireTread.back}  label="뒤 타이어" />
           </div>
         </div>
 
-        {/* 휠 스크래치 */}
         {car_status.wheelScratch > 0 && (
           <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-center gap-2">
             <span className="text-yellow-500">⚠️</span>
@@ -233,10 +352,10 @@ export default function PublicReportPage() {
         </h2>
         <div className="space-y-3">
           {[
-            { label: "누유 상태", value: evaluation.leakDesc, icon: "💧" },
-            { label: "주행 상태", value: evaluation.driveDesc, icon: "🏁" },
+            { label: "누유 상태", value: evaluation.leakDesc,    icon: "💧" },
+            { label: "주행 상태", value: evaluation.driveDesc,   icon: "🏁" },
             { label: "옵션 상태", value: evaluation.optionsDesc, icon: "🔧" },
-            { label: "경고등", value: evaluation.warningDesc, icon: "⚡" },
+            { label: "경고등",    value: evaluation.warningDesc, icon: "⚡" },
           ].map((item) => {
             const isOk = item.value === "이상 없음" || !item.value;
             return (
@@ -267,46 +386,38 @@ export default function PublicReportPage() {
         </div>
       </div>
 
-      {/* 손상 내역 */}
+      {/* 손상 다이어그램 */}
       {damagedParts.length > 0 && (
         <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <span>🔍</span> 손상 내역
+          <h2 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            <span>🔍</span> 손상 부위
             <span className="text-xs font-normal text-gray-400">({damagedParts.length}개 부위)</span>
           </h2>
-          <div className="space-y-2">
+          <p className="text-xs text-gray-400 mb-4">마커에 마우스를 올리면 부위명을 확인할 수 있어요</p>
+
+          <DamageChecker damages={damages} />
+
+          {/* 손상 목록 */}
+          <div className="mt-4 space-y-1.5">
             {damagedParts.map((part) => (
-              <div key={part.name} className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+              <div key={part.name} className="flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0">
                 <p className="text-sm text-gray-700 flex-1">{part.name}</p>
                 <div className="flex gap-1 flex-wrap justify-end">
                   {part.symbols.map((sym) => {
-                    const info = SYMBOL_MAP[sym];
+                    const s = SYMBOL_STYLE[sym];
                     return (
                       <span
                         key={sym}
-                        className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
-                          info ? info.color : "bg-gray-100 text-gray-600 border-gray-300"
-                        }`}
+                        className="text-xs px-2 py-0.5 rounded-full border font-medium"
+                        style={s ? { backgroundColor: s.bg, color: s.text, borderColor: s.border } : {}}
                       >
-                        {info ? info.label : sym}
+                        {s ? s.label : sym}
                       </span>
                     );
                   })}
                 </div>
               </div>
             ))}
-          </div>
-
-          {/* 범례 */}
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-400 mb-2">범례</p>
-            <div className="flex flex-wrap gap-1.5">
-              {Object.entries(SYMBOL_MAP).map(([sym, { label, color }]) => (
-                <span key={sym} className={`text-xs px-2 py-0.5 rounded-full border ${color}`}>
-                  {sym} · {label}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       )}
