@@ -7,7 +7,7 @@ import { clsx } from 'clsx';
 // ─────────────────────────────────────────
 // 토스 설정 (클라이언트 키 교체 필요)
 // ─────────────────────────────────────────
-const TOSS_CLIENT_KEY = 'test_ck_YOUR_TOSS_CLIENT_KEY'; // ← 토스 대시보드에서 발급받은 키로 교체
+const TOSS_CLIENT_KEY = 'test_gck_GePWvyJnrKKGYdYDNq06rgLzN97E'; // ← 토스 대시보드에서 발급받은 키로 교체
 const INSPECTION_PRICE = 80_000;
 
 function generateOrderId() {
