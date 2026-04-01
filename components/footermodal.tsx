@@ -47,7 +47,7 @@ export default function AppFooter() {
                 <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
                 <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
                 {/* 🌟 통신판매업 신고번호는 심사 필수 항목입니다. */}
-                <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0000호</p> 
+                <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0474</p> 
                 <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
               </div>
 
@@ -69,7 +69,7 @@ export default function AppFooter() {
               {/* 🌟 환불정책 링크 추가 (토스 심사용) */}
               <button 
                 onClick={() => router.push('/policy/refund')} 
-                className="text-red-500 font-medium transition-colors hover:underline"
+                className="font-medium text-red-500 transition-colors hover:underline"
               >
                 취소 및 환불규정
               </button>
