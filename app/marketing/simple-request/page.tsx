@@ -90,6 +90,8 @@ export default function SimpleRequestPage() {
     const [formData, setFormData] = useState({
         carNumber: '',
         carOwner: '',
+        carYear: '',
+        desiredPrice: '',
         dealerName: '',
         contact: '',
         address: '',
@@ -127,7 +129,7 @@ export default function SimpleRequestPage() {
         }));
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         const cleanValue = name === 'carNumber' ? value.replace(/\s/g, '') : value;
         setFormData(prev => ({ ...prev, [name]: cleanValue }));
@@ -242,18 +244,52 @@ export default function SimpleRequestPage() {
                         </div>
                     </div>
 
-                    {/* 02. 연락처 */}
+                    {/* 02. 차량 상태 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">02. 연락처</h3>
+                        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">02. 차량 상태</h3>
+                        <div className="space-y-4">
+                            {/* 연식 */}
+                            <div>
+                                <label className="text-xs text-slate-400 font-bold mb-1 block">차량 연식</label>
+                                <select
+                                    name="carYear"
+                                    onChange={handleChange}
+                                    className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all bg-transparent text-slate-700"
+                                >
+                                    <option value="">연식 선택</option>
+                                    {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                        <option key={y} value={y}>{y}년</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* 희망 판매가 */}
+                            <div className="relative">
+                                <label className="text-xs text-slate-400 font-bold mb-1 block">희망 판매가</label>
+                                <input
+                                    type="number"
+                                    name="desiredPrice"
+                                    placeholder="예: 1500"
+                                    min="0"
+                                    className="w-full border-b-2 border-slate-100 p-3 pr-14 focus:border-blue-600 outline-none transition-all"
+                                    onChange={handleChange}
+                                />
+                                <span className="absolute right-3 bottom-3 text-sm text-slate-400 font-bold">만원</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 03. 연락처 */}
+                    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">03. 연락처</h3>
                         <div className="space-y-4">
                             <input required name="dealerName" placeholder="딜러님 성함 또는 상사명" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
                             <input required type="tel" name="contact" placeholder="연락처 (- 제외)" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
                         </div>
                     </div>
 
-                    {/* 03. 장소 및 시간 */}
+                    {/* 04. 장소 및 시간 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">03. 장소 및 시간</h3>
+                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">04. 장소 및 시간</h3>
                         <DateTimeSelector onDateTimeSelect={handleDateTimeChange} />
                         <div className="pt-4 border-t border-slate-50 space-y-4">
                             <div className="flex gap-2">

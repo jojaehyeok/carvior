@@ -37,6 +37,7 @@ export const Navbar = () => {
   const isNoNavbarPath = 
     pathname === '/marketing/simple-request' || 
     pathname === '/simple-request' || 
+     pathname.startsWith('/marketing') ||
     pathname.startsWith('/reports') ||
     pathname.startsWith('/report');
 
