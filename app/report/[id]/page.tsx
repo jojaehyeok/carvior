@@ -39,6 +39,9 @@ interface ReportData {
     exterior?: string[];
     interior?: string[];
     undercarriage?: string[];
+    damage?: string[];
+    extra?: string[];
+    extraMemo?: string[];
     dashboard?: string[];
     registration?: string[];
     vin?: string[];
@@ -105,23 +108,26 @@ const ORIGINAL_W = 2109;
 const ORIGINAL_H = 4001;
 
 const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  X: { label: "교환",      bg: "rgba(239,68,68,0.25)",   text: "#dc2626", border: "#ef4444" },
-  W: { label: "판금/도장", bg: "rgba(249,115,22,0.25)",  text: "#ea580c", border: "#f97316" },
-  M: { label: "탈부착",    bg: "rgba(234,179,8,0.25)",   text: "#ca8a04", border: "#eab308" },
-  A: { label: "흠집",      bg: "rgba(59,130,246,0.25)",  text: "#2563eb", border: "#3b82f6" },
-  U: { label: "요철",      bg: "rgba(168,85,247,0.25)",  text: "#9333ea", border: "#a855f7" },
-  T: { label: "깨짐",      bg: "rgba(107,114,128,0.25)", text: "#4b5563", border: "#6b7280" },
-  C: { label: "부식",      bg: "rgba(34,197,94,0.25)",   text: "#16a34a", border: "#22c55e" },
-  P: { label: "도장필요",  bg: "rgba(236,72,153,0.25)",  text: "#db2777", border: "#ec4899" },
-  B: { label: "판금",      bg: "rgba(139,92,246,0.25)",  text: "#7c3aed", border: "#8b5cf6" },
+  X: { label: "교환",      bg: "#ef4444", text: "#ffffff", border: "#ef4444" },
+  W: { label: "판금/도장", bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
+  M: { label: "탈부착",    bg: "#eab308", text: "#ffffff", border: "#eab308" },
+  A: { label: "흠집",      bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
+  U: { label: "요철",      bg: "#a855f7", text: "#ffffff", border: "#a855f7" },
+  T: { label: "깨짐",      bg: "#6b7280", text: "#ffffff", border: "#6b7280" },
+  C: { label: "부식",      bg: "#22c55e", text: "#ffffff", border: "#22c55e" },
+  P: { label: "도장필요",  bg: "#ec4899", text: "#ffffff", border: "#ec4899" },
+  B: { label: "판금",      bg: "#8b5cf6", text: "#ffffff", border: "#8b5cf6" },
 };
 
 const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: string }[] = [
-  { key: "exterior",     label: "외관", icon: "🚗" },
-  { key: "interior",     label: "실내", icon: "💺" },
-  { key: "wheel",        label: "휠",   icon: "🛞" },
-  { key: "engine",       label: "엔진", icon: "⚙️" },
-  { key: "undercarriage",label: "하부", icon: "🔩" },
+  { key: "exterior",     label: "외관",      icon: "🚗" },
+  { key: "interior",     label: "실내",      icon: "💺" },
+  { key: "extra",        label: "옵션",      icon: "🔧" },
+  { key: "wheel",        label: "휠",        icon: "🛞" },
+  { key: "engine",       label: "엔진",      icon: "⚙️" },
+  { key: "undercarriage",label: "하부",      icon: "🔩" },
+  { key: "damage",       label: "외판 데미지", icon: "🔨" },
+  { key: "extraMemo",    label: "기타사진",   icon: "📷" },
 ];
 
 const DOC_IMAGES: { key: keyof ReportData["images"]; label: string }[] = [
@@ -199,7 +205,7 @@ function DamageChecker({ damages }: { damages: string[][] }) {
               height: boxSize,
               backgroundColor: style.bg,
               border: `1.5px solid ${style.border}`,
-              borderRadius: 4,
+              borderRadius: boxSize / 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -482,17 +488,21 @@ export default function PublicReportPage() {
       </div>
 
       {/* 손상 다이어그램 */}
-      {damagedParts.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-          <h2 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
-            <span>🔍</span> 손상 부위
+      <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
+        <h2 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+          <span>🔍</span> 손상 부위
+          {damagedParts.length > 0 ? (
             <span className="text-xs font-normal text-gray-400">({damagedParts.length}개 부위)</span>
-          </h2>
-          <p className="text-xs text-gray-400 mb-4">마커에 마우스를 올리면 부위명을 확인할 수 있어요</p>
+          ) : (
+            <span className="text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">✅ 무사고 차량</span>
+          )}
+        </h2>
+        <p className="text-xs text-gray-400 mb-4">마커에 마우스를 올리면 부위명을 확인할 수 있어요</p>
 
-          <DamageChecker damages={damages} />
+        <DamageChecker damages={damages} />
 
-          {/* 손상 목록 */}
+        {/* 손상 목록 */}
+        {damagedParts.length > 0 ? (
           <div className="mt-4 space-y-1.5">
             {damagedParts.map((part) => (
               <div key={part.name} className="flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0">
@@ -514,8 +524,12 @@ export default function PublicReportPage() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="mt-4 text-center py-6 text-green-600 text-sm font-medium bg-green-50 rounded-xl border border-green-100">
+            무사고 차량이예요 🎉
+          </div>
+        )}
+      </div>
 
       {/* 이미지 갤러리 */}
       <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">

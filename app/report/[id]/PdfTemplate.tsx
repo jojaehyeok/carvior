@@ -37,7 +37,7 @@ const SYMBOL_LABEL: Record<string,string> = {
   X:"교환",W:"판금/도장",M:"탈부착",A:"흠집",U:"요철",T:"깨짐",C:"부식",P:"도장필요",B:"판금",
 };
 const SYMBOL_COLOR: Record<string,string> = {
-  X:"#ef4444",W:"#f97316",M:"#eab308",A:"#3b82f6",U:"#a855f7",T:"#6b7280",C:"#22c55e",P:"#ec4899",B:"#8b5cf6",
+  X:"#ef4444",W:"#3b82f6",M:"#eab308",A:"#3b82f6",U:"#a855f7",T:"#6b7280",C:"#22c55e",P:"#ec4899",B:"#8b5cf6",
 };
 
 export interface ReportData {
@@ -52,6 +52,7 @@ export interface ReportData {
   images: {
     wheel?:string[]; engine?:string[]; exterior?:string[];
     interior?:string[]; undercarriage?:string[];
+    damage?:string[]; extra?:string[]; extraMemo?:string[];
     dashboard?:string[]; registration?:string[]; vin?:string[];
   };
 }
@@ -187,24 +188,26 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
               </div>
             )}
 
-            {damagedParts.length>0&&(
-              <>
-                <SectionLabel text="Damage List" />
-                <div style={{ border:"1px solid #e5e7eb",borderRadius:8,overflow:"hidden" }}>
-                  {damagedParts.map((part,i)=>(
-                    <div key={i} style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:i<damagedParts.length-1?"1px solid #f3f4f6":"none" }}>
-                      <span style={{ fontSize:9,color:"#374151" }}>{part.name}</span>
-                      <div style={{ display:"flex",gap:3,flexWrap:"wrap" }}>
-                        {part.symbols.map(sym=>(
-                          <span key={sym} style={{ fontSize:8,fontWeight:700,color:SYMBOL_COLOR[sym]??"#6b7280",backgroundColor:(SYMBOL_COLOR[sym]??"#6b7280")+"22",border:`1px solid ${SYMBOL_COLOR[sym]??"#6b7280"}`,borderRadius:99,padding:"1px 5px" }}>
-                            {SYMBOL_LABEL[sym]??sym}
-                          </span>
-                        ))}
-                      </div>
+            <SectionLabel text="Damage List" />
+            {damagedParts.length>0 ? (
+              <div style={{ border:"1px solid #e5e7eb",borderRadius:8,overflow:"hidden" }}>
+                {damagedParts.map((part,i)=>(
+                  <div key={i} style={{ display:"flex",alignItems:"center",justifyContent:"space-between",padding:"5px 10px",borderBottom:i<damagedParts.length-1?"1px solid #f3f4f6":"none" }}>
+                    <span style={{ fontSize:9,color:"#374151" }}>{part.name}</span>
+                    <div style={{ display:"flex",gap:3,flexWrap:"wrap" }}>
+                      {part.symbols.map(sym=>(
+                        <span key={sym} style={{ fontSize:8,fontWeight:700,color:"#ffffff",backgroundColor:SYMBOL_COLOR[sym]??"#6b7280",border:`1px solid ${SYMBOL_COLOR[sym]??"#6b7280"}`,borderRadius:99,padding:"1px 5px" }}>
+                          {SYMBOL_LABEL[sym]??sym}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ backgroundColor:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"8px 12px",textAlign:"center" }}>
+                <span style={{ fontSize:10,fontWeight:700,color:"#16a34a" }}>✅ 무사고 차량 · 외판 손상 없음</span>
+              </div>
             )}
           </div>
 
@@ -219,8 +222,8 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
                 if(!syms.length) return null;
                 const sym=syms[0], clr=SYMBOL_COLOR[sym]??"#ef4444";
                 return (
-                  <div key={i} style={{ position:"absolute",left:wR*(pos.x+60)-box/2,top:hR*(pos.y+60)-box/2,width:box,height:box,backgroundColor:clr+"33",border:`1.5px solid ${clr}`,borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center" }}>
-                    <span style={{ color:clr,fontWeight:"bold",fontSize:box*0.5,lineHeight:1 }}>{sym}</span>
+                  <div key={i} style={{ position:"absolute",left:wR*(pos.x+60)-box/2,top:hR*(pos.y+60)-box/2,width:box,height:box,backgroundColor:clr,border:`1.5px solid ${clr}`,borderRadius:box/2,display:"flex",alignItems:"center",justifyContent:"center" }}>
+                    <span style={{ color:"#ffffff",fontWeight:"bold",fontSize:box*0.5,lineHeight:1 }}>{sym}</span>
                   </div>
                 );
               })}
@@ -249,11 +252,14 @@ function Page2({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
   ];
 
   const photoCats: { label:string; imgs:string[] }[] = [
-    { label:"외관",  imgs:images.exterior??[] },
-    { label:"실내",  imgs:images.interior??[] },
-    { label:"휠",    imgs:images.wheel??[] },
-    { label:"엔진",  imgs:images.engine??[] },
-    { label:"하부",  imgs:images.undercarriage??[] },
+    { label:"외관",       imgs:images.exterior??[] },
+    { label:"실내",       imgs:images.interior??[] },
+    { label:"옵션",       imgs:images.extra??[] },
+    { label:"휠",         imgs:images.wheel??[] },
+    { label:"엔진",       imgs:images.engine??[] },
+    { label:"하부",       imgs:images.undercarriage??[] },
+    { label:"외판 데미지", imgs:images.damage??[] },
+    { label:"기타사진",   imgs:images.extraMemo??[] },
   ].filter(c=>c.imgs.length>0);
 
   // 페이지당 4열로 사진 배치 — 한 페이지에 맞게 각 카테고리 최대 4장
