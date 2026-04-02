@@ -142,7 +142,7 @@ function TireGauge({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <p className="text-xs text-gray-500">{label}</p>
-      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-3 overflow-hidden bg-gray-200 rounded-full">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
       <p className="text-sm font-bold">{value}%</p>
@@ -178,7 +178,7 @@ function DamageChecker({ damages }: { damages: string[][] }) {
       <img
         src="/car-damage-bg.svg"
         alt="차량 도면"
-        className="w-full h-auto block"
+        className="block w-full h-auto"
         draggable={false}
       />
 
@@ -235,9 +235,9 @@ function ImageSection({ images, label, icon }: { images: string[]; label: string
   if (!images || images.length === 0) return null;
   return (
     <div>
-      <h3 className="text-base font-semibold mb-3 flex items-center gap-2">
+      <h3 className="flex items-center gap-2 mb-3 text-base font-semibold">
         <span>{icon}</span>{label}
-        <span className="text-xs text-gray-400 font-normal">({images.length}장)</span>
+        <span className="text-xs font-normal text-gray-400">({images.length}장)</span>
       </h3>
       <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-3 flex-wrap">
         {images.map((url, i) => (
@@ -340,16 +340,16 @@ export default function PublicReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-500 text-sm">리포트를 불러오는 중...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="w-10 h-10 border-4 border-blue-500 rounded-full border-t-transparent animate-spin" />
+        <p className="text-sm text-gray-500">리포트를 불러오는 중...</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-2">
+      <div className="flex flex-col items-center justify-center min-h-screen gap-2">
         <p className="text-2xl">😥</p>
         <p className="text-gray-600">리포트를 찾을 수 없습니다.</p>
       </div>
@@ -366,34 +366,34 @@ export default function PublicReportPage() {
     .filter((p) => p.symbols.length > 0);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 pb-16">
+    <div className="max-w-2xl px-4 py-8 pb-16 mx-auto">
       {/* 헤더 */}
-      <div className="text-center mb-8">
+      <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <span>🔍</span> 차량 진단 리포트
         </div>
         <h1 className="text-3xl font-bold text-gray-900">{car_info.number}</h1>
-        <p className="text-gray-500 mt-1">{car_info.type}</p>
+        <p className="mt-1 text-gray-500">{car_info.type}</p>
       </div>
 
       {/* 차량 기본 정보 */}
-      <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-        <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+      <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
+        <h2 className="flex items-center gap-2 mb-4 font-semibold text-gray-800">
           <span>🚗</span> 차량 기본 정보
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-xs text-gray-400 mb-1">주행거리</p>
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <p className="mb-1 text-xs text-gray-400">주행거리</p>
             <p className="text-lg font-bold text-gray-800">
               {car_info.mileage.toLocaleString()} km
             </p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-xs text-gray-400 mb-1">색상</p>
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <p className="mb-1 text-xs text-gray-400">색상</p>
             <p className="text-lg font-bold text-gray-800">{car_info.color || "-"}</p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-xs text-gray-400 mb-1">열쇠</p>
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <p className="mb-1 text-xs text-gray-400">열쇠</p>
             <p className="text-lg font-bold text-gray-800">{totalKeys}개</p>
             <p className="text-xs text-gray-400 mt-0.5">
               {car_status.keys.smart > 0 && `스마트키 ${car_status.keys.smart}`}
@@ -401,14 +401,14 @@ export default function PublicReportPage() {
               {car_status.keys.folding > 0 && ` / 폴딩 ${car_status.keys.folding}`}
             </p>
           </div>
-          <div className="bg-gray-50 rounded-xl p-4">
-            <p className="text-xs text-gray-400 mb-1">외판 도색 필요</p>
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <p className="mb-1 text-xs text-gray-400">외판 도색 필요</p>
             <p className="text-lg font-bold text-gray-800">{car_status.paintNeeded}개소</p>
           </div>
         </div>
 
-        <div className="mt-4 bg-gray-50 rounded-xl p-4">
-          <p className="text-xs text-gray-400 mb-3">타이어 잔존량</p>
+        <div className="p-4 mt-4 bg-gray-50 rounded-xl">
+          <p className="mb-3 text-xs text-gray-400">타이어 잔존량</p>
           <div className="grid grid-cols-2 gap-4">
             <TireGauge value={car_status.tireTread.front} label="앞 타이어" />
             <TireGauge value={car_status.tireTread.back}  label="뒤 타이어" />
@@ -416,7 +416,7 @@ export default function PublicReportPage() {
         </div>
 
         {car_status.wheelScratch > 0 && (
-          <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 p-3 mt-3 border border-yellow-200 bg-yellow-50 rounded-xl">
             <span className="text-yellow-500">⚠️</span>
             <p className="text-sm text-yellow-800">휠 스크래치 {car_status.wheelScratch}개</p>
           </div>
@@ -425,7 +425,7 @@ export default function PublicReportPage() {
         {/* 계기판 / 등록증 / 차대번호 */}
         {DOC_IMAGES.some((d) => images[d.key]?.length) && (
           <div className="mt-4">
-            <p className="text-xs text-gray-400 mb-2">서류 및 계기판</p>
+            <p className="mb-2 text-xs text-gray-400">서류 및 계기판</p>
             <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-3 flex-wrap">
               {DOC_IMAGES.flatMap((d) =>
                 (images[d.key] ?? []).map((url, i) => (
@@ -447,8 +447,8 @@ export default function PublicReportPage() {
       </div>
 
       {/* 진단 결과 */}
-      <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-        <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+      <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
+        <h2 className="flex items-center gap-2 mb-4 font-semibold text-gray-800">
           <span>📋</span> 진단 결과
         </h2>
         <div className="space-y-3">
@@ -479,8 +479,8 @@ export default function PublicReportPage() {
           })}
 
           {evaluation.memo && (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-              <p className="text-xs text-gray-500 mb-1">진단사 고지사항</p>
+            <div className="p-3 border border-gray-200 bg-gray-50 rounded-xl">
+              <p className="mb-1 text-xs text-gray-500">진단사 고지사항</p>
               <p className="text-sm text-gray-700 whitespace-pre-line">{evaluation.memo}</p>
             </div>
           )}
@@ -488,8 +488,8 @@ export default function PublicReportPage() {
       </div>
 
       {/* 손상 다이어그램 */}
-      <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-        <h2 className="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+      <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
+        <h2 className="flex items-center gap-2 mb-1 font-semibold text-gray-800">
           <span>🔍</span> 손상 부위
           {damagedParts.length > 0 ? (
             <span className="text-xs font-normal text-gray-400">({damagedParts.length}개 부위)</span>
@@ -497,7 +497,7 @@ export default function PublicReportPage() {
             <span className="text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">✅ 무사고 차량</span>
           )}
         </h2>
-        <p className="text-xs text-gray-400 mb-4">마커에 마우스를 올리면 부위명을 확인할 수 있어요</p>
+        <p className="mb-4 text-xs text-gray-400">마커에 마우스를 올리면 부위명을 확인할 수 있어요</p>
 
         <DamageChecker damages={damages} />
 
@@ -506,8 +506,8 @@ export default function PublicReportPage() {
           <div className="mt-4 space-y-1.5">
             {damagedParts.map((part) => (
               <div key={part.name} className="flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0">
-                <p className="text-sm text-gray-700 flex-1">{part.name}</p>
-                <div className="flex gap-1 flex-wrap justify-end">
+                <p className="flex-1 text-sm text-gray-700">{part.name}</p>
+                <div className="flex flex-wrap justify-end gap-1">
                   {part.symbols.map((sym) => {
                     const s = SYMBOL_STYLE[sym];
                     return (
@@ -525,15 +525,15 @@ export default function PublicReportPage() {
             ))}
           </div>
         ) : (
-          <div className="mt-4 text-center py-6 text-green-600 text-sm font-medium bg-green-50 rounded-xl border border-green-100">
+          <div className="py-6 mt-4 text-sm font-medium text-center text-green-600 border border-green-100 bg-green-50 rounded-xl">
             무사고 차량이예요 🎉
           </div>
         )}
       </div>
 
       {/* 이미지 갤러리 */}
-      <div className="bg-white rounded-2xl shadow-sm border p-5 mb-5">
-        <h2 className="font-semibold text-gray-800 mb-5 flex items-center gap-2">
+      <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
+        <h2 className="flex items-center gap-2 mb-5 font-semibold text-gray-800">
           <span>📸</span> 차량 사진
         </h2>
         <div className="space-y-6">
@@ -549,7 +549,7 @@ export default function PublicReportPage() {
       </div>
 
       {/* 푸터 */}
-      <div className="text-center text-xs text-gray-400 mt-8">
+      <div className="mt-8 text-xs text-center text-gray-400">
         <p>본 리포트는 진단 시점 기준으로 작성되었습니다.</p>
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
       </div>
@@ -558,11 +558,11 @@ export default function PublicReportPage() {
       <button
         onClick={downloadPDF}
         disabled={pdfLoading}
-        className="fixed bottom-6 right-5 flex items-center gap-2 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 text-white text-sm font-semibold px-5 py-3 rounded-full shadow-lg transition-colors z-50"
+        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-blue-700 rounded-full shadow-lg bottom-6 right-5 hover:bg-blue-800 disabled:bg-blue-400"
       >
         {pdfLoading ? (
           <>
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
             생성 중...
           </>
         ) : (
