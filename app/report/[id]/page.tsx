@@ -239,13 +239,13 @@ function ImageSection({ images, label, icon }: { images: string[]; label: string
         <span>{icon}</span>{label}
         <span className="text-xs font-normal text-gray-400">({images.length}장)</span>
       </h3>
-      <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-3 flex-wrap">
+      <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
         {images.map((url, i) => (
-          <a key={i} href={url} data-src={url} className="block">
+          <a key={i} href={url} data-src={url} className="block aspect-square overflow-hidden rounded-md">
             <img
               src={url}
               alt={`${label} ${i + 1}`}
-              className="w-[120px] h-[90px] object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity"
+              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
             />
           </a>
         ))}

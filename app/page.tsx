@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody } from "@nextui-org/card";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/react";
-
+import ChannelTalk from "@/components/ChannelTalk"; // 만든 컴포넌트 임포트
 import AddressSelector from "@/components/booking/AddressSelector";
 import DateSelector from "@/components/booking/DateSelector";
 import CarLiveShortsRow from "@/components/CarLiveShorts/CarLiveShorts";
@@ -181,6 +181,8 @@ export default function Home() {
       <CarLiveShortsRow />
       <ServiceSection />
       <AppFooter/>
+      {/* 🟢 채널톡 컴포넌트 추가 */}
+      <ChannelTalk />
     </main>
 
     
