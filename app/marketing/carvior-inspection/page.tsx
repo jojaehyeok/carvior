@@ -496,9 +496,15 @@ export default function CarviorInspectionPage() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-white/5 rounded-full blur-3xl" />
 
                 <div className="relative max-w-xl mx-auto px-6 pt-14 pb-0">
-                    <div className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 mb-6 bg-white/5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-zinc-400 text-xs font-bold tracking-wider">EVALUATE · MATCH · SELL</span>
+                    <div className="flex flex-wrap gap-2 mb-6">
+                        <div className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 bg-white/5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-zinc-400 text-xs font-bold tracking-wider">EVALUATE · MATCH · SELL</span>
+                        </div>
+                        <div className="inline-flex items-center gap-1.5 border border-blue-400/30 rounded-full px-3 py-1.5 bg-blue-500/10">
+                            <span className="text-blue-400 text-xs">📍</span>
+                            <span className="text-blue-300 text-xs font-bold">서울 · 경기 · 인천 운영 중</span>
+                        </div>
                     </div>
 
                     <h1 className="text-[2.4rem] font-black leading-[1.15] mb-5 tracking-tight">
@@ -542,7 +548,7 @@ export default function CarviorInspectionPage() {
             {/* ── 신뢰 뱃지 바 ── */}
             <section className="bg-zinc-100 px-5 py-4">
                 <div className="max-w-xl mx-auto flex items-center justify-center gap-5 flex-wrap">
-                    {['방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
+                    {['수도권 전문 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
                         <div key={t} className="flex items-center gap-1.5 text-xs font-bold text-zinc-500">
                             <span className="w-4 h-4 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[9px]">✓</span>
                             {t}
@@ -730,9 +736,21 @@ export default function CarviorInspectionPage() {
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center mb-2">EVALUATION</p>
                     <h2 className="text-2xl font-black text-white text-center mb-2 leading-tight">평가 예약하기</h2>
-                    <p className="text-zinc-500 text-sm text-center mb-8">
+                    <p className="text-zinc-500 text-sm text-center mb-6">
                         방문 평가 · 리포트 발행 · 딜러 매칭까지
                     </p>
+
+                    {/* 운영 지역 안내 */}
+                    <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-400/20 rounded-2xl px-4 py-3.5 mb-6">
+                        <span className="text-lg flex-shrink-0">📍</span>
+                        <div>
+                            <p className="text-blue-300 text-xs font-extrabold mb-0.5">현재 운영 지역</p>
+                            <p className="text-zinc-400 text-xs leading-relaxed">
+                                서울 · 경기 · 인천 (수도권) 지역에서 운영 중입니다.<br />
+                                타 지역은 순차적으로 확대할 예정이에요.
+                            </p>
+                        </div>
+                    </div>
 
                     <InspectionForm light />
 
