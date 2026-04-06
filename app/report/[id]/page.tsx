@@ -328,7 +328,7 @@ export default function PublicReportPage() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`https://carvior.store/api/v1/external/inspection/report/${id}`)
+    fetch(`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}`)
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
