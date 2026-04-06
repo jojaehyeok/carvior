@@ -183,6 +183,7 @@ function PhoneInput({ value, onChange, light = false }: { value: string; onChang
 // 결제 신청 폼
 // ─────────────────────────────────────────
 function InspectionForm({ light = false, formId }: { light?: boolean; formId?: string }) {
+    const [vehicleCategory, setVehicleCategory] = useState('');
     const [carType, setCarType] = useState('');
     const [phone, setPhone] = useState('');
     const [desiredPrice, setDesiredPrice] = useState('');
@@ -231,6 +232,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
         if (paying) return;
         const rawPhone = phone.replace(/-/g, '');
         if (rawPhone.length < 10) { alert('연락처를 올바르게 입력해주세요.'); return; }
+        if (!vehicleCategory) { alert('차량 구분을 선택해주세요.'); return; }
         if (!carType.trim()) { alert('차종을 입력해주세요.'); return; }
         if (!preferredDateTime) { alert('방문 날짜와 시간을 선택해주세요.'); return; }
         if (!address) { alert('방문 장소 주소를 입력해주세요.'); return; }
@@ -241,7 +243,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
 
             const orderId = generateOrderId();
             sessionStorage.setItem('carvior_pending', JSON.stringify({
-                carType, phone: rawPhone, orderId,
+                carType: `[${vehicleCategory}] ${carType}`, phone: rawPhone, orderId,
                 desiredPrice, address, detailAddress, preferredDateTime,
             }));
 
@@ -266,12 +268,27 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
     return (
         <form id={formId} onSubmit={handlePay} className="space-y-6">
 
+            {/* 차량 구분 */}
+            <div>
+                <label className={labelClass}>차량 구분</label>
+                <select
+                    required
+                    value={vehicleCategory}
+                    onChange={e => setVehicleCategory(e.target.value)}
+                    className={inputClass}
+                >
+                    <option value="">선택해주세요</option>
+                    <option value="승용차">승용차</option>
+                    <option value="포터·봉고">포터·봉고 (화물)</option>
+                </select>
+            </div>
+
             {/* 차종 */}
             <div>
                 <label className={labelClass}>차종</label>
                 <input
                     required value={carType} onChange={e => setCarType(e.target.value)}
-                    placeholder="예: 현대 그랜저, 기아 K5 등"
+                    placeholder={vehicleCategory === '포터·봉고' ? '예: 현대 포터2, 기아 봉고3 등' : '예: 현대 그랜저, 기아 K5 등'}
                     className={inputClass}
                 />
             </div>

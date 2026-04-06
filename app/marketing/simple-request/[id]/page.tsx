@@ -92,6 +92,8 @@ export default function SimpleRequestByCompanyPage() {
     const companyId = typeof params?.id === 'string' ? params.id : '';
     const companyLabel = COMPANY_LABELS[companyId] || companyId;
 
+    const [vehicleCategory, setVehicleCategory] = useState('');
+
     const [formData, setFormData] = useState({
         carNumber: '',
         carOwner: '',
@@ -159,6 +161,10 @@ export default function SimpleRequestByCompanyPage() {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isSubmitting || carError) return;
+        if (!vehicleCategory) {
+            alert('차량 구분을 선택해주세요.');
+            return;
+        }
         if (!formData.preferredDateTime) {
             alert('방문 날짜와 시간을 선택해주세요.');
             return;
@@ -173,7 +179,7 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, source: companyId }),
+                body: JSON.stringify({ ...formData, source: companyId, additionalMemo: `[${vehicleCategory}] ${formData.additionalMemo}`.trim() }),
             });
 
             const dbResult = await dbResponse.json();
@@ -241,6 +247,19 @@ export default function SimpleRequestByCompanyPage() {
                     <div className="bg-white rounded-2xl p-6">
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">01 · 차량 확인</p>
                         <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 구분</label>
+                                <select
+                                    required
+                                    value={vehicleCategory}
+                                    onChange={e => setVehicleCategory(e.target.value)}
+                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
+                                >
+                                    <option value="">선택해주세요</option>
+                                    <option value="승용차">승용차</option>
+                                    <option value="포터·봉고">포터·봉고 (화물)</option>
+                                </select>
+                            </div>
                             <div>
                                 <input
                                     required
