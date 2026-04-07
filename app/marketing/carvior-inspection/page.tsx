@@ -275,11 +275,11 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                     required
                     value={vehicleCategory}
                     onChange={e => setVehicleCategory(e.target.value)}
-                    className={inputClass}
+                    className={clsx(inputClass, light ? 'bg-zinc-900 text-white' : 'bg-white text-zinc-900')}
                 >
-                    <option value="">선택해주세요</option>
-                    <option value="승용차">승용차</option>
-                    <option value="포터·봉고">포터·봉고 (화물)</option>
+                    <option value="" disabled style={{ background: light ? '#18181b' : '#fff', color: light ? '#a1a1aa' : '#71717a' }}>선택해주세요</option>
+                    <option value="승용차" style={{ background: light ? '#18181b' : '#fff', color: light ? '#fff' : '#18181b' }}>승용차</option>
+                    <option value="포터·봉고" style={{ background: light ? '#18181b' : '#fff', color: light ? '#fff' : '#18181b' }}>포터·봉고 (화물)</option>
                 </select>
             </div>
 
