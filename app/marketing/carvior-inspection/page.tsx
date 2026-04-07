@@ -218,7 +218,7 @@ function BankTransferModal({ onClose }: { onClose: () => void }) {
 
                     {/* 안내 문구 */}
                     <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 text-xs text-amber-700 leading-relaxed">
-                        입금 후 <span className="font-extrabold">1588-2285</span>로 문자 또는 전화 주시면 담당 평가사가 배정됩니다.
+                        입금 후 <span className="font-extrabold">010-2285-6017</span>로 문자 또는 전화 주시면 담당 평가사가 배정됩니다.
                     </div>
 
                     <button
@@ -833,7 +833,7 @@ export default function CarviorInspectionPage() {
                             href="tel:15882285"
                             className="flex items-center justify-center w-full gap-3 py-4 text-lg font-extrabold text-white transition-all border border-zinc-700 rounded-2xl hover:bg-zinc-900 active:scale-95"
                         >
-                            <span>📞</span> 1588-2285
+                            <span>📞</span> 010-2285-6017
                         </a>
                         <p className="mt-2 text-xs text-center text-zinc-700">평일 09:00 – 18:00</p>
                     </div>

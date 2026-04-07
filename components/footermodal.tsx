@@ -53,7 +53,7 @@ export default function AppFooter() {
 
               <div className="space-y-2">
                 <p className="mb-3 text-base font-bold text-gray-900">고객센터</p>
-                <p className="text-lg font-bold text-blue-600">1588-2285</p>
+                <p className="text-lg font-bold text-blue-600">010-2285-6017</p>
                 <p><span className="text-gray-400">휴대폰 :</span> 010-2285-6017</p>
                 <p><span className="text-gray-400">이메일 :</span> cs@carvior.com</p>
                 <p className="pt-2 text-xs text-gray-400">평일 09:00 - 18:00 (주말/공휴일 휴무)</p>
@@ -147,7 +147,7 @@ export default function AppFooter() {
                     <p>가. 상호 : 카비어</p>
                     <p>나. 대표자: 조재혁</p>
                     <p>다. 주소 : 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
-                    <p>라. 대표전화: 1588-2285</p>
+                    <p>라. 대표전화: 010-2285-6017</p>
                   </div>
 
                   <h3 className="mb-4 text-lg font-bold">[4장 기타]</h3>
@@ -162,7 +162,7 @@ export default function AppFooter() {
                     <p className="font-bold">부칙</p>
                     <p>제1조. 본 약관은 2026년 2월 24일부터 적용됩니다.</p>
                     <p>제2조. 카비어의 위치정보 관리책임자는 다음과 같습니다.</p>
-                    <p>1. 이름: 조재혁 / 2. 연락처: 1588-2285</p>
+                    <p>1. 이름: 조재혁 / 2. 연락처: 010-2285-6017</p>
                   </div>
 
                   <div className="pt-4 text-gray-500 border-t border-gray-200">
@@ -211,7 +211,7 @@ export default function AppFooter() {
 
                   <div>
                     <p className="font-bold">4. 개인정보 보호책임자</p>
-                    <p>- 성명: 조재혁 / 연락처: 1588-2285</p>
+                    <p>- 성명: 조재혁 / 연락처: 010-2285-6017</p>
                   </div>
                 </div>
               </ModalBody>
