@@ -5,26 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
 import AppFooter from '@/components/footermodal';
 
-// ─────────────────────────────────────────
-// 토스 설정 (클라이언트 키 교체 필요)
-// ─────────────────────────────────────────
-const TOSS_CLIENT_KEY = 'test_gck_GePWvyJnrKKGYdYDNq06rgLzN97E'; // ← 토스 대시보드에서 발급받은 키로 교체
-const INSPECTION_PRICE = 80_000;
-
-function generateOrderId() {
-    return 'CARVIOR-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-}
-
-function loadTossScript(): Promise<void> {
-    return new Promise((resolve) => {
-        if (document.getElementById('toss-sdk')) { resolve(); return; }
-        const s = document.createElement('script');
-        s.id = 'toss-sdk';
-        s.src = 'https://js.tosspayments.com/v1/payment';
-        s.onload = () => resolve();
-        document.head.appendChild(s);
-    });
-}
+// 토스 결제 심사 완료 후 아래 주석 해제
+// const TOSS_CLIENT_KEY = 'test_ck_d46qopOB89x1jxbPMddLrZmM75y0';
+// const INSPECTION_PRICE = 80_000;
 
 // ─────────────────────────────────────────
 // 데이터
@@ -180,6 +163,78 @@ function PhoneInput({ value, onChange, light = false }: { value: string; onChang
 }
 
 // ─────────────────────────────────────────
+// 계좌이체 안내 모달
+// ─────────────────────────────────────────
+function BankTransferModal({ onClose }: { onClose: () => void }) {
+    const [copied, setCopied] = useState(false);
+
+    const copyAccount = () => {
+        navigator.clipboard.writeText('333335197303').then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0 bg-black/70 backdrop-blur-sm">
+            <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl">
+                {/* 상단 헤더 */}
+                <div className="bg-zinc-900 px-6 py-5 text-center">
+                    <p className="text-zinc-400 text-[10px] font-extrabold uppercase tracking-widest mb-1">예약 접수 완료</p>
+                    <p className="text-white text-xl font-black">계좌 이체 안내</p>
+                </div>
+
+                <div className="px-6 py-6 space-y-5">
+                    {/* 금액 */}
+                    <div className="flex items-center justify-between bg-zinc-50 rounded-2xl px-4 py-3.5 border border-zinc-100">
+                        <p className="text-zinc-500 text-sm font-bold">입금 금액</p>
+                        <p className="text-zinc-900 text-2xl font-black tabular-nums">80,000<span className="text-sm font-bold">원</span></p>
+                    </div>
+
+                    {/* 계좌 정보 */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+                            <p className="text-zinc-400 text-xs font-bold">은행</p>
+                            <p className="text-zinc-900 text-sm font-extrabold">카카오뱅크</p>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+                            <p className="text-zinc-400 text-xs font-bold">계좌번호</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-zinc-900 text-sm font-extrabold tabular-nums">3333-35-1997303</p>
+                                <button
+                                    type="button"
+                                    onClick={copyAccount}
+                                    className="text-[10px] font-extrabold bg-zinc-900 text-white px-2.5 py-1 rounded-lg active:scale-95 transition-all"
+                                >
+                                    {copied ? '복사됨 ✓' : '복사'}
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between pb-1">
+                            <p className="text-zinc-400 text-xs font-bold">예금주</p>
+                            <p className="text-zinc-900 text-sm font-extrabold">카비어 (조재혁)</p>
+                        </div>
+                    </div>
+
+                    {/* 안내 문구 */}
+                    <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 text-xs text-amber-700 leading-relaxed">
+                        입금 후 <span className="font-extrabold">1588-2285</span>로 문자 또는 전화 주시면 담당 평가사가 배정됩니다.
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="w-full py-4 bg-zinc-900 text-white font-extrabold rounded-2xl active:scale-[0.98] transition-all"
+                    >
+                        확인했어요
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─────────────────────────────────────────
 // 결제 신청 폼
 // ─────────────────────────────────────────
 function InspectionForm({ light = false, formId }: { light?: boolean; formId?: string }) {
@@ -191,6 +246,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
     const [detailAddress, setDetailAddress] = useState('');
     const [preferredDateTime, setPreferredDateTime] = useState('');
     const [paying, setPaying] = useState(false);
+    const [showBankModal, setShowBankModal] = useState(false);
 
     const labelClass = clsx(
         'text-[11px] font-bold mb-1 block uppercase tracking-widest',
@@ -239,33 +295,31 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
 
         setPaying(true);
         try {
-            await loadTossScript();
-
-            const orderId = generateOrderId();
-            sessionStorage.setItem('carvior_pending', JSON.stringify({
-                carType: `[${vehicleCategory}] ${carType}`, phone: rawPhone, orderId,
-                desiredPrice, address, detailAddress, preferredDateTime,
-            }));
-
-            const tossPayments = (window as any).TossPayments(TOSS_CLIENT_KEY);
-            await tossPayments.requestPayment('카드', {
-                amount: INSPECTION_PRICE,
-                orderId,
-                orderName: '카비어 차량 전문 평가',
-                customerMobilePhone: rawPhone,
-                successUrl: `${location.origin}/marketing/carvior-inspection?payment=success`,
-                failUrl: `${location.origin}/marketing/carvior-inspection?payment=fail`,
+            await fetch('https://carvior.store/api/v1/external/request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    carNumber: `[${vehicleCategory}] ${carType}`,
+                    contact: rawPhone,
+                    desiredPrice: desiredPrice ? `${desiredPrice}만원` : '',
+                    address,
+                    detailAddress,
+                    preferredDateTime,
+                    source: 'CARVIOR_INSPECTION',
+                    additionalMemo: '계좌이체 대기',
+                }),
             });
-        } catch (err: any) {
-            if (err?.code !== 'USER_CANCEL') {
-                alert(err?.message ?? '결제 중 오류가 발생했습니다.');
-            }
+            setShowBankModal(true);
+        } catch {
+            alert('신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setPaying(false);
         }
     };
 
     return (
+        <>
+        {showBankModal && <BankTransferModal onClose={() => setShowBankModal(false)} />}
         <form id={formId} onSubmit={handlePay} className="space-y-6">
 
             {/* 차량 구분 */}
@@ -388,9 +442,10 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                 {paying ? '처리 중...' : '결제하고 평가 예약하기 →'}
             </button>
             <p className={clsx('text-center text-[11px]', light ? 'text-zinc-600' : 'text-zinc-400')}>
-                카드 · 토스페이 · 카카오페이 · 네이버페이 가능
+                카카오뱅크 계좌이체로 진행됩니다
             </p>
         </form>
+        </>
     );
 }
 
