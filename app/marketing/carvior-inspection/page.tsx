@@ -8,7 +8,7 @@ import AppFooter from '@/components/footermodal';
 // ─────────────────────────────────────────
 // 토스 설정 (클라이언트 키 교체 필요)
 // ─────────────────────────────────────────
-const TOSS_CLIENT_KEY = 'test_ck_d46qopOB89x1jxbPMddLrZmM75y0'; // ← 토스 대시보드에서 발급받은 키로 교체
+const TOSS_CLIENT_KEY = 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy'; // ← 토스 대시보드에서 발급받은 키로 교체
 const INSPECTION_PRICE = 80_000;
 
 function generateOrderId() {
@@ -102,7 +102,7 @@ function DateTimeSelector({ onSelect, light = false }: {
         <div className="space-y-5">
             <div>
                 <label className={labelClass}>방문 날짜</label>
-                <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+                <div className="flex gap-2 pb-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
                     {dates.map(d => (
                         <button
                             key={d.full} type="button" onClick={() => setSelDate(d.full)}
@@ -459,15 +459,15 @@ function PaymentResultHandler({ onSuccess }: { onSuccess: () => void }) {
 function SuccessBanner({ onClose }: { onClose: () => void }) {
     return (
         <div className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col items-center justify-center px-8 text-center">
-            <div className="text-6xl mb-6">🎉</div>
-            <p className="text-white font-black text-2xl mb-3">결제 완료!</p>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+            <div className="mb-6 text-6xl">🎉</div>
+            <p className="mb-3 text-2xl font-black text-white">결제 완료!</p>
+            <p className="mb-8 text-sm leading-relaxed text-zinc-400">
                 평가 예약이 완료되었습니다.<br />
-                담당 평가사가 <span className="text-white font-bold">24시간 내</span> 일정을 안내드리겠습니다.
+                담당 평가사가 <span className="font-bold text-white">24시간 내</span> 일정을 안내드리겠습니다.
             </p>
             <button
                 onClick={onClose}
-                className="bg-white text-zinc-900 font-extrabold px-8 py-4 rounded-2xl text-base active:scale-95 transition-all"
+                className="px-8 py-4 text-base font-extrabold transition-all bg-white text-zinc-900 rounded-2xl active:scale-95"
             >
                 확인
             </button>
@@ -494,7 +494,7 @@ export default function CarviorInspectionPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans antialiased">
+        <div className="min-h-screen font-sans antialiased bg-white">
 
             {/* 결제 결과 처리 (useSearchParams → Suspense 필요) */}
             <Suspense fallback={null}>
@@ -504,7 +504,7 @@ export default function CarviorInspectionPage() {
             {paymentDone && <SuccessBanner onClose={() => setPaymentDone(false)} />}
 
             {/* ── HERO ── */}
-            <section className="relative bg-zinc-950 text-white overflow-hidden">
+            <section className="relative overflow-hidden text-white bg-zinc-950">
                 <div className="absolute inset-0 opacity-[0.04]" style={{
                     backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
                         linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
@@ -512,15 +512,15 @@ export default function CarviorInspectionPage() {
                 }} />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-white/5 rounded-full blur-3xl" />
 
-                <div className="relative max-w-xl mx-auto px-6 pt-14 pb-0">
+                <div className="relative max-w-xl px-6 pb-0 mx-auto pt-14">
                     <div className="flex flex-wrap gap-2 mb-6">
                         <div className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 bg-white/5">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-zinc-400 text-xs font-bold tracking-wider">EVALUATE · MATCH · SELL</span>
+                            <span className="text-xs font-bold tracking-wider text-zinc-400">EVALUATE · MATCH · SELL</span>
                         </div>
                         <div className="inline-flex items-center gap-1.5 border border-blue-400/30 rounded-full px-3 py-1.5 bg-blue-500/10">
-                            <span className="text-blue-400 text-xs">📍</span>
-                            <span className="text-blue-300 text-xs font-bold">서울 · 경기 · 인천 운영 중</span>
+                            <span className="text-xs text-blue-400">📍</span>
+                            <span className="text-xs font-bold text-blue-300">서울 · 경기 · 인천 운영 중</span>
                         </div>
                     </div>
 
@@ -528,11 +528,11 @@ export default function CarviorInspectionPage() {
                         공인 평가사가 직접 가고<br />
                         딜러가 경쟁합니다
                     </h1>
-                    <p className="text-zinc-400 text-sm leading-relaxed mb-3">
+                    <p className="mb-3 text-sm leading-relaxed text-zinc-400">
                         100+ 항목 전문 평가 → 공식 가치 리포트 발행<br />
-                        검증된 딜러 네트워크에서 <span className="text-white font-bold">최고가를 제시</span>합니다.
+                        검증된 딜러 네트워크에서 <span className="font-bold text-white">최고가를 제시</span>합니다.
                     </p>
-                    <p className="text-zinc-500 text-xs mb-8">
+                    <p className="mb-8 text-xs text-zinc-500">
                         8만원으로 수십~수백만원을 더 받아가세요.
                     </p>
 
@@ -542,14 +542,14 @@ export default function CarviorInspectionPage() {
                     >
                         평가 예약하기 (80,000원) →
                     </button>
-                    <p className="text-center text-zinc-600 text-xs mb-10">
+                    <p className="mb-10 text-xs text-center text-zinc-600">
                         방문 평가 · 리포트 포함 · 카드/간편결제 가능
                     </p>
 
-                    <div className="grid grid-cols-4 border-t border-white/10 pt-6 pb-8">
+                    <div className="grid grid-cols-4 pt-6 pb-8 border-t border-white/10">
                         {STATS.map(s => (
                             <div key={s.label} className="text-center">
-                                <p className="text-white font-black text-xl leading-none tabular-nums">{s.value}</p>
+                                <p className="text-xl font-black leading-none text-white tabular-nums">{s.value}</p>
                                 <p className="text-zinc-600 text-[10px] mt-1.5 leading-tight">{s.label}</p>
                             </div>
                         ))}
@@ -557,14 +557,14 @@ export default function CarviorInspectionPage() {
                 </div>
 
                 {/* 히어로 이미지 (경로: /images/inspection-hero.jpg) */}
-                <div className="w-full h-56 bg-zinc-800 overflow-hidden">
-                    <img src="/images/inspection-hero.jpg" alt="카비어 인스펙션 현장" className="w-full h-full object-fill opacity-40" />
+                <div className="w-full h-56 overflow-hidden bg-zinc-800">
+                    <img src="/images/inspection-hero.jpg" alt="카비어 인스펙션 현장" className="object-fill w-full h-full opacity-40" />
                 </div>
             </section>
 
             {/* ── 신뢰 뱃지 바 ── */}
-            <section className="bg-zinc-100 px-5 py-4">
-                <div className="max-w-xl mx-auto flex items-center justify-center gap-5 flex-wrap">
+            <section className="px-5 py-4 bg-zinc-100">
+                <div className="flex flex-wrap items-center justify-center max-w-xl gap-5 mx-auto">
                     {['수도권 전문 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
                         <div key={t} className="flex items-center gap-1.5 text-xs font-bold text-zinc-500">
                             <span className="w-4 h-4 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[9px]">✓</span>
@@ -575,13 +575,13 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 가치 제안 ── */}
-            <section className="bg-white px-6 py-14">
+            <section className="px-6 bg-white py-14">
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">WHY CARVIOR</p>
-                    <h2 className="text-2xl font-black text-zinc-900 text-center mb-3 leading-tight">
+                    <h2 className="mb-3 text-2xl font-black leading-tight text-center text-zinc-900">
                         8만원이 왜 이득인가요?
                     </h2>
-                    <p className="text-zinc-400 text-sm text-center mb-8">
+                    <p className="mb-8 text-sm text-center text-zinc-400">
                         감가 없이 리포트로 증명하면, 딜러가 먼저 최고가를 씁니다
                     </p>
                     <div className="space-y-3">
@@ -591,13 +591,13 @@ export default function CarviorInspectionPage() {
                             { icon: '⚡', title: '빠른 판매 마감', desc: '리포트가 있으면 협의 없이 빠르게 계약이 마무리됩니다.' },
                             { icon: '🔒', title: '토스 안전 결제', desc: '결제는 토스페이먼츠로 안전하게 처리됩니다. 영수증 자동 발급.' },
                         ].map(item => (
-                            <div key={item.title} className="flex gap-4 items-start p-5 rounded-2xl bg-zinc-50 border border-zinc-100">
-                                <div className="flex-shrink-0 w-11 h-11 bg-zinc-900 rounded-xl flex items-center justify-center text-xl">
+                            <div key={item.title} className="flex items-start gap-4 p-5 border rounded-2xl bg-zinc-50 border-zinc-100">
+                                <div className="flex items-center justify-center flex-shrink-0 text-xl w-11 h-11 bg-zinc-900 rounded-xl">
                                     {item.icon}
                                 </div>
                                 <div>
                                     <p className="font-extrabold text-zinc-900 text-sm mb-0.5">{item.title}</p>
-                                    <p className="text-zinc-500 text-xs leading-relaxed">{item.desc}</p>
+                                    <p className="text-xs leading-relaxed text-zinc-500">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -606,15 +606,15 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 중간 CTA 배너 ── */}
-            <section className="bg-zinc-950 px-6 py-10">
-                <div className="max-w-xl mx-auto text-center space-y-4">
-                    <p className="text-zinc-500 text-sm font-bold tracking-wider uppercase">데이터로 증명된 차량 가치</p>
-                    <p className="text-white font-black text-2xl leading-tight">
+            <section className="px-6 py-10 bg-zinc-950">
+                <div className="max-w-xl mx-auto space-y-4 text-center">
+                    <p className="text-sm font-bold tracking-wider uppercase text-zinc-500">데이터로 증명된 차량 가치</p>
+                    <p className="text-2xl font-black leading-tight text-white">
                         리포트 하나로<br />딜러가 먼저 연락합니다
                     </p>
                     <button
                         onClick={scrollToForm}
-                        className="bg-white text-zinc-900 font-extrabold text-base px-10 py-4 rounded-2xl shadow-xl active:scale-95 transition-all"
+                        className="px-10 py-4 text-base font-extrabold transition-all bg-white shadow-xl text-zinc-900 rounded-2xl active:scale-95"
                     >
                         80,000원으로 시작하기 →
                     </button>
@@ -622,29 +622,29 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 검사 항목 ── */}
-            <section className="bg-white px-6 py-14">
+            <section className="px-6 bg-white py-14">
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">EVALUATION</p>
-                    <h2 className="text-2xl font-black text-zinc-900 text-center mb-2 leading-tight">100+ 항목 정밀 평가</h2>
-                    <p className="text-zinc-400 text-sm text-center mb-8">전문 평가사가 직접 방문해 꼼꼼하게 확인합니다</p>
+                    <h2 className="mb-2 text-2xl font-black leading-tight text-center text-zinc-900">100+ 항목 정밀 평가</h2>
+                    <p className="mb-8 text-sm text-center text-zinc-400">전문 평가사가 직접 방문해 꼼꼼하게 확인합니다</p>
 
                     {/* 진단장비 이미지 갤러리 (경로: /images/diagnostic-1~3.jpg) */}
                     <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="relative h-36 bg-zinc-100 rounded-2xl overflow-hidden">
-                            <img src="/images/diagnostic-1.jpg" alt="OBD 진단장비" className="w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                        <div className="relative overflow-hidden h-36 bg-zinc-100 rounded-2xl">
+                            <img src="/images/diagnostic-1.jpg" alt="OBD 진단장비" className="object-cover w-full h-full" />
+                            <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
                                 <p className="text-white text-[10px] font-bold">OBD 정밀 진단</p>
                             </div>
                         </div>
-                        <div className="relative h-36 bg-zinc-100 rounded-2xl overflow-hidden">
-                            <img src="/images/diagnostic-2.jpg" alt="도장두께 측정기" className="w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                        <div className="relative overflow-hidden h-36 bg-zinc-100 rounded-2xl">
+                            <img src="/images/diagnostic-2.jpg" alt="도장두께 측정기" className="object-cover w-full h-full" />
+                            <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
                                 <p className="text-white text-[10px] font-bold">도장두께 측정</p>
                             </div>
                         </div>
-                        <div className="relative h-36 bg-zinc-100 rounded-2xl overflow-hidden col-span-2">
-                            <img src="/images/diagnostic-3.jpg" alt="하부 검사 현장" className="w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2">
+                        <div className="relative col-span-2 overflow-hidden h-36 bg-zinc-100 rounded-2xl">
+                            <img src="/images/diagnostic-3.jpg" alt="하부 검사 현장" className="object-cover w-full h-full" />
+                            <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/60 to-transparent">
                                 <p className="text-white text-[10px] font-bold">하부 정밀 검사</p>
                             </div>
                         </div>
@@ -652,8 +652,8 @@ export default function CarviorInspectionPage() {
 
                     <div className="grid grid-cols-2 gap-3">
                         {CHECK_ITEMS.map(group => (
-                            <div key={group.category} className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4">
-                                <p className="text-xs font-extrabold text-zinc-900 mb-3 uppercase tracking-wider">{group.category}</p>
+                            <div key={group.category} className="p-4 border bg-zinc-50 border-zinc-100 rounded-2xl">
+                                <p className="mb-3 text-xs font-extrabold tracking-wider uppercase text-zinc-900">{group.category}</p>
                                 <ul className="space-y-1.5">
                                     {group.items.map(item => (
                                         <li key={item} className="flex items-center gap-2 text-xs text-zinc-500">
@@ -670,10 +670,10 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 진행 절차 ── */}
-            <section className="bg-zinc-50 px-6 py-14">
+            <section className="px-6 bg-zinc-50 py-14">
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">PROCESS</p>
-                    <h2 className="text-2xl font-black text-zinc-900 text-center mb-10 leading-tight">5단계, 이게 전부입니다</h2>
+                    <h2 className="mb-10 text-2xl font-black leading-tight text-center text-zinc-900">5단계, 이게 전부입니다</h2>
                     <div className="space-y-0">
                         {STEPS.map((step, i) => (
                             <div key={step.num} className="flex gap-5">
@@ -684,14 +684,14 @@ export default function CarviorInspectionPage() {
                                     )}>
                                         {step.num}
                                     </div>
-                                    {i < STEPS.length - 1 && <div className="w-px flex-1 bg-zinc-200 my-1" style={{ minHeight: '32px' }} />}
+                                    {i < STEPS.length - 1 && <div className="flex-1 w-px my-1 bg-zinc-200" style={{ minHeight: '32px' }} />}
                                 </div>
                                 <div className="pb-8 pt-1.5">
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-lg">{step.icon}</span>
                                         <p className={clsx('font-extrabold text-sm', i === 0 ? 'text-zinc-900' : 'text-zinc-700')}>{step.title}</p>
                                     </div>
-                                    <p className="text-zinc-400 text-xs leading-relaxed">{step.desc}</p>
+                                    <p className="text-xs leading-relaxed text-zinc-400">{step.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -700,21 +700,21 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 고객 후기 ── */}
-            <section className="bg-white py-14 overflow-hidden">
-                <div className="max-w-xl mx-auto px-6">
+            <section className="overflow-hidden bg-white py-14">
+                <div className="max-w-xl px-6 mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">REVIEWS</p>
-                    <h2 className="text-2xl font-black text-zinc-900 text-center mb-8">실제 고객 후기</h2>
+                    <h2 className="mb-8 text-2xl font-black text-center text-zinc-900">실제 고객 후기</h2>
                 </div>
                 <div className="px-6">
                     {/* 가로 슬라이드 캐러셀 */}
                     <div
-                        className="flex gap-4 overflow-x-auto pb-3 -mx-6 px-6"
+                        className="flex gap-4 px-6 pb-3 -mx-6 overflow-x-auto"
                         style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
                     >
                         {REVIEWS.map(r => (
                             <div
                                 key={r.name}
-                                className="flex-shrink-0 bg-white rounded-2xl border border-zinc-100 shadow-sm overflow-hidden flex flex-col"
+                                className="flex flex-col flex-shrink-0 overflow-hidden bg-white border shadow-sm rounded-2xl border-zinc-100"
                                 style={{ scrollSnapAlign: 'start', width: 'calc(80vw)', maxWidth: '320px' }}
                             >
                                 {/* 후기 사진 (경로: r.img) */}
@@ -722,22 +722,22 @@ export default function CarviorInspectionPage() {
                                     <img
                                         src={r.img}
                                         alt={`${r.name} 후기`}
-                                        className="w-full h-full object-cover"
+                                        className="object-cover w-full h-full"
                                     />
                                 </div>
-                                <div className="p-4 flex flex-col flex-1">
+                                <div className="flex flex-col flex-1 p-4">
                                     <div className="flex items-center justify-between mb-2">
                                         <div>
-                                            <p className="font-extrabold text-zinc-900 text-sm">{r.name}</p>
-                                            <p className="text-zinc-400 text-xs">{r.car}</p>
+                                            <p className="text-sm font-extrabold text-zinc-900">{r.name}</p>
+                                            <p className="text-xs text-zinc-400">{r.car}</p>
                                         </div>
                                         <div className="flex gap-0.5">
                                             {Array.from({ length: r.stars }).map((_, i) => (
-                                                <span key={i} className="text-zinc-900 text-sm">★</span>
+                                                <span key={i} className="text-sm text-zinc-900">★</span>
                                             ))}
                                         </div>
                                     </div>
-                                    <p className="text-zinc-500 text-xs leading-relaxed flex-1">"{r.text}"</p>
+                                    <p className="flex-1 text-xs leading-relaxed text-zinc-500">"{r.text}"</p>
                                 </div>
                             </div>
                         ))}
@@ -749,20 +749,20 @@ export default function CarviorInspectionPage() {
             </section>
 
             {/* ── 하단 결제 폼 ── */}
-            <section ref={formRef} className="bg-zinc-950 px-6 py-14">
+            <section ref={formRef} className="px-6 bg-zinc-950 py-14">
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center mb-2">EVALUATION</p>
-                    <h2 className="text-2xl font-black text-white text-center mb-2 leading-tight">평가 예약하기</h2>
-                    <p className="text-zinc-500 text-sm text-center mb-6">
+                    <h2 className="mb-2 text-2xl font-black leading-tight text-center text-white">평가 예약하기</h2>
+                    <p className="mb-6 text-sm text-center text-zinc-500">
                         방문 평가 · 리포트 발행 · 딜러 매칭까지
                     </p>
 
                     {/* 운영 지역 안내 */}
                     <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-400/20 rounded-2xl px-4 py-3.5 mb-6">
-                        <span className="text-lg flex-shrink-0">📍</span>
+                        <span className="flex-shrink-0 text-lg">📍</span>
                         <div>
                             <p className="text-blue-300 text-xs font-extrabold mb-0.5">현재 운영 지역</p>
-                            <p className="text-zinc-400 text-xs leading-relaxed">
+                            <p className="text-xs leading-relaxed text-zinc-400">
                                 서울 · 경기 · 인천 (수도권) 지역에서 운영 중입니다.<br />
                                 타 지역은 순차적으로 확대할 예정이에요.
                             </p>
@@ -772,15 +772,15 @@ export default function CarviorInspectionPage() {
                     <InspectionForm light />
 
                     {/* 전화 상담 */}
-                    <div className="mt-8 pt-8 border-t border-zinc-800">
-                        <p className="text-zinc-600 text-xs text-center mb-3">결제 전 전화 문의</p>
+                    <div className="pt-8 mt-8 border-t border-zinc-800">
+                        <p className="mb-3 text-xs text-center text-zinc-600">결제 전 전화 문의</p>
                         <a
                             href="tel:15882285"
-                            className="flex items-center justify-center gap-3 w-full py-4 border border-zinc-700 rounded-2xl text-white font-extrabold text-lg hover:bg-zinc-900 active:scale-95 transition-all"
+                            className="flex items-center justify-center w-full gap-3 py-4 text-lg font-extrabold text-white transition-all border border-zinc-700 rounded-2xl hover:bg-zinc-900 active:scale-95"
                         >
                             <span>📞</span> 1588-2285
                         </a>
-                        <p className="text-zinc-700 text-xs text-center mt-2">평일 09:00 – 18:00</p>
+                        <p className="mt-2 text-xs text-center text-zinc-700">평일 09:00 – 18:00</p>
                     </div>
                 </div>
             </section>
