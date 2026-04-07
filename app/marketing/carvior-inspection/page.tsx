@@ -8,7 +8,7 @@ import AppFooter from '@/components/footermodal';
 // ─────────────────────────────────────────
 // 토스 설정 (클라이언트 키 교체 필요)
 // ─────────────────────────────────────────
-const TOSS_CLIENT_KEY = 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy'; // ← 토스 대시보드에서 발급받은 키로 교체
+const TOSS_CLIENT_KEY = 'test_gck_GePWvyJnrKKGYdYDNq06rgLzN97E'; // ← 토스 대시보드에서 발급받은 키로 교체
 const INSPECTION_PRICE = 80_000;
 
 function generateOrderId() {
