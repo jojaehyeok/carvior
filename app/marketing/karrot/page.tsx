@@ -325,27 +325,39 @@ export default function CarviorPrivateDealPage() {
                             공인 진단평가사 · 사업자 등록 완료
                         </div>
 
-                        {/* 헤드라인: 구체적인 이익 제시 */}
+                        {/* 헤드라인 */}
                         <h1 className="text-[2.1rem] font-black leading-[1.15] mb-5 tracking-tight">
-                            개인 직거래,<br />
+                            중고차 직거래,<br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
-                                혼자 하면 손해입니다.
+                                혼자 사면 손해입니다.
                             </span>
                         </h1>
 
-                        {/* 서브 카피: 공포 → 해결책 */}
+                        {/* 서브 카피 */}
                         <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-                            허위 매물 의심, 계약서 실수, 저가 흥정 압박...
+                            숨겨진 결함, 모르는 시세, 막막한 협상...
                             <br />
-                            <span className="text-white font-bold">카비어 공인 평가사가 현장에서 직접 해결합니다.</span>
+                            <span className="text-white font-bold">카비어 공인 평가사가 판매자에게 직접 가서 해결합니다.</span>
                         </p>
+
+                        {/* 이벤트 가격 배너 */}
+                        <div className="bg-amber-400 rounded-2xl px-4 py-3.5 mb-4 flex items-center justify-between">
+                            <div>
+                                <p className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-0.5">기간 한정 이벤트 ~2026.08</p>
+                                <p className="text-zinc-900 font-black text-base">어떤 차든 진단비 고정 <span className="text-xl">8만원</span></p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-amber-700 text-xs line-through">정가 12만원</p>
+                                <p className="text-zinc-900 font-black text-lg">₩80,000</p>
+                            </div>
+                        </div>
 
                         {/* 핵심 수치: 구체적 숫자로 신뢰 */}
                         <div className="grid grid-cols-3 gap-3">
                             {[
-                                { v: '1,800+', l: '월 대행 완료', sub: '건' },
+                                { v: '1,800+', l: '월 검수 완료', sub: '건' },
                                 { v: '98%', l: '고객 만족도', sub: '' },
-                                { v: '평균', l: '추가 수익', sub: '+87만원' },
+                                { v: '평균', l: '가격 절충', sub: '+65만원' },
                             ].map(s => (
                                 <div key={s.l} className="bg-white/[0.06] border border-white/10 rounded-2xl py-3.5 px-2 text-center">
                                     <p className="text-xl font-black text-white">{s.v}</p>
@@ -361,13 +373,13 @@ export default function CarviorPrivateDealPage() {
 
                     {/* ── 문제 제기 섹션 (공감 형성) */}
                     <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 -mt-5 mb-6 relative z-10">
-                        <p className="text-[10px] font-extrabold text-red-500 uppercase tracking-widest mb-4">이런 경험 있으신가요?</p>
+                        <p className="text-[10px] font-extrabold text-red-500 uppercase tracking-widest mb-4">중고차 살 때 이런 생각 드셨나요?</p>
                         <div className="space-y-3">
                             {[
-                                '구매자가 계속 가격을 깎으려 해서 곤란했다',
-                                '계약서 내용이 맞는지 확인할 방법이 없었다',
-                                '차량 상태를 제대로 설명하기가 어려웠다',
-                                '거래 후 분쟁이 생길까봐 불안했다',
+                                '판매자가 결함을 숨기고 있는 건 아닐까?',
+                                '이 가격이 적당한지 차에 대해 아무것도 모른다',
+                                '가격 협상을 어떻게 해야 할지 막막하다',
+                                '계약서 내용이 불리하게 작성되면 어쩌지?',
                             ].map((pain, i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <div className="w-5 h-5 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
@@ -379,7 +391,8 @@ export default function CarviorPrivateDealPage() {
                         </div>
                         <div className="mt-5 pt-4 border-t border-zinc-50">
                             <p className="text-sm font-extrabold text-zinc-900">
-                                카비어가 이 모든 걱정을 대신합니다.
+                                카비어 평가사가 판매자에게 직접 가서 확인하고,<br />
+                                <span className="text-zinc-500 font-bold">결함 근거로 가격을 협상해드립니다.</span>
                             </p>
                         </div>
                     </div>
@@ -392,10 +405,10 @@ export default function CarviorPrivateDealPage() {
                         </div>
                         <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 space-y-6">
                             {[
-                                { num: '01', icon: '📋', title: '무료 상담 신청', desc: '30초 만에 정보 입력 → 담당 상담사 배정 → 1시간 내 연락' },
-                                { num: '02', icon: '🔍', title: '공인 평가사 현장 방문', desc: '100+ 항목 정밀 진단 · 시장가 분석 · 진단 리포트 즉시 발행' },
-                                { num: '03', icon: '🤝', title: '협상 및 계약 전 과정 대행', desc: '가격 협상 · 계약서 작성 · 서류 처리까지 전부 대신 수행' },
-                                { num: '04', icon: '✅', title: '안전한 대금 수령', desc: '거래 완료 후 즉시 대금 수령 · 사후 분쟁 대응 지원' },
+                                { num: '01', icon: '📋', title: '상담 신청 (무료)', desc: '구매 희망 차량 정보와 판매자 위치를 남겨주시면 상담사가 연락드려요' },
+                                { num: '02', icon: '🔍', title: '평가사가 판매자에게 직접 방문', desc: '구매자 대신 현장에 가서 100+ 항목 정밀 진단 · 숨겨진 결함 확인 · 시장 시세 분석' },
+                                { num: '03', icon: '💬', title: '결함 근거로 가격 협상 대행', desc: '수리비·감가 요인을 근거로 판매자와 직접 협상 → 구매자에게 유리한 가격으로 조율' },
+                                { num: '04', icon: '✅', title: '계약서 검토 및 안전 구매 완료', desc: '계약 내용 확인 · 서류 이전 안내 · 구매 후 분쟁 대응 지원' },
                             ].map((step, i) => (
                                 <div key={i} className="flex gap-4">
                                     <div className="flex flex-col items-center">
@@ -425,8 +438,8 @@ export default function CarviorPrivateDealPage() {
                         <div className="grid grid-cols-1 gap-5">
                             <TrustBadge icon="🏢" title="사업자 등록 완료" desc="사업자등록번호 783-24-02190 · 통신판매업 제 2026-경기안산-0474" />
                             <TrustBadge icon="🎓" title="공인 진단평가사 직접 방문" desc="국가공인 자격 보유 평가사가 직접 현장에 방문합니다" />
-                            <TrustBadge icon="🔒" title="수수료 후불제" desc="거래 성사 시에만 수수료 발생 · 상담 및 진단은 무료" />
-                            <TrustBadge icon="📄" title="공식 진단 리포트 발행" desc="객관적 데이터 기반 리포트로 분쟁 발생 시 법적 근거 확보" />
+                            <TrustBadge icon="💳" title="진단비 8만원 고정 (이벤트가)" desc="차종·연식 무관 고정가 · 상담은 무료 · ~2026년 8월까지 적용" />
+                            <TrustBadge icon="📄" title="공식 진단 리포트 발행" desc="객관적 데이터 기반 리포트 · 구매 후 하자 발생 시 법적 근거로 활용 가능" />
                         </div>
                     </div>
 
@@ -439,19 +452,19 @@ export default function CarviorPrivateDealPage() {
                         <div className="space-y-3">
                             {[
                                 {
-                                    name: '이*현', car: 'BMW 3시리즈 · 2021년식', stars: 5,
-                                    gain: '+120만원',
-                                    text: '혼자 직거래 하려다 카비어 믿고 맡겼어요. 평가사가 협상까지 직접 해주니까 예상보다 120만원을 더 받았습니다. 수수료가 전혀 아깝지 않았어요.',
+                                    name: '이*현', car: 'BMW 3시리즈 · 2021년식 구매', stars: 5,
+                                    gain: '70만원 절충',
+                                    text: '판매자가 무사고라고 했는데 평가사가 가보니까 외판 수리 흔적이 있었어요. 수리비 기준으로 70만원 깎아서 계약했습니다. 8만원이 아깝지 않았어요.',
                                 },
                                 {
-                                    name: '김*수', car: '제네시스 G80 · 2022년식', stars: 5,
-                                    gain: '사기 예방',
-                                    text: '계약서 실수가 걱정됐는데 모든 서류를 직접 검토해주시더라고요. 거래 후에도 문제 없이 마무리됐습니다.',
+                                    name: '김*수', car: '제네시스 G80 · 2022년식 구매', stars: 5,
+                                    gain: '결함 발견',
+                                    text: '엔진 오일 누유가 있다는 걸 평가사가 찾아줬어요. 판매자한테 수리 후 인도 조건으로 계약 마무리했습니다. 혼자 봤으면 절대 몰랐을 것 같아요.',
                                 },
                                 {
-                                    name: '박*진', car: '쏘렌토 하이브리드 · 2023년식', stars: 5,
-                                    gain: '+87만원',
-                                    text: '구매자가 계속 가격 깎으려 했는데 평가사 리포트 보여주니까 바로 제 가격 맞춰줬어요. 전문가가 옆에 있으니 완전 달라지더라고요.',
+                                    name: '박*진', car: '쏘렌토 하이브리드 · 2023년식 구매', stars: 5,
+                                    gain: '50만원 절충',
+                                    text: '차에 대해 아무것도 몰라서 불안했는데 평가사가 판매자랑 직접 협상해줬어요. 제가 원하는 가격에서 딱 맞게 계약됐고 계약서까지 검토해주셨어요.',
                                 },
                             ].map((r, i) => (
                                 <div key={i} className="bg-white rounded-2xl border border-zinc-100 p-5 shadow-sm">
@@ -481,18 +494,18 @@ export default function CarviorPrivateDealPage() {
                         {/* CTA 섹션 헤더 */}
                         <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl p-6 mb-4 text-center">
                             <p className="text-[10px] font-extrabold text-orange-800 uppercase tracking-widest mb-2">지금 바로 시작하세요</p>
-                            <h2 className="text-xl font-black text-zinc-900 mb-1">무료 상담 신청</h2>
-                            <p className="text-orange-800 text-xs">상담 무료 · 진단 무료 · 거래 성사 시에만 수수료</p>
+                            <h2 className="text-xl font-black text-zinc-900 mb-1">상담 신청</h2>
+                            <p className="text-orange-800 text-xs font-bold">상담 무료 · 진단 <span className="line-through opacity-60">정가 12만원</span> → <span className="text-red-700">이벤트 8만원</span> · ~2026년 8월</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
 
-                            {/* 01. 차주 정보 */}
+                            {/* 01. 신청자 정보 */}
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
-                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">01 · 차주 정보</h3>
+                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">01 · 신청자 정보 (구매자)</h3>
                                 <div className="space-y-5">
                                     <div>
-                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">차주 성명 <span className="text-red-400">*</span></label>
+                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">성함 <span className="text-red-400">*</span></label>
                                         <input
                                             required
                                             name="carOwner"
@@ -512,11 +525,14 @@ export default function CarviorPrivateDealPage() {
                                 </div>
                             </div>
 
-                            {/* 02. 진단 장소 및 일시 */}
+                            {/* 02. 차량 위치 및 방문 일시 */}
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 space-y-6">
-                                <h3 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">02 · 진단 장소 및 일시</h3>
+                                <h3 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">02 · 차량 위치 및 방문 일시</h3>
                                 <div className="space-y-3">
-                                    <label className="text-xs text-zinc-400 font-bold block">진단 장소 <span className="text-red-400">*</span></label>
+                                    <div>
+                                        <label className="text-xs text-zinc-400 font-bold block mb-1">차량 위치 (판매자 주소) <span className="text-red-400">*</span></label>
+                                        <p className="text-[10px] text-zinc-400 mb-2">평가사가 이 주소로 직접 방문합니다</p>
+                                    </div>
                                     <div className="flex gap-2">
                                         <input
                                             readOnly required
@@ -548,12 +564,12 @@ export default function CarviorPrivateDealPage() {
                                 </div>
                             </div>
 
-                            {/* 03. 추가 정보 */}
+                            {/* 03. 구매 차량 정보 */}
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
-                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">03 · 추가 정보 <span className="normal-case font-bold text-zinc-300">(선택)</span></h3>
+                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">03 · 구매 차량 정보 <span className="normal-case font-bold text-zinc-300">(선택)</span></h3>
                                 <div className="space-y-5">
                                     <div>
-                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">희망 구매가격</label>
+                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">구매 희망 가격</label>
                                         <select
                                             name="desiredPrice"
                                             value={formData.desiredPrice}
@@ -571,13 +587,13 @@ export default function CarviorPrivateDealPage() {
                                             <option value="4000~5000만원">4,000 ~ 5,000만원</option>
                                             <option value="5000만원 이상">5,000만원 이상</option>
                                         </select>
-                                        <p className="text-[10px] text-zinc-400 mt-1.5">가격대를 알면 상담사가 더 정확한 시세를 안내드려요</p>
+                                        <p className="text-[10px] text-zinc-400 mt-1.5">구매 희망 가격을 알면 협상 목표를 설정하는 데 도움이 돼요</p>
                                     </div>
                                     <div>
-                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">차량 정보 및 요청사항</label>
+                                        <label className="text-xs text-zinc-400 font-bold mb-1.5 block">구매 차량 정보 및 요청사항</label>
                                         <textarea
                                             name="additionalMemo"
-                                            placeholder="예: 2022년식 BMW 3시리즈 흰색, 무사고, 구매자 연락받은 상태입니다"
+                                            placeholder="예: 2022년식 BMW 3시리즈 흰색, 판매자 요구가 1,800만원인데 1,650만원에 사고 싶습니다"
                                             value={formData.additionalMemo}
                                             onChange={handleChange}
                                             className="w-full h-24 border border-zinc-100 rounded-2xl p-4 focus:ring-2 focus:ring-zinc-100 outline-none transition-all resize-none text-sm text-zinc-700 placeholder:text-zinc-300"
@@ -621,11 +637,11 @@ export default function CarviorPrivateDealPage() {
                                         : 'bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 active:scale-[0.98] hover:bg-zinc-800'
                                 )}
                             >
-                                {isSubmitting ? '접수 중...' : '무료 상담 신청하기 →'}
+                                {isSubmitting ? '접수 중...' : '상담 신청하기 →'}
                             </button>
 
                             <p className="text-center text-zinc-400 text-[11px] leading-relaxed">
-                                거래 성사 전까지 100% 무료 · 부담 없이 신청하세요
+                                상담 무료 · 진단비 8만원 (이벤트가, ~2026년 8월)
                             </p>
                         </form>
                     </div>
@@ -639,20 +655,24 @@ export default function CarviorPrivateDealPage() {
                         <div className="space-y-2">
                             {[
                                 {
-                                    q: '수수료는 얼마인가요?',
-                                    a: '거래 성사 시에만 수수료가 발생하며, 금액은 상담 후 안내드립니다. 상담·진단은 완전 무료입니다.',
+                                    q: '검수 비용은 얼마인가요?',
+                                    a: '상담은 무료이며, 검수(진단)비는 차종·연식에 관계없이 8만원 고정입니다. 2026년 8월까지 이벤트 가격으로 운영 중입니다.',
                                 },
                                 {
-                                    q: '구매자를 직접 구해야 하나요?',
-                                    a: '기존에 연락이 온 구매자가 있으면 그 거래를 대행해드립니다. 구매자 없이 신청하셔도 됩니다.',
+                                    q: '판매자가 평가사 방문에 동의해야 하나요?',
+                                    a: '네, 판매자가 동의한 경우에만 방문이 가능합니다. 상담사가 판매자에게 사전 안내하는 방법을 함께 알려드려요. 대부분의 판매자는 진단이 거래 진행에 도움이 된다고 느껴 동의합니다.',
                                 },
                                 {
-                                    q: '어디서든 방문 가능한가요?',
-                                    a: '전국 어디든 방문 가능합니다. 차량이 있는 장소로 직접 찾아갑니다.',
+                                    q: '가격 협상도 직접 해주나요?',
+                                    a: '네. 진단 결과를 근거로 평가사가 판매자에게 직접 협상합니다. 구매자가 원하는 절충 금액을 미리 알려주시면 그 목표에 맞게 진행합니다.',
                                 },
                                 {
-                                    q: '계약서 작성도 대신 해주나요?',
-                                    a: '네, 협상부터 계약서 작성, 서류 이전 안내까지 전 과정을 대행해드립니다.',
+                                    q: '계약서도 검토해주나요?',
+                                    a: '네, 계약 내용 검토 및 서류 이전 안내까지 전 과정을 지원해드립니다. 구매 후 하자 발생 시 진단 리포트가 법적 근거로 활용됩니다.',
+                                },
+                                {
+                                    q: '전국 어디서나 가능한가요?',
+                                    a: '네, 전국 방문 가능합니다. 차량이 있는 판매자 위치로 평가사가 직접 이동합니다.',
                                 },
                             ].map((faq, i) => (
                                 <details key={i} className="bg-white rounded-2xl border border-zinc-100 group">
