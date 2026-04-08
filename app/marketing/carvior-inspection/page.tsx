@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react
 import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
 import AppFooter from '@/components/footermodal';
+import PrivacyModal from '@/components/PrivacyModal';
 
 // 토스 결제 심사 완료 후 아래 주석 해제
 // const TOSS_CLIENT_KEY = 'test_ck_d46qopOB89x1jxbPMddLrZmM75y0';
@@ -246,6 +247,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
     const [detailAddress, setDetailAddress] = useState('');
     const [preferredDateTime, setPreferredDateTime] = useState('');
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
     const [paying, setPaying] = useState(false);
     const [showBankModal, setShowBankModal] = useState(false);
 
@@ -323,6 +325,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
     return (
         <>
         {showBankModal && <BankTransferModal onClose={() => setShowBankModal(false)} />}
+        {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
         <form id={formId} onSubmit={handlePay} className="space-y-6">
 
             {/* 차량 구분 */}
@@ -448,12 +451,12 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                     <span className="font-extrabold text-red-400">필수</span>{' '}
                     <span
                         className={clsx('underline underline-offset-2 cursor-pointer', light ? 'text-zinc-300' : 'text-zinc-700')}
-                        onClick={() => setPrivacyAgreed(v => !v)}
+                        onClick={e => { e.stopPropagation(); setShowPrivacyModal(true); }}
                     >
                         개인정보 수집·이용
                     </span>에 동의합니다.{' '}
                     <span className={clsx(light ? 'text-zinc-600' : 'text-zinc-400')}>
-                        (차량번호, 연락처, 주소를 평가 서비스 제공 목적으로 수집하며 서비스 종료 후 즉시 파기합니다.)
+                        (차량번호, 연락처, 주소를 평가 서비스 제공 목적으로 수집하며 완료 후 1년 보관합니다.)
                     </span>
                 </p>
             </label>

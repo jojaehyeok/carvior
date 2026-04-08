@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { clsx } from 'clsx';
+import PrivacyModal from '@/components/PrivacyModal';
 
 const COMPANY_LABELS: Record<string, string> = {
     'anyone-motors': '애니원 모터스',
@@ -110,6 +111,7 @@ export default function SimpleRequestByCompanyPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [carError, setCarError] = useState<string | null>(null);
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     const checkDuplicateCar = async (carNum: string) => {
         if (carNum.length < 7) return;
@@ -215,6 +217,7 @@ export default function SimpleRequestByCompanyPage() {
 
     return (
         <div className="min-h-screen bg-zinc-100 font-sans">
+            {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
             {/* ── NAV ── */}
             <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
                 <span className="text-xl font-black text-zinc-900 tracking-tight">CARVIOR</span>
@@ -409,11 +412,11 @@ export default function SimpleRequestByCompanyPage() {
                         </div>
                         <p className="text-xs text-zinc-500 leading-relaxed">
                             <span className="font-extrabold text-red-500">필수</span>{' '}
-                            <span className="underline underline-offset-2 text-zinc-700 cursor-pointer" onClick={() => setPrivacyAgreed(v => !v)}>
+                            <span className="underline underline-offset-2 text-zinc-700 cursor-pointer" onClick={e => { e.stopPropagation(); setShowPrivacyModal(true); }}>
                                 개인정보 수집·이용
                             </span>에 동의합니다.{' '}
                             <span className="text-zinc-400">
-                                (차량번호, 연락처, 주소를 진단 서비스 제공 목적으로 수집하며 서비스 종료 후 즉시 파기합니다.)
+                                (차량번호, 연락처, 주소를 진단 서비스 제공 목적으로 수집하며 완료 후 1년 보관합니다.)
                             </span>
                         </p>
                     </label>
