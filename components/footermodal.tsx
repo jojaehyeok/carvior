@@ -55,7 +55,7 @@ export default function AppFooter() {
                 <p className="mb-3 text-base font-bold text-gray-900">고객센터</p>
                 <p className="text-lg font-bold text-blue-600">010-2285-6017</p>
                 <p><span className="text-gray-400">휴대폰 :</span> 010-2285-6017</p>
-                <p><span className="text-gray-400">이메일 :</span> cs@carvior.com</p>
+                <p><span className="text-gray-400">이메일 :</span> jjhstc2285@naver.com</p>
                 <p className="pt-2 text-xs text-gray-400">평일 09:00 - 18:00 (주말/공휴일 휴무)</p>
               </div>
             </div>
