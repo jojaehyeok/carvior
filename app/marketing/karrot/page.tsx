@@ -491,6 +491,19 @@ export default function CarviorPrivateDealPage() {
 
                     {/* ── 신청 폼 */}
                     <div className="mb-6">
+                        {/* 운영 지역 안내 */}
+                        <div className="bg-zinc-100 border border-zinc-200 rounded-2xl px-5 py-4 mb-4 flex items-start gap-3">
+                            <span className="text-lg flex-shrink-0">📍</span>
+                            <div>
+                                <p className="text-xs font-extrabold text-zinc-800 mb-1">현재 운영 지역 안내</p>
+                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                    <span className="font-bold text-zinc-700">경기도 수원시 · 안산시 · 고양시</span> 중심으로 운영 중입니다.<br />
+                                    해당 지역 외에도 가능한 진단사 배정을 위해 협의 중이니,
+                                    부담 없이 신청해주시면 상담사가 방문 가능 여부를 먼저 확인해드립니다.
+                                </p>
+                            </div>
+                        </div>
+
                         {/* CTA 섹션 헤더 */}
                         <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl p-6 mb-4 text-center">
                             <p className="text-[10px] font-extrabold text-orange-800 uppercase tracking-widest mb-2">지금 바로 시작하세요</p>
@@ -671,8 +684,8 @@ export default function CarviorPrivateDealPage() {
                                     a: '네, 계약 내용 검토 및 서류 이전 안내까지 전 과정을 지원해드립니다. 구매 후 하자 발생 시 진단 리포트가 법적 근거로 활용됩니다.',
                                 },
                                 {
-                                    q: '전국 어디서나 가능한가요?',
-                                    a: '네, 전국 방문 가능합니다. 차량이 있는 판매자 위치로 평가사가 직접 이동합니다.',
+                                    q: '어느 지역까지 방문 가능한가요?',
+                                    a: '현재 경기도 수원시 · 안산시 · 고양시를 중심으로 운영 중입니다. 해당 지역 외에도 가능한 진단사 배정을 위해 협의하고 있으니, 우선 신청해주시면 상담사가 일정 조율 가능 여부를 안내드립니다.',
                                 },
                             ].map((faq, i) => (
                                 <details key={i} className="bg-white rounded-2xl border border-zinc-100 group">
