@@ -146,9 +146,6 @@ function WorkGallery() {
                     </div>
                 ))}
             </div>
-            <p className="text-[10px] text-zinc-300 text-center mt-2">
-                이미지 파일 위치: /public/images/karrot-work-1~4.jpg
-            </p>
         </div>
     );
 }
