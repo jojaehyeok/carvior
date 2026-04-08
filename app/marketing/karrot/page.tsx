@@ -97,7 +97,7 @@ function PhoneInput({ value, onChange }: { value: string; onChange: (v: string) 
             type="tel" inputMode="numeric" value={value} onChange={format}
             placeholder="010-0000-0000"
             required
-            className="w-full p-3 outline-none transition-all text-base font-bold border-b-2 border-zinc-200 bg-transparent text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-900"
+            className="w-full p-3 text-base font-bold transition-all bg-transparent border-b-2 outline-none border-zinc-200 text-zinc-900 placeholder:text-zinc-300 focus:border-zinc-900"
         />
     );
 }
@@ -106,17 +106,17 @@ function PhoneInput({ value, onChange }: { value: string; onChange: (v: string) 
 // 현장 이미지 갤러리
 // ─────────────────────────────────────────
 const WORK_IMAGES = [
-    { src: '/images/karrot-work-1.jpg', label: '외관 정밀 진단' },
+    { src: '/images/review-1.jpg', label: '외관 정밀 진단' },
     { src: '/images/karrot-work-2.jpg', label: '엔진룸 점검' },
-    { src: '/images/karrot-work-3.jpg', label: '하체 상태 확인' },
-    { src: '/images/karrot-work-4.jpg', label: '계약 현장 대행' },
+    { src: '/images/diagnostic-3.jpg', label: '하체 상태 확인' },
+    { src: '/images/karrot-work-4.png', label: '계약 현장 대행' },
 ];
 
 function WorkGallery() {
     return (
         <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4 px-1">
-                <div className="w-1 h-4 bg-zinc-900 rounded-full" />
+            <div className="flex items-center gap-3 px-1 mb-4">
+                <div className="w-1 h-4 rounded-full bg-zinc-900" />
                 <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">실제 현장 사진</p>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
@@ -125,7 +125,7 @@ function WorkGallery() {
                         <img
                             src={img.src}
                             alt={img.label}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
                             onError={(e) => {
                                 const el = e.target as HTMLImageElement;
                                 el.style.display = 'none';
@@ -159,11 +159,11 @@ function WorkGallery() {
 function TrustBadge({ icon, title, desc }: { icon: string; title: string; desc: string }) {
     return (
         <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 flex items-center justify-center text-base flex-shrink-0">
+            <div className="flex items-center justify-center flex-shrink-0 text-base w-9 h-9 rounded-xl bg-zinc-100">
                 {icon}
             </div>
             <div>
-                <p className="text-xs font-extrabold text-zinc-900 leading-tight">{title}</p>
+                <p className="text-xs font-extrabold leading-tight text-zinc-900">{title}</p>
                 <p className="text-[10px] text-zinc-400 mt-0.5 leading-relaxed">{desc}</p>
             </div>
         </div>
@@ -266,25 +266,25 @@ export default function CarviorPrivateDealPage() {
     // ── 완료 화면
     if (submitted) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center text-2xl mb-6">✓</div>
-                <h2 className="text-2xl font-black text-zinc-900 mb-3">신청 완료</h2>
-                <p className="text-zinc-500 text-sm leading-relaxed mb-2">
+            <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center bg-zinc-50">
+                <div className="flex items-center justify-center w-16 h-16 mb-6 text-2xl rounded-full bg-zinc-900">✓</div>
+                <h2 className="mb-3 text-2xl font-black text-zinc-900">신청 완료</h2>
+                <p className="mb-2 text-sm leading-relaxed text-zinc-500">
                     <span className="font-bold text-zinc-800">{formData.carOwner}</span>님, 접수가 완료되었습니다.
                 </p>
-                <p className="text-zinc-500 text-sm leading-relaxed mb-8">
+                <p className="mb-8 text-sm leading-relaxed text-zinc-500">
                     카비어 담당 상담사가 <strong className="text-zinc-800">영업일 기준 1시간 이내</strong>에 연락드립니다.
                 </p>
-                <div className="bg-white rounded-3xl border border-zinc-100 p-6 w-full max-w-sm text-left space-y-4 shadow-sm mb-8">
+                <div className="w-full max-w-sm p-6 mb-8 space-y-4 text-left bg-white border shadow-sm rounded-3xl border-zinc-100">
                     {[
                         { label: '신청자', value: formData.carOwner },
                         { label: '연락처', value: formData.contact },
                         { label: '방문 일시', value: formData.preferredDateTime },
                         { label: '장소', value: formData.address },
                     ].map(({ label, value }) => (
-                        <div key={label} className="flex justify-between items-start text-sm gap-3">
-                            <span className="text-zinc-400 font-bold flex-shrink-0">{label}</span>
-                            <span className="font-extrabold text-zinc-900 text-right">{value}</span>
+                        <div key={label} className="flex items-start justify-between gap-3 text-sm">
+                            <span className="flex-shrink-0 font-bold text-zinc-400">{label}</span>
+                            <span className="font-extrabold text-right text-zinc-900">{value}</span>
                         </div>
                     ))}
                 </div>
@@ -297,28 +297,28 @@ export default function CarviorPrivateDealPage() {
         <>
             {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
 
-            <div className="min-h-screen bg-zinc-50 font-sans">
+            <div className="min-h-screen font-sans bg-zinc-50">
 
                 {/* ── 헤더 */}
-                <nav className="bg-white border-b border-zinc-100 px-6 py-4 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+                <nav className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 bg-white border-b shadow-sm border-zinc-100">
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-md bg-zinc-900 flex items-center justify-center">
+                        <div className="flex items-center justify-center w-6 h-6 rounded-md bg-zinc-900">
                             <span className="text-white text-[10px] font-black">C</span>
                         </div>
-                        <span className="text-base font-black text-zinc-900 tracking-tight">카비어</span>
+                        <span className="text-base font-black tracking-tight text-zinc-900">카비어</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                         <span className="text-[10px] font-bold text-zinc-500">상담 가능</span>
                     </div>
                 </nav>
 
                 {/* ── 히어로: 페인포인트 후킹 */}
-                <div className="bg-zinc-900 text-white px-6 pt-10 pb-16 relative overflow-hidden">
+                <div className="relative px-6 pt-10 pb-16 overflow-hidden text-white bg-zinc-900">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.03] rounded-full -translate-y-1/2 translate-x-1/3" />
                     <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/[0.03] rounded-full translate-y-1/2 -translate-x-1/4" />
 
-                    <div className="max-w-xl mx-auto relative">
+                    <div className="relative max-w-xl mx-auto">
                         {/* 후킹 배지 */}
                         <div className="inline-flex items-center gap-2 border border-zinc-700 rounded-full px-3 py-1.5 text-[11px] font-bold text-zinc-300 mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
@@ -334,21 +334,21 @@ export default function CarviorPrivateDealPage() {
                         </h1>
 
                         {/* 서브 카피 */}
-                        <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                        <p className="mb-8 text-sm leading-relaxed text-zinc-400">
                             숨겨진 결함, 모르는 시세, 막막한 협상...
                             <br />
-                            <span className="text-white font-bold">카비어 공인 평가사가 판매자에게 직접 가서 해결합니다.</span>
+                            <span className="font-bold text-white">카비어 공인 평가사가 판매자에게 직접 가서 해결합니다.</span>
                         </p>
 
                         {/* 이벤트 가격 배너 */}
                         <div className="bg-amber-400 rounded-2xl px-4 py-3.5 mb-4 flex items-center justify-between">
                             <div>
                                 <p className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider mb-0.5">기간 한정 이벤트 ~2026.08</p>
-                                <p className="text-zinc-900 font-black text-base">어떤 차든 진단비 고정 <span className="text-xl">8만원</span></p>
+                                <p className="text-base font-black text-zinc-900">어떤 차든 진단비 고정 <span className="text-xl">8만원</span></p>
                             </div>
                             <div className="text-right">
-                                <p className="text-amber-700 text-xs line-through">정가 12만원</p>
-                                <p className="text-zinc-900 font-black text-lg">₩80,000</p>
+                                <p className="text-xs line-through text-amber-700">정가 12만원</p>
+                                <p className="text-lg font-black text-zinc-900">₩80,000</p>
                             </div>
                         </div>
 
@@ -369,10 +369,10 @@ export default function CarviorPrivateDealPage() {
                     </div>
                 </div>
 
-                <div className="max-w-xl mx-auto px-6">
+                <div className="max-w-xl px-6 mx-auto">
 
                     {/* ── 문제 제기 섹션 (공감 형성) */}
-                    <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 -mt-5 mb-6 relative z-10">
+                    <div className="relative z-10 p-6 mb-6 -mt-5 bg-white border shadow-sm rounded-3xl border-zinc-100">
                         <p className="text-[10px] font-extrabold text-red-500 uppercase tracking-widest mb-4">중고차 살 때 이런 생각 드셨나요?</p>
                         <div className="space-y-3">
                             {[
@@ -382,28 +382,28 @@ export default function CarviorPrivateDealPage() {
                                 '계약서 내용이 불리하게 작성되면 어쩌지?',
                             ].map((pain, i) => (
                                 <div key={i} className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-5 h-5 border border-red-100 rounded-full bg-red-50">
                                         <span className="text-red-400 text-[10px] font-black">!</span>
                                     </div>
                                     <p className="text-sm text-zinc-600">{pain}</p>
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-5 pt-4 border-t border-zinc-50">
+                        <div className="pt-4 mt-5 border-t border-zinc-50">
                             <p className="text-sm font-extrabold text-zinc-900">
                                 카비어 평가사가 판매자에게 직접 가서 확인하고,<br />
-                                <span className="text-zinc-500 font-bold">결함 근거로 가격을 협상해드립니다.</span>
+                                <span className="font-bold text-zinc-500">결함 근거로 가격을 협상해드립니다.</span>
                             </p>
                         </div>
                     </div>
 
                     {/* ── 서비스 흐름 */}
                     <div className="mb-8">
-                        <div className="flex items-center gap-3 mb-5 px-1">
-                            <div className="w-1 h-4 bg-zinc-900 rounded-full" />
+                        <div className="flex items-center gap-3 px-1 mb-5">
+                            <div className="w-1 h-4 rounded-full bg-zinc-900" />
                             <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">서비스 과정</p>
                         </div>
-                        <div className="bg-white rounded-3xl border border-zinc-100 shadow-sm p-6 space-y-6">
+                        <div className="p-6 space-y-6 bg-white border shadow-sm rounded-3xl border-zinc-100">
                             {[
                                 { num: '01', icon: '📋', title: '상담 신청 (무료)', desc: '구매 희망 차량 정보와 판매자 위치를 남겨주시면 상담사가 연락드려요' },
                                 { num: '02', icon: '🔍', title: '평가사가 판매자에게 직접 방문', desc: '구매자 대신 현장에 가서 100+ 항목 정밀 진단 · 숨겨진 결함 확인 · 시장 시세 분석' },
@@ -412,7 +412,7 @@ export default function CarviorPrivateDealPage() {
                             ].map((step, i) => (
                                 <div key={i} className="flex gap-4">
                                     <div className="flex flex-col items-center">
-                                        <div className="w-10 h-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-xl flex-shrink-0">
+                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 text-xl rounded-2xl bg-zinc-900">
                                             {step.icon}
                                         </div>
                                         {i < 3 && <div className="w-px flex-1 bg-zinc-100 my-1.5 min-h-[20px]" />}
@@ -420,9 +420,9 @@ export default function CarviorPrivateDealPage() {
                                     <div className="pb-1">
                                         <div className="flex items-center gap-2 mb-0.5">
                                             <span className="text-[9px] font-extrabold text-zinc-300">{step.num}</span>
-                                            <p className="font-extrabold text-zinc-900 text-sm">{step.title}</p>
+                                            <p className="text-sm font-extrabold text-zinc-900">{step.title}</p>
                                         </div>
-                                        <p className="text-zinc-400 text-xs leading-relaxed">{step.desc}</p>
+                                        <p className="text-xs leading-relaxed text-zinc-400">{step.desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -433,7 +433,7 @@ export default function CarviorPrivateDealPage() {
                     <WorkGallery />
 
                     {/* ── 신뢰 신호 */}
-                    <div className="bg-zinc-900 text-white rounded-3xl p-6 mb-6">
+                    <div className="p-6 mb-6 text-white bg-zinc-900 rounded-3xl">
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">카비어를 믿을 수 있는 이유</p>
                         <div className="grid grid-cols-1 gap-5">
                             <TrustBadge icon="🏢" title="사업자 등록 완료" desc="사업자등록번호 783-24-02190 · 통신판매업 제 2026-경기안산-0474" />
@@ -445,8 +445,8 @@ export default function CarviorPrivateDealPage() {
 
                     {/* ── 고객 후기 */}
                     <div className="mb-8">
-                        <div className="flex items-center gap-3 mb-5 px-1">
-                            <div className="w-1 h-4 bg-zinc-900 rounded-full" />
+                        <div className="flex items-center gap-3 px-1 mb-5">
+                            <div className="w-1 h-4 rounded-full bg-zinc-900" />
                             <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">실제 고객 후기</p>
                         </div>
                         <div className="space-y-3">
@@ -467,10 +467,10 @@ export default function CarviorPrivateDealPage() {
                                     text: '차에 대해 아무것도 몰라서 불안했는데 평가사가 판매자랑 직접 협상해줬어요. 제가 원하는 가격에서 딱 맞게 계약됐고 계약서까지 검토해주셨어요.',
                                 },
                             ].map((r, i) => (
-                                <div key={i} className="bg-white rounded-2xl border border-zinc-100 p-5 shadow-sm">
+                                <div key={i} className="p-5 bg-white border shadow-sm rounded-2xl border-zinc-100">
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-xs font-black text-white">
+                                            <div className="flex items-center justify-center w-8 h-8 text-xs font-black text-white rounded-full bg-zinc-900">
                                                 {r.name[0]}
                                             </div>
                                             <div>
@@ -482,7 +482,7 @@ export default function CarviorPrivateDealPage() {
                                             <p className="text-[10px] font-extrabold text-emerald-600">{r.gain}</p>
                                         </div>
                                     </div>
-                                    <p className="text-xs text-zinc-500 leading-relaxed">{r.text}</p>
+                                    <p className="text-xs leading-relaxed text-zinc-500">{r.text}</p>
                                     <div className="mt-2 text-amber-400 text-[11px]">{'★'.repeat(r.stars)}</div>
                                 </div>
                             ))}
@@ -492,11 +492,11 @@ export default function CarviorPrivateDealPage() {
                     {/* ── 신청 폼 */}
                     <div className="mb-6">
                         {/* 운영 지역 안내 */}
-                        <div className="bg-zinc-100 border border-zinc-200 rounded-2xl px-5 py-4 mb-4 flex items-start gap-3">
-                            <span className="text-lg flex-shrink-0">📍</span>
+                        <div className="flex items-start gap-3 px-5 py-4 mb-4 border bg-zinc-100 border-zinc-200 rounded-2xl">
+                            <span className="flex-shrink-0 text-lg">📍</span>
                             <div>
-                                <p className="text-xs font-extrabold text-zinc-800 mb-1">현재 운영 지역 안내</p>
-                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                <p className="mb-1 text-xs font-extrabold text-zinc-800">현재 운영 지역 안내</p>
+                                <p className="text-xs leading-relaxed text-zinc-500">
                                     <span className="font-bold text-zinc-700">경기도 수원시 · 안산시 · 고양시</span> 중심으로 운영 중입니다.<br />
                                     해당 지역 외에도 가능한 진단사 배정을 위해 협의 중이니,
                                     부담 없이 신청해주시면 상담사가 방문 가능 여부를 먼저 확인해드립니다.
@@ -505,16 +505,16 @@ export default function CarviorPrivateDealPage() {
                         </div>
 
                         {/* CTA 섹션 헤더 */}
-                        <div className="bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl p-6 mb-4 text-center">
+                        <div className="p-6 mb-4 text-center bg-gradient-to-r from-amber-400 to-orange-400 rounded-3xl">
                             <p className="text-[10px] font-extrabold text-orange-800 uppercase tracking-widest mb-2">지금 바로 시작하세요</p>
-                            <h2 className="text-xl font-black text-zinc-900 mb-1">상담 신청</h2>
-                            <p className="text-orange-800 text-xs font-bold">상담 무료 · 진단 <span className="line-through opacity-60">정가 12만원</span> → <span className="text-red-700">이벤트 8만원</span> · ~2026년 8월</p>
+                            <h2 className="mb-1 text-xl font-black text-zinc-900">상담 신청</h2>
+                            <p className="text-xs font-bold text-orange-800">상담 무료 · 진단 <span className="line-through opacity-60">정가 12만원</span> → <span className="text-red-700">이벤트 8만원</span> · ~2026년 8월</p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
 
                             {/* 01. 신청자 정보 */}
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
+                            <div className="p-6 bg-white border shadow-sm rounded-3xl border-zinc-100">
                                 <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">01 · 신청자 정보 (구매자)</h3>
                                 <div className="space-y-5">
                                     <div>
@@ -525,7 +525,7 @@ export default function CarviorPrivateDealPage() {
                                             placeholder="홍길동"
                                             value={formData.carOwner}
                                             onChange={handleChange}
-                                            className="w-full border-b-2 border-zinc-200 p-3 focus:border-zinc-900 outline-none transition-all text-zinc-900 font-bold placeholder:text-zinc-300"
+                                            className="w-full p-3 font-bold transition-all border-b-2 outline-none border-zinc-200 focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-300"
                                         />
                                     </div>
                                     <div>
@@ -539,11 +539,11 @@ export default function CarviorPrivateDealPage() {
                             </div>
 
                             {/* 02. 차량 위치 및 방문 일시 */}
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100 space-y-6">
+                            <div className="p-6 space-y-6 bg-white border shadow-sm rounded-3xl border-zinc-100">
                                 <h3 className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">02 · 차량 위치 및 방문 일시</h3>
                                 <div className="space-y-3">
                                     <div>
-                                        <label className="text-xs text-zinc-400 font-bold block mb-1">차량 위치 (판매자 주소) <span className="text-red-400">*</span></label>
+                                        <label className="block mb-1 text-xs font-bold text-zinc-400">차량 위치 (판매자 주소) <span className="text-red-400">*</span></label>
                                         <p className="text-[10px] text-zinc-400 mb-2">평가사가 이 주소로 직접 방문합니다</p>
                                     </div>
                                     <div className="flex gap-2">
@@ -553,12 +553,12 @@ export default function CarviorPrivateDealPage() {
                                             placeholder="주소 검색을 눌러주세요"
                                             value={formData.address}
                                             onClick={handleAddressSearch}
-                                            className="flex-1 border-b-2 border-zinc-200 p-3 bg-zinc-50 text-zinc-700 outline-none cursor-pointer font-bold placeholder:text-zinc-300 text-sm"
+                                            className="flex-1 p-3 text-sm font-bold border-b-2 outline-none cursor-pointer border-zinc-200 bg-zinc-50 text-zinc-700 placeholder:text-zinc-300"
                                         />
                                         <button
                                             type="button"
                                             onClick={handleAddressSearch}
-                                            className="bg-zinc-900 text-white px-4 rounded-xl text-xs font-bold active:scale-95 transition-transform whitespace-nowrap"
+                                            className="px-4 text-xs font-bold text-white transition-transform bg-zinc-900 rounded-xl active:scale-95 whitespace-nowrap"
                                         >
                                             주소찾기
                                         </button>
@@ -569,7 +569,7 @@ export default function CarviorPrivateDealPage() {
                                         placeholder="상세주소 (예: 지하주차장 B1구역, 아파트 주차장 등)"
                                         value={formData.detailAddress}
                                         onChange={handleChange}
-                                        className="w-full border-b-2 border-zinc-200 p-3 focus:border-zinc-900 outline-none transition-all text-zinc-900 placeholder:text-zinc-300 text-sm"
+                                        className="w-full p-3 text-sm transition-all border-b-2 outline-none border-zinc-200 focus:border-zinc-900 text-zinc-900 placeholder:text-zinc-300"
                                     />
                                 </div>
                                 <div className="pt-2 border-t border-zinc-50">
@@ -578,8 +578,8 @@ export default function CarviorPrivateDealPage() {
                             </div>
 
                             {/* 03. 구매 차량 정보 */}
-                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-100">
-                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">03 · 구매 차량 정보 <span className="normal-case font-bold text-zinc-300">(선택)</span></h3>
+                            <div className="p-6 bg-white border shadow-sm rounded-3xl border-zinc-100">
+                                <h3 className="text-[10px] font-extrabold text-zinc-400 mb-5 uppercase tracking-widest">03 · 구매 차량 정보 <span className="font-bold normal-case text-zinc-300">(선택)</span></h3>
                                 <div className="space-y-5">
                                     <div>
                                         <label className="text-xs text-zinc-400 font-bold mb-1.5 block">구매 희망 가격</label>
@@ -587,7 +587,7 @@ export default function CarviorPrivateDealPage() {
                                             name="desiredPrice"
                                             value={formData.desiredPrice}
                                             onChange={handleChange}
-                                            className="w-full border-b-2 border-zinc-200 p-3 focus:border-zinc-900 outline-none transition-all bg-transparent text-zinc-700 text-sm"
+                                            className="w-full p-3 text-sm transition-all bg-transparent border-b-2 outline-none border-zinc-200 focus:border-zinc-900 text-zinc-700"
                                         >
                                             <option value="">선택 안 함</option>
                                             <option value="500만원 미만">500만원 미만</option>
@@ -609,14 +609,14 @@ export default function CarviorPrivateDealPage() {
                                             placeholder="예: 2022년식 BMW 3시리즈 흰색, 판매자 요구가 1,800만원인데 1,650만원에 사고 싶습니다"
                                             value={formData.additionalMemo}
                                             onChange={handleChange}
-                                            className="w-full h-24 border border-zinc-100 rounded-2xl p-4 focus:ring-2 focus:ring-zinc-100 outline-none transition-all resize-none text-sm text-zinc-700 placeholder:text-zinc-300"
+                                            className="w-full h-24 p-4 text-sm transition-all border outline-none resize-none border-zinc-100 rounded-2xl focus:ring-2 focus:ring-zinc-100 text-zinc-700 placeholder:text-zinc-300"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* 개인정보 동의 */}
-                            <div className="bg-white rounded-2xl border border-zinc-100 px-5 py-4 shadow-sm">
+                            <div className="px-5 py-4 bg-white border shadow-sm rounded-2xl border-zinc-100">
                                 <div className="flex items-start gap-3">
                                     <input
                                         type="checkbox"
@@ -625,13 +625,13 @@ export default function CarviorPrivateDealPage() {
                                         onChange={(e) => setPrivacyAgreed(e.target.checked)}
                                         className="mt-0.5 w-4 h-4 accent-zinc-900 cursor-pointer flex-shrink-0"
                                     />
-                                    <label htmlFor="privacy-agree" className="text-xs text-zinc-600 leading-relaxed cursor-pointer select-none">
+                                    <label htmlFor="privacy-agree" className="text-xs leading-relaxed cursor-pointer select-none text-zinc-600">
                                         <span className="font-black text-zinc-900">[필수] </span>
                                         개인정보 수집 및 이용에 동의합니다.{' '}
                                         <button
                                             type="button"
                                             onClick={() => setShowPrivacyModal(true)}
-                                            className="text-zinc-500 font-bold underline underline-offset-2 hover:text-zinc-900"
+                                            className="font-bold underline text-zinc-500 underline-offset-2 hover:text-zinc-900"
                                         >
                                             내용 보기
                                         </button>
@@ -661,8 +661,8 @@ export default function CarviorPrivateDealPage() {
 
                     {/* ── FAQ */}
                     <div className="mb-10">
-                        <div className="flex items-center gap-3 mb-4 px-1">
-                            <div className="w-1 h-4 bg-zinc-900 rounded-full" />
+                        <div className="flex items-center gap-3 px-1 mb-4">
+                            <div className="w-1 h-4 rounded-full bg-zinc-900" />
                             <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">자주 묻는 질문</p>
                         </div>
                         <div className="space-y-2">
@@ -688,13 +688,13 @@ export default function CarviorPrivateDealPage() {
                                     a: '현재 경기도 수원시 · 안산시 · 고양시를 중심으로 운영 중입니다. 해당 지역 외에도 가능한 진단사 배정을 위해 협의하고 있으니, 우선 신청해주시면 상담사가 일정 조율 가능 여부를 안내드립니다.',
                                 },
                             ].map((faq, i) => (
-                                <details key={i} className="bg-white rounded-2xl border border-zinc-100 group">
-                                    <summary className="flex items-center justify-between px-5 py-4 cursor-pointer list-none">
+                                <details key={i} className="bg-white border rounded-2xl border-zinc-100 group">
+                                    <summary className="flex items-center justify-between px-5 py-4 list-none cursor-pointer">
                                         <p className="text-sm font-bold text-zinc-900">{faq.q}</p>
-                                        <span className="text-zinc-300 group-open:rotate-180 transition-transform duration-200 flex-shrink-0 ml-2">▼</span>
+                                        <span className="flex-shrink-0 ml-2 transition-transform duration-200 text-zinc-300 group-open:rotate-180">▼</span>
                                     </summary>
                                     <div className="px-5 pb-4">
-                                        <p className="text-xs text-zinc-500 leading-relaxed">{faq.a}</p>
+                                        <p className="text-xs leading-relaxed text-zinc-500">{faq.a}</p>
                                     </div>
                                 </details>
                             ))}
