@@ -230,7 +230,7 @@ export default function CarviorPrivateDealPage() {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch('https://carvior.store/api/v1/external/request', {
+            const res = await fetch('https://carvior.store/api/v1/external/buyer-request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...formData, source: 'PRIVATE_DEAL_FORM', privacyAgreed }),
