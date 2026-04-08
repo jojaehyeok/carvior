@@ -245,6 +245,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
     const [address, setAddress] = useState('');
     const [detailAddress, setDetailAddress] = useState('');
     const [preferredDateTime, setPreferredDateTime] = useState('');
+    const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [paying, setPaying] = useState(false);
     const [showBankModal, setShowBankModal] = useState(false);
 
@@ -292,6 +293,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
         if (!carType.trim()) { alert('차종을 입력해주세요.'); return; }
         if (!preferredDateTime) { alert('방문 날짜와 시간을 선택해주세요.'); return; }
         if (!address) { alert('방문 장소 주소를 입력해주세요.'); return; }
+        if (!privacyAgreed) { alert('개인정보 수집·이용에 동의해주세요.'); return; }
 
         setPaying(true);
         try {
@@ -307,6 +309,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                     preferredDateTime,
                     source: 'CARVIOR_INSPECTION',
                     additionalMemo: '계좌이체 대기',
+                    privacyAgreed,
                 }),
             });
             setShowBankModal(true);
@@ -428,11 +431,38 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                 </p>
             </div>
 
+            {/* 개인정보 동의 */}
+            <label className="flex items-start gap-3 cursor-pointer group">
+                <div
+                    onClick={() => setPrivacyAgreed(v => !v)}
+                    className={clsx(
+                        'flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all mt-0.5',
+                        privacyAgreed
+                            ? 'bg-zinc-900 border-zinc-900'
+                            : light ? 'border-zinc-600 bg-transparent' : 'border-zinc-300 bg-transparent'
+                    )}
+                >
+                    {privacyAgreed && <span className="text-white text-[11px] font-black leading-none">✓</span>}
+                </div>
+                <p className={clsx('text-xs leading-relaxed', light ? 'text-zinc-400' : 'text-zinc-500')}>
+                    <span className="font-extrabold text-red-400">필수</span>{' '}
+                    <span
+                        className={clsx('underline underline-offset-2 cursor-pointer', light ? 'text-zinc-300' : 'text-zinc-700')}
+                        onClick={() => setPrivacyAgreed(v => !v)}
+                    >
+                        개인정보 수집·이용
+                    </span>에 동의합니다.{' '}
+                    <span className={clsx(light ? 'text-zinc-600' : 'text-zinc-400')}>
+                        (차량번호, 연락처, 주소를 평가 서비스 제공 목적으로 수집하며 서비스 종료 후 즉시 파기합니다.)
+                    </span>
+                </p>
+            </label>
+
             <button
-                type="submit" disabled={paying}
+                type="submit" disabled={paying || !privacyAgreed}
                 className={clsx(
                     'w-full py-4 rounded-2xl font-extrabold text-base tracking-wide transition-all flex items-center justify-center gap-2',
-                    paying
+                    (paying || !privacyAgreed)
                         ? 'bg-zinc-300 text-zinc-400 cursor-not-allowed'
                         : light
                         ? 'bg-white text-zinc-900 hover:bg-zinc-100 active:scale-[0.98] shadow-xl'

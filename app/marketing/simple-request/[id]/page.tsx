@@ -109,6 +109,7 @@ export default function SimpleRequestByCompanyPage() {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [carError, setCarError] = useState<string | null>(null);
+    const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
     const checkDuplicateCar = async (carNum: string) => {
         if (carNum.length < 7) return;
@@ -161,6 +162,10 @@ export default function SimpleRequestByCompanyPage() {
     const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isSubmitting || carError) return;
+        if (!privacyAgreed) {
+            alert('개인정보 수집·이용에 동의해주세요.');
+            return;
+        }
         if (!vehicleCategory) {
             alert('차량 구분을 선택해주세요.');
             return;
@@ -179,7 +184,7 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, source: companyId, additionalMemo: `[${vehicleCategory}] ${formData.additionalMemo}`.trim() }),
+                body: JSON.stringify({ ...formData, source: companyId, additionalMemo: `[${vehicleCategory}] ${formData.additionalMemo}`.trim(), privacyAgreed }),
             });
 
             const dbResult = await dbResponse.json();
@@ -391,12 +396,34 @@ export default function SimpleRequestByCompanyPage() {
                         </p>
                     </div>
 
+                    {/* 개인정보 동의 */}
+                    <label className="flex items-start gap-3 cursor-pointer bg-white rounded-2xl px-4 py-4 border border-zinc-100">
+                        <div
+                            onClick={() => setPrivacyAgreed(v => !v)}
+                            className={clsx(
+                                'flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all mt-0.5',
+                                privacyAgreed ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'
+                            )}
+                        >
+                            {privacyAgreed && <span className="text-white text-[11px] font-black leading-none">✓</span>}
+                        </div>
+                        <p className="text-xs text-zinc-500 leading-relaxed">
+                            <span className="font-extrabold text-red-500">필수</span>{' '}
+                            <span className="underline underline-offset-2 text-zinc-700 cursor-pointer" onClick={() => setPrivacyAgreed(v => !v)}>
+                                개인정보 수집·이용
+                            </span>에 동의합니다.{' '}
+                            <span className="text-zinc-400">
+                                (차량번호, 연락처, 주소를 진단 서비스 제공 목적으로 수집하며 서비스 종료 후 즉시 파기합니다.)
+                            </span>
+                        </p>
+                    </label>
+
                     <button
                         type="submit"
-                        disabled={isSubmitting || !!carError}
+                        disabled={isSubmitting || !!carError || !privacyAgreed}
                         className={clsx(
                             'w-full py-5 rounded-2xl text-base font-extrabold transition-all',
-                            (isSubmitting || !!carError)
+                            (isSubmitting || !!carError || !privacyAgreed)
                                 ? 'bg-zinc-300 text-zinc-400 cursor-not-allowed'
                                 : 'bg-zinc-900 text-white active:scale-[0.98] shadow-lg shadow-zinc-300'
                         )}
