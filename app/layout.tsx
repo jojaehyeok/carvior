@@ -4,7 +4,7 @@ import { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/navbar";
+import StoreNav from "@/components/StoreNav";
 import clsx from "clsx";
 import Script from "next/script"; // 카카오 지도 위해 추가
 
@@ -21,10 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
           <div className="relative flex flex-col h-screen">
-            {/* ✅ Navbar 내부에서 경로를 체크하므로 여기서는 그냥 불러오기만 하면 됩니다 */}
-            <Navbar />
+            <StoreNav />
             
-            <main className="container mx-auto max-w-7xl pt-6 px-4 flex-grow">
+            <main className="flex-grow">
               {children}
             </main>
           </div>

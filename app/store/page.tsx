@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import StoreNav from '@/components/StoreNav';
 import { clsx } from 'clsx';
 
 const CAR_TYPES = [
@@ -39,7 +39,7 @@ function CarIcon({ type }: { type: string }) {
 const SERVICES = [
   {
     label: '내차사기',
-    href: '/buy',
+    href: '/store/buy',
     desc: '검증된 매물만 엄선\n허위매물 필터링',
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -50,7 +50,7 @@ const SERVICES = [
   },
   {
     label: '내차팔기',
-    href: '/sell',
+    href: '/store/sell',
     desc: '평가사가 직접 방문\n무료 시세 산정',
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ const SERVICES = [
   },
   {
     label: '내차시세',
-    href: '/price',
+    href: '/store/price',
     desc: '30초만에 확인\n빅데이터 기반 시세',
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -70,7 +70,7 @@ const SERVICES = [
   },
   {
     label: '딜러 입찰',
-    href: '/auction',
+    href: '/store/auction',
     desc: '가격 미매칭 매물\n딜러 직접 입찰',
     icon: (
       <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
@@ -87,61 +87,48 @@ const TRUST_STATS = [
   { value: '4.8',    label: '이용자 평점' },
 ];
 
-interface StoreItem {
-  id: string;
-  titleKo: string;
-  year: number;
-  mileage: number;
-  priceKRW: number;
-  region: string;
-  photos: { exterior?: string[] };
-  status: string;
-}
-
-const NAV_ITEMS = [
-  { label: '내차사기',   href: '/buy' },
-  { label: '내차팔기',   href: '/sell' },
-  { label: '내차시세',   href: '/price' },
-  { label: '스마트옥션', href: '/auction' },
+const PREVIEW_CARS = [
+  { id: '1', brand: '기아',   model: '더 뉴쏘렌토', year: 2024, mileage: 31764, price: 3690, hasReport: true },
+  { id: '2', brand: '현대',   model: '더 뉴아반떼', year: 2016, mileage: 93508, price: 780,  hasReport: false },
+  { id: '6', brand: '제네시스', model: 'G80',      year: 2021, mileage: 44000, price: 3990, hasReport: true },
+  { id: '7', brand: '현대',   model: '그랜저 IG',  year: 2020, mileage: 52000, price: 2490, hasReport: true },
 ];
 
-export default function HomePage() {
+const NAV_ITEMS = [
+  { label: '내차사기',   href: '/store/buy' },
+  { label: '내차팔기',   href: '/store/sell' },
+  { label: '내차시세',   href: '/store/price' },
+  { label: '스마트옥션', href: '/store/auction' },
+];
+
+export default function StorePage() {
   const [selectedType, setSelectedType] = useState('전체');
   const [priceMax, setPriceMax]         = useState(10000);
-  const [previewCars, setPreviewCars]   = useState<StoreItem[]>([]);
-
-  useEffect(() => {
-    fetch('/api/admin/store-items')
-      .then(r => r.json())
-      .then((items: StoreItem[]) => {
-        const active = items.filter(i => i.status === 'active').slice(0, 4);
-        setPreviewCars(active);
-      })
-      .catch(() => {});
-  }, []);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
       <div className="bg-black">
+        <StoreNav />
+
         <section className="max-w-7xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 text-center lg:text-left">
             <p className="inline-block text-[10px] font-black tracking-[0.2em] uppercase text-white/40 border border-white/10 px-3 py-1 rounded-full mb-6">
-              카비어 중고차 수출 플랫폼
+              카비어 중고차 플랫폼
             </p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
-              검증된 한국 중고차,<br />
-              <span className="text-white/40">전 세계로.</span>
+              검증된 중고차,<br />
+              <span className="text-white/40">한 곳에서.</span>
             </h1>
             <p className="text-white/50 text-base md:text-lg mb-10 leading-relaxed">
               공인 평가사가 직접 확인한 매물만 올립니다.<br />
               허위매물 없이, 가격도 투명하게.
             </p>
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-              <Link href="/buy" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors">
+              <Link href="/store/buy" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors">
                 매물 보러가기
               </Link>
-              <Link href="/price" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors">
+              <Link href="/store/price" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors">
                 내 차 시세 보기
               </Link>
             </div>
@@ -263,7 +250,7 @@ export default function HomePage() {
               </div>
 
               <Link
-                href="/buy"
+                href="/store/buy"
                 className="flex items-center justify-center gap-2 w-full bg-white text-black font-black py-4 rounded-xl text-sm hover:bg-white/90 transition-colors"
               >
                 매물 검색하기
@@ -279,9 +266,24 @@ export default function HomePage() {
 
               <div className="space-y-3">
                 {[
-                  { title: '카비어 방문 평가', desc: '평가사가 직접 찾아가 한 번에 진행합니다.', href: '/sell', tag: '무료' },
-                  { title: '내 차 시세 먼저 확인', desc: '30초만에 내 차 시세를 빅데이터로 확인하세요.', href: '/price', tag: '빠름' },
-                  { title: '딜러 입찰 받기', desc: '가격 협상 실패? 딜러에게 직접 입찰받으세요.', href: '/auction', tag: '신규' },
+                  {
+                    title: '카비어 방문 평가',
+                    desc: '평가사가 직접 찾아가 한 번에 진행합니다.',
+                    href: '/store/sell',
+                    tag: '무료',
+                  },
+                  {
+                    title: '내 차 시세 먼저 확인',
+                    desc: '30초만에 내 차 시세를 빅데이터로 확인하세요.',
+                    href: '/store/price',
+                    tag: '빠름',
+                  },
+                  {
+                    title: '딜러 입찰 받기',
+                    desc: '가격 협상 실패? 딜러에게 직접 입찰받으세요.',
+                    href: '/store/auction',
+                    tag: '신규',
+                  },
                 ].map((item, i) => (
                   <Link
                     key={i}
@@ -313,7 +315,7 @@ export default function HomePage() {
             <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 mb-2">최신 매물</p>
             <h2 className="text-3xl font-black text-gray-900">방금 올라온 차량</h2>
           </div>
-          <Link href="/buy" className="text-sm font-bold text-gray-400 hover:text-black transition-colors flex items-center gap-1">
+          <Link href="/store/buy" className="text-sm font-bold text-gray-400 hover:text-black transition-colors flex items-center gap-1">
             전체보기
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -322,38 +324,31 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {previewCars.map(car => {
-            const thumb = car.photos?.exterior?.[0];
-            const priceMan = Math.round(car.priceKRW / 10000);
-            return (
-              <Link key={car.id} href={`/buy/${car.id}`} className="group">
-                <div className="relative aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden mb-3 flex items-center justify-center border border-gray-100 group-hover:border-black transition-colors">
-                  {thumb ? (
-                    <Image src={thumb} alt={car.titleKo} fill className="object-cover" sizes="300px" />
-                  ) : (
-                    <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-200 group-hover:text-gray-300 transition-colors">
-                      <rect x="5" y="22" width="110" height="36" rx="7" fill="currentColor"/>
-                      <path d="M15 22L27 8H93L105 22Z" fill="currentColor"/>
-                      <circle cx="28" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
-                      <circle cx="92" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
-                    </svg>
-                  )}
+          {PREVIEW_CARS.map(car => (
+            <Link key={car.id} href={`/store/buy/${car.id}`} className="group">
+              <div className="relative aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden mb-3 flex items-center justify-center border border-gray-100 group-hover:border-black transition-colors">
+                <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-200 group-hover:text-gray-300 transition-colors">
+                  <rect x="5" y="22" width="110" height="36" rx="7" fill="currentColor"/>
+                  <path d="M15 22L27 8H93L105 22Z" fill="currentColor"/>
+                  <circle cx="28" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
+                  <circle cx="92" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
+                </svg>
+                {car.hasReport && (
                   <span className="absolute top-2.5 left-2.5 bg-black text-white text-[9px] font-black px-2 py-0.5 rounded-full tracking-wide">
-                    진단완료
+                    리포트
                   </span>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 mb-0.5">{car.year}년 · {car.region}</p>
-                  <p className="font-bold text-gray-900 text-sm truncate mb-0.5">{car.titleKo}</p>
-                  <p className="text-[11px] text-gray-400 mb-2">{car.mileage.toLocaleString()} km</p>
-                  <p className="font-black text-gray-900 text-base">
-                    {priceMan.toLocaleString()}<span className="text-xs font-bold text-gray-400 ml-0.5">만원</span>
-                    <span className="text-xs font-bold text-gray-400 ml-2">${Math.round(car.priceKRW / 1350).toLocaleString()}</span>
-                  </p>
-                </div>
-              </Link>
-            );
-          })}
+                )}
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">{car.brand}</p>
+                <p className="font-bold text-gray-900 text-sm truncate mb-0.5">{car.model}</p>
+                <p className="text-[11px] text-gray-400 mb-2">{car.year}년 · {car.mileage.toLocaleString()}km</p>
+                <p className="font-black text-gray-900 text-base">
+                  {car.price.toLocaleString()}<span className="text-xs font-bold text-gray-400 ml-0.5">만원</span>
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -367,10 +362,10 @@ export default function HomePage() {
             <p className="text-white/40 text-sm">다른 플랫폼에서 안 팔린 차, 카비어 딜러들이 직접 입찰합니다.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link href="/auction/register" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors text-center">
+            <Link href="/store/auction/register" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors text-center">
               내 차 등록하기
             </Link>
-            <Link href="/auction" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors text-center">
+            <Link href="/store/auction" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors text-center">
               입찰 현황 보기
             </Link>
           </div>

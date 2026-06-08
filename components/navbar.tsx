@@ -9,22 +9,18 @@ import {
   NavbarItem,
   NavbarMenuItem,
 } from "@nextui-org/navbar";
-import { Button } from "@nextui-org/button";
 import { Kbd } from "@nextui-org/kbd";
 import { Link } from "@nextui-org/link";
 import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-import { usePathname } from "next/navigation"; 
+import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import {
-  TwitterIcon,
   GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
   SearchIcon,
   Logo,
 } from "@/components/icons";
@@ -34,12 +30,18 @@ export const Navbar = () => {
 
   // 1. 헤더를 숨기고 싶은 조건 (startsWith 사용)
   // /reports/1, /reports/100 등 모든 리포트 상세 페이지에서 Navbar를 숨깁니다.
-  const isNoNavbarPath = 
-    pathname === '/marketing/simple-request' || 
-    pathname === '/simple-request' || 
-     pathname.startsWith('/marketing') ||
+  const isNoNavbarPath =
+    pathname === '/marketing/carvior-inspection' ||
+    pathname === '/simple-request' ||
+    pathname.startsWith('/marketing') ||
     pathname.startsWith('/reports') ||
-    pathname.startsWith('/report');
+    pathname.startsWith('/report') ||
+    pathname.startsWith('/store') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/buy') ||
+    pathname.startsWith('/sell') ||
+    pathname.startsWith('/price') ||
+    pathname.startsWith('/auction');
 
   // 2. 조건에 해당하면 아무것도 렌더링하지 않음 (Navbar 제거)
   if (isNoNavbarPath) {
@@ -72,7 +74,7 @@ export const Navbar = () => {
       maxWidth="xl"
       position="static"
       isBordered={false}
-      className="fixed top-0 left-0 z-50 w-full bg-white text-gray-900 border-b border-gray-200 shadow-sm"
+      className="sticky top-0 z-50 w-full bg-white text-gray-900 border-b border-gray-200 shadow-sm"
     >
       {/* 좌측: 로고 + 메뉴 */}
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">

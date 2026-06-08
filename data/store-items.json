@@ -1,0 +1,62 @@
+[
+  {
+    "id": "b20",
+    "bookingId": 20,
+    "titleKo": "진단 완료 매물",
+    "titleEn": "Inspected Vehicle",
+    "trim": "",
+    "year": 2026,
+    "mileage": 24111,
+    "fuel": "알수없음",
+    "displacement": "",
+    "transmission": "AUTO",
+    "color": "",
+    "colorKo": "",
+    "accident": false,
+    "priceKRW": 0,
+    "priceUSD": 0,
+    "hasReport": true,
+    "location": "Korea",
+    "category": "SUV",
+    "doors": 5,
+    "seats": 5,
+    "region": "서울",
+    "inspectedAt": "2026-04-08",
+    "registeredAt": "2026-04-08T13:08:52.000Z",
+    "status": "active",
+    "carNumber": "190거3289",
+    "photos": {
+      "exterior": [
+        "https://carvior-bucket.s3.ap-northeast-2.amazonaws.com/190%EA%B1%B03289/exterior/1775686070534_photo_1775686069300.jpg",
+        "https://carvior-bucket.s3.ap-northeast-2.amazonaws.com/190%EA%B1%B03289/exterior/1775686067497_photo_1775686067014.jpg"
+      ],
+      "dashboard": [
+        "https://carvior-bucket.s3.ap-northeast-2.amazonaws.com/190%EA%B1%B03289/dashboard/1775685978323_photo_1775685977964.jpg"
+      ],
+      "registration": [
+        "https://carvior-bucket.s3.ap-northeast-2.amazonaws.com/190%EA%B1%B03289/registration/1775685973235_photo_1775685972877.jpg"
+      ],
+      "vin": [
+        "https://carvior-bucket.s3.ap-northeast-2.amazonaws.com/190%EA%B1%B03289/vin/1775686116202_photo_1775686115581.jpg"
+      ]
+    },
+    "specs": [
+      { "label": "주행거리", "value": "24,111 KM" },
+      { "label": "차량번호", "value": "190거3289" }
+    ],
+    "options": [],
+    "adminMemo": "테스트",
+    "inspectionData": {
+      "leakDesc": "이상 없음",
+      "driveDesc": "이상 없음",
+      "optionsDesc": "이상 없음",
+      "warningDesc": "Tpms"
+    },
+    "conditionData": {
+      "keys": { "smart": 2, "folding": 0, "general": 0, "special": 0 },
+      "tireTread": { "back": 30, "front": 70 },
+      "paintNeeded": 9,
+      "wheelScratch": 2
+    }
+  }
+]

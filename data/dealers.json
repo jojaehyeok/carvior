@@ -1,0 +1,5 @@
+[
+  { "code": "DEALER2025", "name": "카비어 파트너", "company": "카비어 딜러 네트워크" },
+  { "code": "PREMIUM01",  "name": "프리미엄 딜러", "company": "프리미엄 자동차" },
+  { "code": "VIP2025",    "name": "VIP 딜러",    "company": "VIP 모터스" }
+]
