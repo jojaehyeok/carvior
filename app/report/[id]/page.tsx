@@ -232,24 +232,49 @@ function DamageChecker({ damages }: { damages: string[][] }) {
 
 // ─── 이미지 갤러리 섹션 ─────────────────────────────────────────────────────────
 function ImageSection({ images, label, icon }: { images: string[]; label: string; icon: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !images.length) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { rootMargin: "300px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [images.length]);
+
   if (!images || images.length === 0) return null;
+
   return (
-    <div>
+    <div ref={ref}>
       <h3 className="flex items-center gap-2 mb-3 text-base font-semibold">
         <span>{icon}</span>{label}
         <span className="text-xs font-normal text-gray-400">({images.length}장)</span>
       </h3>
-      <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
-        {images.map((url, i) => (
-          <a key={i} href={url} data-src={url} className="block aspect-square overflow-hidden rounded-md">
-            <img
-              src={url}
-              alt={`${label} ${i + 1}`}
-              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-            />
-          </a>
-        ))}
-      </LightGallery>
+      {visible ? (
+        <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
+          {images.map((url, i) => (
+            <a key={i} href={url} data-src={url} className="block aspect-square overflow-hidden rounded-md">
+              <img
+                src={url}
+                alt={`${label} ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+              />
+            </a>
+          ))}
+        </LightGallery>
+      ) : (
+        <div className="grid grid-cols-4 gap-1">
+          {images.map((_, i) => (
+            <div key={i} className="aspect-square bg-gray-100 rounded-md animate-pulse" />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -282,60 +307,74 @@ export default function PublicReportPage() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  const downloadPDF = async () => {
-    if (!pdfRef.current || !data) return;
+  const downloadPDF = () => {
+    if (!data || pdfLoading) return;
     setPdfLoading(true);
-    try {
-      // 1. 외부 이미지를 base64로 변환 (CORS 우회)
-      const imgEls = pdfRef.current.querySelectorAll<HTMLImageElement>("img");
-      await Promise.all(
-        Array.from(imgEls).map(async (img) => {
-          if (!img.src || img.src.startsWith("data:") || img.src.startsWith("/")) return;
-          try {
-            const res = await fetch(img.src);
-            const blob = await res.blob();
-            const dataUrl = await new Promise<string>((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.readAsDataURL(blob);
-            });
-            img.src = dataUrl;
-          } catch { /* 실패한 이미지는 스킵 */ }
-        })
-      );
-
-      // 2. 각 .pdf-page를 순서대로 캡처
-      const pages = pdfRef.current.querySelectorAll<HTMLElement>(".pdf-page");
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = pdf.internal.pageSize.getHeight();
-
-      for (let i = 0; i < pages.length; i++) {
-        const canvas = await html2canvas(pages[i], {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-        });
-        if (i > 0) pdf.addPage();
-        pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pdfW, pdfH);
-      }
-
-      pdf.save(`카비어_안심리포트_${data.car_info.number}.pdf`);
-    } finally {
-      setPdfLoading(false);
-    }
   };
+
+  // pdfLoading=true → PdfTemplate 마운트 → useEffect 실행 순서 보장
+  useEffect(() => {
+    if (!pdfLoading || !pdfRef.current || !data) return;
+
+    const run = async () => {
+      try {
+        // 1. 외부 이미지를 base64로 변환 (CORS 우회)
+        const imgEls = pdfRef.current!.querySelectorAll<HTMLImageElement>("img");
+        await Promise.all(
+          Array.from(imgEls).map(async (img) => {
+            if (!img.src || img.src.startsWith("data:") || img.src.startsWith("/")) return;
+            try {
+              const res = await fetch(img.src);
+              const blob = await res.blob();
+              const dataUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.readAsDataURL(blob);
+              });
+              img.src = dataUrl;
+            } catch {}
+          })
+        );
+
+        // 2. 각 .pdf-page를 순서대로 캡처
+        const pages = pdfRef.current!.querySelectorAll<HTMLElement>(".pdf-page");
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+
+        for (let i = 0; i < pages.length; i++) {
+          const canvas = await html2canvas(pages[i], {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+          });
+          if (i > 0) pdf.addPage();
+          pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, pdfW, pdfH);
+        }
+
+        pdf.save(`카비어_안심리포트_${data.car_info.number}.pdf`);
+      } finally {
+        setPdfLoading(false);
+      }
+    };
+
+    run();
+  }, [pdfLoading, data]);
 
   useEffect(() => {
     if (!id) return;
-    fetch(`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}`)
+    const controller = new AbortController();
+    fetch(`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}`, {
+      signal: controller.signal,
+    })
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();
       })
       .then(setData)
-      .catch(() => setError(true))
+      .catch((err) => { if (err.name !== "AbortError") setError(true); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [id]);
 
   if (loading) {
@@ -434,6 +473,8 @@ export default function PublicReportPage() {
                       <img
                         src={url}
                         alt={d.label}
+                        loading="lazy"
+                        decoding="async"
                         className="w-[100px] h-[75px] object-cover rounded-lg border border-gray-200 hover:opacity-90 transition-opacity"
                       />
                     </a>
@@ -570,12 +611,14 @@ export default function PublicReportPage() {
         )}
       </button>
 
-      {/* 숨겨진 PDF 전용 템플릿 (캡처용) */}
-      <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
-        <div ref={pdfRef}>
-          <PdfTemplate data={data} grade={calcGrade(data)} />
+      {/* PDF 클릭 시에만 마운트 → 평소엔 이미지 이중 요청 없음 */}
+      {pdfLoading && (
+        <div style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}>
+          <div ref={pdfRef}>
+            <PdfTemplate data={data} grade={calcGrade(data)} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
