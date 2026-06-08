@@ -19,6 +19,8 @@ interface UnifiedCar {
   accident: boolean;
   priceKRW: number;
   priceUSD: number;
+  hidePrice?: boolean;
+  status?: string;
   hasReport: boolean;
   location: string;
   category: string;
@@ -284,11 +286,13 @@ export default function CarDetailPage() {
     car.transmission || null,
   ].filter(Boolean) as string[];
 
-  const priceLabel = car.priceUSD > 0
-    ? `$ ${car.priceUSD.toLocaleString()}`
-    : car.priceKRW > 0
-      ? `₩ ${Math.round(car.priceKRW / 10000).toLocaleString()}만`
-      : '가격 협의';
+  const priceLabel = (car.hidePrice || car.status === 'sold')
+    ? '거래완료'
+    : car.priceUSD > 0
+      ? `$ ${car.priceUSD.toLocaleString()}`
+      : car.priceKRW > 0
+        ? `₩ ${Math.round(car.priceKRW / 10000).toLocaleString()}만`
+        : '가격 협의';
 
   return (
     <div className="min-h-screen bg-white">
