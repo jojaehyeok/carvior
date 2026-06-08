@@ -274,7 +274,7 @@ export default function CarDetailPage() {
 
   const photos = collectPhotos(car);
   const hasPhotos = photos.length > 0;
-  const totalPhotos = hasPhotos ? photos.length : 8;
+  const totalPhotos = photos.length;
 
   const prevPhoto = () => setActivePhoto(p => (p - 1 + totalPhotos) % totalPhotos);
   const nextPhoto = () => setActivePhoto(p => (p + 1) % totalPhotos);

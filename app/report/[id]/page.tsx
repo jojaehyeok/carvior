@@ -232,49 +232,27 @@ function DamageChecker({ damages }: { damages: string[][] }) {
 
 // ─── 이미지 갤러리 섹션 ─────────────────────────────────────────────────────────
 function ImageSection({ images, label, icon }: { images: string[]; label: string; icon: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !images.length) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: "300px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [images.length]);
-
   if (!images || images.length === 0) return null;
 
   return (
-    <div ref={ref}>
+    <div>
       <h3 className="flex items-center gap-2 mb-3 text-base font-semibold">
         <span>{icon}</span>{label}
         <span className="text-xs font-normal text-gray-400">({images.length}장)</span>
       </h3>
-      {visible ? (
-        <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
-          {images.map((url, i) => (
-            <a key={i} href={url} data-src={url} className="block aspect-square overflow-hidden rounded-md">
-              <img
-                src={url}
-                alt={`${label} ${i + 1}`}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-              />
-            </a>
-          ))}
-        </LightGallery>
-      ) : (
-        <div className="grid grid-cols-4 gap-1">
-          {images.map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-100 rounded-md animate-pulse" />
-          ))}
-        </div>
-      )}
+      <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
+        {images.map((url, i) => (
+          <a key={i} href={encodeURI(url)} data-src={encodeURI(url)} className="block aspect-square overflow-hidden rounded-md">
+            <img
+              src={encodeURI(url)}
+              alt={`${label} ${i + 1}`}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+            />
+          </a>
+        ))}
+      </LightGallery>
     </div>
   );
 }
