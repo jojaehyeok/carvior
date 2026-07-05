@@ -165,7 +165,7 @@ function collectPhotos(car: UnifiedCar): PhotoItem[] {
   p.wheel?.forEach(url => result.push({ url, label: '휠' }));
   p.dashboard?.forEach(url => result.push({ url, label: '계기판' }));
   p.vin?.forEach(url => result.push({ url, label: 'VIN' }));
-  p.registration?.forEach(url => result.push({ url, label: '자동차 등록증' }));
+  // registration(자동차등록증)은 개인정보 보호를 위해 사이트에 절대 표시하지 않음
   return result;
 }
 

@@ -131,9 +131,9 @@ const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: 
 ];
 
 const DOC_IMAGES: { key: keyof ReportData["images"]; label: string }[] = [
-  { key: "dashboard",   label: "계기판" },
-  { key: "registration",label: "등록증" },
-  { key: "vin",         label: "차대번호" },
+  { key: "dashboard", label: "계기판" },
+  { key: "vin",       label: "차대번호" },
+  // registration(자동차등록증)은 개인정보 보호를 위해 사이트에 절대 표시하지 않음
 ];
 
 // ─── 타이어 게이지 ──────────────────────────────────────────────────────────────

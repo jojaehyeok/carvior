@@ -43,7 +43,7 @@ const SERVICES = [
     href: '/buy',
     desc: '검증된 매물만 엄선\n허위매물 필터링',
     icon: (
-      <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+      <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
         <path d="M21 10H3M21 10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2M21 10l-3-7H6L3 10"/>
         <circle cx="7" cy="17" r="1"/><circle cx="17" cy="17" r="1"/>
       </svg>
@@ -54,7 +54,7 @@ const SERVICES = [
     href: '/sell',
     desc: '평가사가 직접 방문\n무료 시세 산정',
     icon: (
-      <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+      <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
       </svg>
     ),
@@ -64,7 +64,7 @@ const SERVICES = [
     href: '/price',
     desc: '30초만에 확인\n빅데이터 기반 시세',
     icon: (
-      <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+      <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
       </svg>
     ),
@@ -74,7 +74,7 @@ const SERVICES = [
     href: '/auction',
     desc: '가격 미매칭 매물\n딜러 직접 입찰',
     icon: (
-      <svg width="28" height="28" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+      <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
         <path d="m14.5 12.5-8 8a2.121 2.121 0 0 1-3-3l8-8"/><path d="m16 16 6-6"/><path d="m8 8 6-6"/><path d="m9 7 8 8"/><path d="m21 11-8-8"/>
       </svg>
     ),
@@ -99,13 +99,6 @@ interface StoreItem {
   status: string;
 }
 
-const NAV_ITEMS = [
-  { label: '내차사기',   href: '/buy' },
-  { label: '내차팔기',   href: '/sell' },
-  { label: '내차시세',   href: '/price' },
-  { label: '스마트옥션', href: '/auction' },
-];
-
 export default function HomePage() {
   const [selectedType, setSelectedType] = useState('전체');
   const [priceMax, setPriceMax]         = useState(10000);
@@ -124,71 +117,71 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
-      <div className="bg-black">
-        <section className="max-w-7xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12">
+      {/* ── 히어로 ── */}
+      <section className="bg-gray-50 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12">
           <div className="flex-1 text-center lg:text-left">
-            <p className="inline-block text-[10px] font-black tracking-[0.2em] uppercase text-white/40 border border-white/10 px-3 py-1 rounded-full mb-6">
+            <span className="inline-block text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 bg-gray-200 px-3 py-1 rounded-full mb-6">
               카비어 중고차 수출 플랫폼
-            </p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 leading-[1.1] mb-6">
               검증된 한국 중고차,<br />
-              <span className="text-white/40">전 세계로.</span>
+              <span className="text-gray-400">전 세계로.</span>
             </h1>
-            <p className="text-white/50 text-base md:text-lg mb-10 leading-relaxed">
+            <p className="text-gray-500 text-base md:text-lg mb-10 leading-relaxed">
               공인 평가사가 직접 확인한 매물만 올립니다.<br />
               허위매물 없이, 가격도 투명하게.
             </p>
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-              <Link href="/buy" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors">
+              <Link href="/buy" className="bg-black text-white font-black px-7 py-3.5 rounded-xl text-sm hover:bg-gray-800 transition-colors">
                 매물 보러가기
               </Link>
-              <Link href="/price" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors">
+              <Link href="/price" className="border border-gray-300 text-gray-700 font-bold px-7 py-3.5 rounded-xl text-sm hover:border-black hover:text-black transition-colors">
                 내 차 시세 보기
               </Link>
             </div>
           </div>
 
           <div className="shrink-0 w-full max-w-sm lg:max-w-md xl:max-w-lg">
-            <svg viewBox="0 0 500 280" fill="none" className="w-full drop-shadow-2xl">
-              <ellipse cx="250" cy="260" rx="180" ry="12" fill="white" opacity="0.05"/>
-              <rect x="40" y="140" width="420" height="100" rx="20" fill="white"/>
-              <path d="M110 140 L155 75 H345 L390 140Z" fill="white"/>
-              <path d="M165 80 L155 130 H235 V80Z" fill="black" opacity="0.08"/>
-              <path d="M245 80 H345 L335 130 H245V80Z" fill="black" opacity="0.08"/>
-              <path d="M165 80 L155 130 H235 V80Z" stroke="black" strokeWidth="2" strokeOpacity="0.1" fill="none"/>
-              <path d="M245 80 H345 L335 130 H245V80Z" stroke="black" strokeWidth="2" strokeOpacity="0.1" fill="none"/>
-              <line x1="240" y1="130" x2="240" y2="195" stroke="black" strokeWidth="1.5" strokeOpacity="0.08"/>
-              <circle cx="130" cy="220" r="44" fill="#111"/>
-              <circle cx="130" cy="220" r="30" fill="#333"/>
-              <circle cx="130" cy="220" r="14" fill="#888"/>
-              <circle cx="130" cy="220" r="5"  fill="#111"/>
-              <circle cx="370" cy="220" r="44" fill="#111"/>
-              <circle cx="370" cy="220" r="30" fill="#333"/>
-              <circle cx="370" cy="220" r="14" fill="#888"/>
-              <circle cx="370" cy="220" r="5"  fill="#111"/>
-              <path d="M430 155 H455 L460 175 H430Z" fill="white" opacity="0.9"/>
-              <path d="M430 155 H455 L460 175 H430Z" fill="none" stroke="black" strokeWidth="1" strokeOpacity="0.1"/>
-              <path d="M40 155 H60 V175 H38Z" fill="#ddd" opacity="0.7"/>
-              <rect x="432" y="178" width="28" height="18" rx="4" fill="black" opacity="0.15"/>
-              <rect x="210" y="200" width="80" height="22" rx="4" fill="black" opacity="0.08"/>
+            <svg viewBox="0 0 500 280" fill="none" className="w-full drop-shadow-sm">
+              <ellipse cx="250" cy="262" rx="180" ry="10" fill="#e5e7eb"/>
+              <rect x="40" y="140" width="420" height="100" rx="20" fill="#f3f4f6" stroke="#e5e7eb" strokeWidth="1.5"/>
+              <path d="M110 140 L155 75 H345 L390 140Z" fill="#f9fafb" stroke="#e5e7eb" strokeWidth="1.5"/>
+              <path d="M165 80 L155 130 H235 V80Z" fill="#e5e7eb" opacity="0.6"/>
+              <path d="M245 80 H345 L335 130 H245V80Z" fill="#e5e7eb" opacity="0.6"/>
+              <line x1="240" y1="130" x2="240" y2="195" stroke="#d1d5db" strokeWidth="1.5"/>
+              <circle cx="130" cy="220" r="44" fill="#1f2937"/>
+              <circle cx="130" cy="220" r="30" fill="#374151"/>
+              <circle cx="130" cy="220" r="14" fill="#9ca3af"/>
+              <circle cx="130" cy="220" r="5"  fill="#1f2937"/>
+              <circle cx="370" cy="220" r="44" fill="#1f2937"/>
+              <circle cx="370" cy="220" r="30" fill="#374151"/>
+              <circle cx="370" cy="220" r="14" fill="#9ca3af"/>
+              <circle cx="370" cy="220" r="5"  fill="#1f2937"/>
+              <path d="M430 155 H455 L460 175 H430Z" fill="#fbbf24" opacity="0.9"/>
+              <path d="M40 155 H60 V175 H38Z" fill="#d1d5db"/>
+              <rect x="432" y="178" width="28" height="18" rx="4" fill="#d1d5db"/>
+              <rect x="210" y="200" width="80" height="22" rx="4" fill="#e5e7eb"/>
             </svg>
           </div>
-        </section>
+        </div>
 
-        <div className="border-t border-white/5">
+        {/* 통계 */}
+        <div className="border-t border-gray-200">
           <div className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
             {TRUST_STATS.map(s => (
               <div key={s.label} className="text-center">
-                <p className="text-2xl font-black text-white">{s.value}</p>
-                <p className="text-[11px] font-bold text-white/30 mt-0.5 tracking-wide">{s.label}</p>
+                <p className="text-2xl font-black text-gray-900">{s.value}</p>
+                <p className="text-[11px] font-bold text-gray-400 mt-0.5 tracking-wide">{s.label}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
+      {/* ── 서비스 ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 mb-3">서비스</p>
+        <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-3">서비스</p>
         <h2 className="text-3xl font-black text-gray-900 mb-12">카비어가 제공하는<br />모든 것</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -196,9 +189,9 @@ export default function HomePage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group border border-gray-100 rounded-2xl p-6 hover:border-black hover:shadow-[0_0_0_1px_black] transition-all duration-200"
+              className="group border border-gray-200 rounded-2xl p-6 hover:border-black hover:shadow-[0_0_0_1px_black] bg-white transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-gray-50 group-hover:bg-black flex items-center justify-center mb-5 transition-colors text-gray-500 group-hover:text-white">
+              <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-black flex items-center justify-center mb-5 transition-colors text-gray-500 group-hover:text-white">
                 {s.icon}
               </div>
               <p className="font-black text-gray-900 text-base mb-1.5">{s.label}</p>
@@ -214,16 +207,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-gray-950 py-20">
+      {/* ── 차량 검색 + 팔기 ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
+            {/* 내차사기 */}
             <div>
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/30 mb-3">내차사기</p>
-              <h2 className="text-2xl font-black text-white mb-8">어떤 차를 찾고 계세요?</h2>
+              <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-3">내차사기</p>
+              <h2 className="text-2xl font-black text-gray-900 mb-8">어떤 차를 찾고 계세요?</h2>
 
               <div className="mb-8">
-                <p className="text-xs font-bold text-white/30 mb-3 uppercase tracking-wide">차종</p>
+                <p className="text-xs font-bold text-gray-400 mb-3 uppercase tracking-wide">차종</p>
                 <div className="flex flex-wrap gap-2">
                   {CAR_TYPES.map(t => (
                     <button
@@ -232,11 +227,11 @@ export default function HomePage() {
                       className={clsx(
                         'flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all',
                         selectedType === t.label
-                          ? 'border-white bg-white text-black'
-                          : 'border-white/10 text-white/40 hover:border-white/30 hover:text-white/70'
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-800 bg-white'
                       )}
                     >
-                      <span className={selectedType === t.label ? 'text-black' : 'text-white/30'}>
+                      <span className={selectedType === t.label ? 'text-white' : 'text-gray-400'}>
                         <CarIcon type={t.icon} />
                       </span>
                       {t.label}
@@ -247,8 +242,8 @@ export default function HomePage() {
 
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-white/30 uppercase tracking-wide">예산</p>
-                  <p className="text-xs font-black text-white">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">예산</p>
+                  <p className="text-xs font-black text-gray-900">
                     {priceMax >= 10000 ? '제한 없음' : `~ ${priceMax.toLocaleString()}만원`}
                   </p>
                 </div>
@@ -256,16 +251,16 @@ export default function HomePage() {
                   type="range" min={0} max={10000} step={100}
                   value={priceMax}
                   onChange={e => setPriceMax(Number(e.target.value))}
-                  className="w-full accent-white cursor-pointer"
+                  className="w-full accent-black cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-white/20 mt-1.5">
+                <div className="flex justify-between text-[10px] text-gray-400 mt-1.5">
                   <span>0</span><span>1억원 이상</span>
                 </div>
               </div>
 
               <Link
                 href="/buy"
-                className="flex items-center justify-center gap-2 w-full bg-white text-black font-black py-4 rounded-xl text-sm hover:bg-white/90 transition-colors"
+                className="flex items-center justify-center gap-2 w-full bg-black text-white font-black py-4 rounded-xl text-sm hover:bg-gray-800 transition-colors"
               >
                 매물 검색하기
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -274,9 +269,10 @@ export default function HomePage() {
               </Link>
             </div>
 
+            {/* 내차팔기 */}
             <div>
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/30 mb-3">내차팔기</p>
-              <h2 className="text-2xl font-black text-white mb-8">내 차를 팔고 싶어요</h2>
+              <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-3">내차팔기</p>
+              <h2 className="text-2xl font-black text-gray-900 mb-8">내 차를 팔고 싶어요</h2>
 
               <div className="space-y-3">
                 {[
@@ -287,17 +283,17 @@ export default function HomePage() {
                   <Link
                     key={i}
                     href={item.href}
-                    className="group flex items-center justify-between p-5 rounded-2xl border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all"
+                    className="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 bg-white hover:border-black hover:shadow-[0_0_0_1px_black] transition-all"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-black text-white">{item.title}</p>
-                        <span className="text-[9px] font-black text-black bg-white px-1.5 py-0.5 rounded-full">{item.tag}</span>
+                        <p className="text-sm font-black text-gray-900">{item.title}</p>
+                        <span className="text-[9px] font-black text-white bg-black px-1.5 py-0.5 rounded-full">{item.tag}</span>
                       </div>
-                      <p className="text-xs text-white/40">{item.desc}</p>
+                      <p className="text-xs text-gray-400">{item.desc}</p>
                     </div>
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-                      className="text-white/20 group-hover:text-white/60 shrink-0 ml-4 transition-colors">
+                      className="text-gray-300 group-hover:text-black shrink-0 ml-4 transition-colors">
                       <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
                   </Link>
@@ -308,10 +304,11 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 최신 매물 ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 mb-2">최신 매물</p>
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-400 mb-2">최신 매물</p>
             <h2 className="text-3xl font-black text-gray-900">방금 올라온 차량</h2>
           </div>
           <Link href="/buy" className="text-sm font-bold text-gray-400 hover:text-black transition-colors flex items-center gap-1">
@@ -328,11 +325,11 @@ export default function HomePage() {
             const priceMan = Math.round(car.priceKRW / 10000);
             return (
               <Link key={car.id} href={`/buy/${car.id}`} className="group">
-                <div className="relative aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden mb-3 flex items-center justify-center border border-gray-100 group-hover:border-black transition-colors">
+                <div className="relative aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden mb-3 flex items-center justify-center border border-gray-100 group-hover:border-gray-400 transition-colors">
                   {thumb ? (
                     <Image src={thumb} alt={car.titleKo} fill className="object-cover" sizes="300px" />
                   ) : (
-                    <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-200 group-hover:text-gray-300 transition-colors">
+                    <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-200">
                       <rect x="5" y="22" width="110" height="36" rx="7" fill="currentColor"/>
                       <path d="M15 22L27 8H93L105 22Z" fill="currentColor"/>
                       <circle cx="28" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
@@ -358,20 +355,21 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 딜러 입찰 CTA (포인트 검정) ── */}
       <section className="bg-black py-20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-white/30 mb-3">NEW</p>
+            <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/40 mb-3">NEW</p>
             <h2 className="text-3xl font-black text-white leading-tight mb-2">
               가격 협상 실패한 매물?<br />딜러 입찰 마켓에 올리세요.
             </h2>
-            <p className="text-white/40 text-sm">다른 플랫폼에서 안 팔린 차, 카비어 딜러들이 직접 입찰합니다.</p>
+            <p className="text-white/50 text-sm">다른 플랫폼에서 안 팔린 차, 카비어 딜러들이 직접 입찰합니다.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link href="/auction/register" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors text-center">
+            <Link href="/auction/register" className="bg-white text-black font-black px-7 py-3.5 rounded-xl text-sm hover:bg-gray-100 transition-colors text-center">
               내 차 등록하기
             </Link>
-            <Link href="/auction" className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors text-center">
+            <Link href="/auction" className="border border-white/30 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/10 transition-colors text-center">
               입찰 현황 보기
             </Link>
           </div>

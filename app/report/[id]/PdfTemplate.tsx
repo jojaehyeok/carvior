@@ -247,7 +247,7 @@ function Page2({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
 
   const docImgs: { label:string; url:string }[] = [
     ...(images.dashboard??[]).map(url=>({ label:"계기판",url })),
-    ...(images.registration??[]).map(url=>({ label:"등록증",url })),
+    // registration(자동차등록증)은 개인정보 보호를 위해 PDF에도 포함하지 않음
     ...(images.vin??[]).map(url=>({ label:"차대번호",url })),
   ];
 
