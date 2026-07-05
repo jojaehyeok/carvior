@@ -53,7 +53,7 @@ export default function AppFooter() {
 
               <div className="space-y-2">
                 <p className="mb-3 text-base font-bold text-gray-900">고객센터</p>
-                <p className="text-lg font-bold text-blue-600">010-2285-6017</p>
+                <p className="text-lg font-bold text-violet-600">010-2285-6017</p>
                 <p><span className="text-gray-400">휴대폰 :</span> 010-2285-6017</p>
                 <p><span className="text-gray-400">이메일 :</span> jjhstc2285@naver.com</p>
                 <p className="pt-2 text-xs text-gray-400">평일 09:00 - 18:00 (주말/공휴일 휴무)</p>
@@ -64,8 +64,8 @@ export default function AppFooter() {
           <div className="flex flex-col items-center justify-between gap-4 pt-8 mt-12 border-t border-gray-100 md:flex-row">
             <p className="text-xs text-gray-400">© 2026 카비어. All Rights Reserved.</p>
             <div className="flex gap-6 text-xs text-gray-500">
-              <button onClick={onTermsOpen} className="transition-colors hover:text-black hover:underline">이용약관</button>
-              <button onClick={onPrivacyOpen} className="font-bold transition-colors hover:text-black hover:underline">개인정보처리방침</button>
+              <button onClick={onTermsOpen} className="transition-colors hover:text-violet-600 hover:underline">이용약관</button>
+              <button onClick={onPrivacyOpen} className="font-bold transition-colors hover:text-violet-600 hover:underline">개인정보처리방침</button>
               {/* 🌟 환불정책 링크 추가 (토스 심사용) */}
               <button 
                 onClick={() => router.push('/policy/refund')} 

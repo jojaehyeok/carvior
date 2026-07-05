@@ -133,10 +133,10 @@ export default function HomePage() {
               허위매물 없이, 가격도 투명하게.
             </p>
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
-              <Link href="/buy" className="bg-black text-white font-black px-7 py-3.5 rounded-xl text-sm hover:bg-gray-800 transition-colors">
+              <Link href="/buy" className="bg-violet-600 text-white font-black px-7 py-3.5 rounded-xl text-sm hover:bg-violet-700 transition-colors">
                 매물 보러가기
               </Link>
-              <Link href="/price" className="border border-gray-300 text-gray-700 font-bold px-7 py-3.5 rounded-xl text-sm hover:border-black hover:text-black transition-colors">
+              <Link href="/price" className="border border-gray-300 text-gray-700 font-bold px-7 py-3.5 rounded-xl text-sm hover:border-violet-500 hover:text-violet-600 transition-colors">
                 내 차 시세 보기
               </Link>
             </div>
@@ -189,14 +189,14 @@ export default function HomePage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group border border-gray-200 rounded-2xl p-6 hover:border-black hover:shadow-[0_0_0_1px_black] bg-white transition-all duration-200"
+              className="group border border-gray-200 rounded-2xl p-6 hover:border-violet-500 hover:shadow-[0_0_0_1px_theme(colors.violet.500)] bg-white transition-all duration-200"
             >
-              <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-black flex items-center justify-center mb-5 transition-colors text-gray-500 group-hover:text-white">
+              <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-violet-600 flex items-center justify-center mb-5 transition-colors text-gray-500 group-hover:text-white">
                 {s.icon}
               </div>
               <p className="font-black text-gray-900 text-base mb-1.5">{s.label}</p>
               <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-line">{s.desc}</p>
-              <div className="mt-5 flex items-center gap-1 text-[12px] font-bold text-gray-300 group-hover:text-black transition-colors">
+              <div className="mt-5 flex items-center gap-1 text-[12px] font-bold text-gray-300 group-hover:text-violet-600 transition-colors">
                 바로가기
                 <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -227,8 +227,8 @@ export default function HomePage() {
                       className={clsx(
                         'flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition-all',
                         selectedType === t.label
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-800 bg-white'
+                          ? 'border-violet-600 bg-violet-600 text-white'
+                          : 'border-gray-200 text-gray-500 hover:border-violet-400 hover:text-violet-600 bg-white'
                       )}
                     >
                       <span className={selectedType === t.label ? 'text-white' : 'text-gray-400'}>
@@ -251,7 +251,7 @@ export default function HomePage() {
                   type="range" min={0} max={10000} step={100}
                   value={priceMax}
                   onChange={e => setPriceMax(Number(e.target.value))}
-                  className="w-full accent-black cursor-pointer"
+                  className="w-full accent-violet-600 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-gray-400 mt-1.5">
                   <span>0</span><span>1억원 이상</span>
@@ -260,7 +260,7 @@ export default function HomePage() {
 
               <Link
                 href="/buy"
-                className="flex items-center justify-center gap-2 w-full bg-black text-white font-black py-4 rounded-xl text-sm hover:bg-gray-800 transition-colors"
+                className="flex items-center justify-center gap-2 w-full bg-violet-600 text-white font-black py-4 rounded-xl text-sm hover:bg-violet-700 transition-colors"
               >
                 매물 검색하기
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -283,17 +283,17 @@ export default function HomePage() {
                   <Link
                     key={i}
                     href={item.href}
-                    className="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 bg-white hover:border-black hover:shadow-[0_0_0_1px_black] transition-all"
+                    className="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 bg-white hover:border-violet-500 hover:shadow-[0_0_0_1px_theme(colors.violet.500)] transition-all"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-sm font-black text-gray-900">{item.title}</p>
-                        <span className="text-[9px] font-black text-white bg-black px-1.5 py-0.5 rounded-full">{item.tag}</span>
+                        <span className="text-[9px] font-black text-white bg-violet-600 px-1.5 py-0.5 rounded-full">{item.tag}</span>
                       </div>
                       <p className="text-xs text-gray-400">{item.desc}</p>
                     </div>
                     <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-                      className="text-gray-300 group-hover:text-black shrink-0 ml-4 transition-colors">
+                      className="text-gray-300 group-hover:text-violet-600 shrink-0 ml-4 transition-colors">
                       <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
                   </Link>
