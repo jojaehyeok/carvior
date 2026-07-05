@@ -8,12 +8,9 @@ const STEPS = ['차량정보', '사진', '가격·설명', '확인'] as const;
 type StepKey = 0 | 1 | 2 | 3;
 
 const PHOTO_CATS = [
-  { key: 'exterior',     label: '외관',   emoji: '🚗', desc: '전면·측면·후면 필수' },
-  { key: 'interior',     label: '실내',   emoji: '💺', desc: '대시보드·시트·뒷좌석' },
-  { key: 'engine',       label: '엔진룸', emoji: '⚙️',  desc: '엔진룸 전체' },
-  { key: 'wheel',        label: '휠/타이어', emoji: '⭕', desc: '4개 모두 권장' },
-  { key: 'undercarriage',label: '하부',   emoji: '🔩', desc: '하부 전체' },
-  { key: 'extra',        label: '기타',   emoji: '📷', desc: '옵션·선루프·특이사항' },
+  { key: 'exterior', label: '외부 사진', emoji: '🚗', desc: '전면·측면·후면·트렁크 등 외관 전체', required: true },
+  { key: 'interior', label: '내부 사진', emoji: '💺', desc: '대시보드·운전석·뒷좌석·계기판 등',   required: true },
+  { key: 'extra',    label: '옵션 사진', emoji: '📷', desc: '선루프·네비·특이사항·장점 부각 사진',  required: false },
 ] as const;
 
 type CatKey = typeof PHOTO_CATS[number]['key'];
@@ -24,11 +21,6 @@ const REGION_OPTIONS = ['서울', '경기도', '인천', '부산', '대구', '�
 const SELL_TYPES = ['일반차량', '리스승계차량', '렌트차량'] as const;
 const EXCHANGE_RATE = 1350;
 
-function fmtKRW(n: number) {
-  if (!n) return '';
-  if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(1)}억원`;
-  return `${Math.round(n / 10_000)}만원`;
-}
 
 function fmtPhone(raw: string) {
   const d = raw.replace(/\D/g, '').slice(0, 11);
@@ -163,8 +155,7 @@ export default function SelfRegisterPage() {
 
   // 사진
   const [photos, setPhotos] = useState<Record<CatKey, string[]>>({
-    exterior: [], interior: [], engine: [],
-    wheel: [], undercarriage: [], extra: [],
+    exterior: [], interior: [], extra: [],
   });
   const [uploading, setUploading] = useState<CatKey | null>(null);
 
@@ -283,8 +274,8 @@ export default function SelfRegisterPage() {
         color: car.color,
         colorKo: car.color,
         accident: false,
-        priceKRW: Number(priceKRW),
-        priceUSD: Math.round(Number(priceKRW) / EXCHANGE_RATE),
+        priceKRW: Number(priceKRW) * 10000,
+        priceUSD: Math.round(Number(priceKRW) * 10000 / EXCHANGE_RATE),
         category: 'SUV',
         region,
         hasReport: false,
@@ -504,22 +495,23 @@ export default function SelfRegisterPage() {
               </div>
             </Field>
 
-            <Field label="희망 판매가 (원)" required>
+            <Field label="희망 판매가" required>
               <div className="relative">
                 <input
                   type="number"
                   value={priceKRW}
                   onChange={e => setPriceKRW(e.target.value)}
-                  placeholder="예: 25000000"
+                  placeholder="예: 2500"
                   inputMode="numeric"
-                  className={`${inp} pr-36`}
+                  className={`${inp} pr-16`}
                 />
-                {Number(priceKRW) > 0 && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-violet-600 text-sm font-bold pointer-events-none">
-                    {fmtKRW(Number(priceKRW))}
-                  </span>
-                )}
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-bold pointer-events-none">만원</span>
               </div>
+              {Number(priceKRW) > 0 && (
+                <p className="text-xs text-violet-600 font-bold mt-1.5">
+                  = {Number(priceKRW).toLocaleString()}만원 ({(Number(priceKRW) * 10000).toLocaleString()}원)
+                </p>
+              )}
             </Field>
 
             <Field label="지역">
@@ -582,7 +574,7 @@ export default function SelfRegisterPage() {
                 { label: '변속기', value: car.transmission },
                 { label: '색상', value: car.color || '-' },
                 { label: '판매구분', value: sellType },
-                { label: '희망 판매가', value: fmtKRW(Number(priceKRW)) || '-' },
+                { label: '희망 판매가', value: Number(priceKRW) > 0 ? `${Number(priceKRW).toLocaleString()}만원` : '-' },
                 { label: '지역', value: region },
                 { label: '연락처', value: contact },
                 { label: '사진', value: `총 ${totalPhotos}장` },
