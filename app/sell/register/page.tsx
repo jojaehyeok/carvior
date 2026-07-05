@@ -328,7 +328,7 @@ export default function SelfRegisterPage() {
           <p className="font-extrabold mb-1.5">이용요금 납부 안내</p>
           <p>카카오뱅크 <span className="font-bold">3333-35-1997303</span><br />
           예금주: 카비어 (조재혁)<br />
-          금액: <span className="font-bold">30,000원</span><br />
+          금액: <span className="font-bold">20,000원</span><br />
           입금 후 <span className="font-bold">010-2285-6017</span>로 문자 주시면 검토가 시작됩니다.</p>
         </div>
         <div className="flex gap-3 w-full max-w-sm">
@@ -591,13 +591,13 @@ export default function SelfRegisterPage() {
           <div className="bg-zinc-950 rounded-2xl p-5">
             <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2">이용 요금</p>
             <p className="text-white text-3xl font-black tabular-nums mb-1">
-              30,000<span className="text-base font-bold text-zinc-400">원</span>
+              20,000<span className="text-base font-bold text-zinc-400">원</span>
             </p>
             <p className="text-zinc-500 text-xs">매물 검토 및 스토어 등록 비용 · 딜러 수수료 별도 없음</p>
           </div>
 
           <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3.5 text-xs text-amber-800 leading-relaxed">
-            등록 신청 후 <strong>카카오뱅크 3333-35-1997303</strong>으로 30,000원 이체 시<br />
+            등록 신청 후 <strong>카카오뱅크 3333-35-1997303</strong>으로 20,000원 이체 시<br />
             검토가 시작됩니다. 1~2 영업일 내 스토어에 노출됩니다.
           </div>
 

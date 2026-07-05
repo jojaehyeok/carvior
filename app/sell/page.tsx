@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppFooter from '@/components/footermodal';
 
@@ -56,7 +55,7 @@ function FeeModal({ onClose, onProceed }: { onClose: () => void; onProceed: () =
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-white text-3xl font-black tabular-nums">
-                  30,000<span className="text-base font-bold text-zinc-400">원</span>
+                  20,000<span className="text-base font-bold text-zinc-400">원</span>
                 </p>
                 <p className="text-zinc-500 text-xs mt-1">검토 및 스토어 등록 비용 (1회)</p>
               </div>
@@ -179,7 +178,7 @@ export default function SellPage() {
           <div className="flex items-center gap-3 mb-5">
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
               <span className="text-[11px] text-zinc-400">이용요금</span>
-              <span className="text-sm font-black text-white">30,000원</span>
+              <span className="text-sm font-black text-white">20,000원</span>
             </div>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
               <span className="text-[11px] text-zinc-400">딜러 수수료</span>
@@ -364,7 +363,7 @@ export default function SellPage() {
             className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-violet-900/50 transition-all flex items-center justify-center gap-3 border border-violet-500/30"
           >
             <span>셀프 등록하기</span>
-            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">30,000원</span>
+            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">20,000원</span>
           </button>
         </div>
       </div>

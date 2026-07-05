@@ -70,11 +70,26 @@ export async function POST(req: NextRequest) {
     const newItem: StoreItem = {
       ...body,
       id: String(body.bookingId),
+      status: body.status ?? 'active',   // 셀프등록은 바로 노출
       registeredAt: new Date().toISOString(),
     };
 
     items.unshift(newItem);
     writeItems(items);
+
+    // 관리자 SMS 알림 (fire-and-forget)
+    const priceMan = newItem.priceKRW ? Math.round(newItem.priceKRW / 10_000) : 0;
+    fetch('https://carvior.store/api/v1/admin/notify/self-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        carNumber: newItem.carNumber,
+        title: newItem.titleKo,
+        price: String(priceMan),
+        contact: newItem.adminMemo?.match(/연락처:([^\s/]+)/)?.[1]?.trim() ?? '',
+      }),
+    }).catch(() => {});
+
     return NextResponse.json(newItem, { status: 201 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
