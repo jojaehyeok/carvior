@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import DealerGate from '@/components/DealerGate';
 
 const FUEL_OPTIONS   = ['가솔린', '디젤', '하이브리드', 'LPG', '전기'];
 const CAT_OPTIONS    = ['SUV', '세단', '해치백', '경차', '소형차', '중형', '대형', 'RV'];
@@ -113,13 +112,12 @@ export default function SelfRegisterPage() {
   }
 
   return (
-    <DealerGate>
-      <div className="min-h-screen bg-white">
-        <div className="bg-zinc-800">
+    <div className="min-h-screen bg-white">
+        <div className="bg-zinc-950">
           <div className="max-w-3xl mx-auto px-6 py-8">
-            <p className="text-zinc-400 text-xs font-bold tracking-[0.2em] uppercase mb-2">딜러 전용</p>
+            <p className="text-zinc-500 text-xs font-bold tracking-[0.2em] uppercase mb-2">일반인 · 딜러 · 수출 모두 가능</p>
             <h1 className="text-2xl font-black text-white">셀프 매물 등록</h1>
-            <p className="text-zinc-400 text-sm mt-1">어드민 검토 후 스토어에 노출됩니다.</p>
+            <p className="text-zinc-400 text-sm mt-1">검토 후 1~2 영업일 내 카비어 스토어에 노출됩니다.</p>
           </div>
         </div>
 
@@ -219,7 +217,6 @@ export default function SelfRegisterPage() {
           </div>
         </div>
       </div>
-    </DealerGate>
   );
 }
 

@@ -1,144 +1,280 @@
 'use client';
 
+import React, { useState } from 'react';
 import Link from 'next/link';
+import AppFooter from '@/components/footermodal';
 
+const STEPS = [
+  {
+    num: '01',
+    icon: '📝',
+    title: '차량 정보 입력',
+    desc: '차종, 연식, 주행거리, 가격 등 기본 정보를 입력합니다. 5분이면 충분해요.',
+  },
+  {
+    num: '02',
+    icon: '📸',
+    title: '사진 첨부',
+    desc: '외관, 실내, 엔진룸 사진을 등록합니다. 사진이 많을수록 딜러의 신뢰도가 높아져요.',
+  },
+  {
+    num: '03',
+    icon: '✅',
+    title: '카비어 검토',
+    desc: '등록 신청 후 1~2 영업일 내에 카비어가 검토하고 스토어에 등록합니다.',
+  },
+  {
+    num: '04',
+    icon: '🤝',
+    title: '딜러 연락',
+    desc: '스토어에 노출된 매물을 본 딜러들이 직접 연락해 최고가를 제시합니다.',
+  },
+  {
+    num: '05',
+    icon: '💰',
+    title: '최고가에 판매',
+    desc: '가장 좋은 조건을 선택해 판매 완료. 수수료 없이 직접 거래합니다.',
+  },
+];
 
-const SELL_DIAGNOSIS_URL = '/marketing/carvior-inspection';
+const FAQS = [
+  {
+    q: '수수료가 있나요?',
+    a: '셀프 등록은 별도 수수료가 없습니다. 단, 카비어를 통한 딜러 매칭은 합의된 조건으로 진행됩니다.',
+  },
+  {
+    q: '일반인도 등록할 수 있나요?',
+    a: '네, 딜러가 아닌 일반 개인도 등록 가능합니다. 카비어 검토 후 스토어에 노출됩니다.',
+  },
+  {
+    q: '수출용 차량도 등록되나요?',
+    a: '수출 셀프 등록도 가능합니다. 차량 정보 입력 시 수출 희망 여부를 체크해주세요.',
+  },
+  {
+    q: '사진 없이도 등록할 수 있나요?',
+    a: '기본 정보만으로 접수는 가능하나, 사진이 있는 매물이 딜러 관심을 3배 이상 더 받습니다. 가능한 많은 사진을 첨부해주세요.',
+  },
+  {
+    q: '등록 후 수정·삭제할 수 있나요?',
+    a: '등록 완료 후 수정·삭제가 필요하면 고객센터(010-2285-6017)로 연락 주세요.',
+  },
+];
 
 export default function SellPage() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <div className="bg-zinc-800">
-        <div className="max-w-7xl mx-auto px-6 py-10">
-          <p className="text-zinc-400 text-xs font-bold tracking-[0.2em] uppercase mb-2">차량 판매</p>
-          <h1 className="text-3xl font-black text-white">내 차 팔기</h1>
-          <p className="text-zinc-400 text-sm mt-1.5">진단 완료 후 카비어 플랫폼에 매물을 올려드립니다.</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-white font-sans antialiased">
 
-      <div className="max-w-3xl mx-auto px-6 py-16">
-
-        {/* 판매 흐름 안내 */}
-        <div className="flex items-center gap-3 mb-12 overflow-x-auto pb-2">
-          {[
-            { step: '1', label: '진단 신청' },
-            { step: '2', label: '현장 방문 진단' },
-            { step: '3', label: '리포트 발행' },
-            { step: '4', label: '카비어 스토어 등록' },
-            { step: '5', label: '딜러 매칭 · 판매' },
-          ].map((s, i, arr) => (
-            <div key={s.step} className="flex items-center gap-3 shrink-0">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-8 rounded-full bg-black text-white text-xs font-black flex items-center justify-center">
-                  {s.step}
-                </div>
-                <span className="text-xs text-gray-500 font-medium whitespace-nowrap">{s.label}</span>
-              </div>
-              {i < arr.length - 1 && (
-                <div className="w-8 h-px bg-gray-200 shrink-0 mb-4" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* 판매 옵션 카드 2개 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-          {/* 옵션 1: 진단사 방문 신청 */}
-          <div className="flex flex-col rounded-2xl border-2 border-black overflow-hidden">
-            <div className="bg-black p-6 flex-1">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4">
-                <svg width="20" height="20" fill="none" stroke="white" strokeWidth={1.5} viewBox="0 0 24 24">
-                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0 1 12 2.944a11.955 11.955 0 0 1-8.618 3.04A12.02 12.02 0 0 0 3 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                </svg>
-              </div>
-              <div className="inline-block bg-white/10 text-white/60 text-[10px] font-black tracking-wider uppercase px-2 py-1 rounded-full mb-3">
-                일반 판매
-              </div>
-              <h2 className="text-xl font-black text-white mb-2">진단사 방문 신청</h2>
-              <p className="text-white/50 text-sm leading-relaxed">
-                공인 진단사가 직접 방문해<br />
-                차량을 꼼꼼히 검사합니다.<br />
-                허위매물 없는 투명한 판매.
-              </p>
-            </div>
-            <div className="bg-black border-t border-white/10 p-4">
-              <ul className="space-y-2 mb-5">
-                {['공인 진단서 발급', '딜러 매칭 서비스', '빠른 판매 가능', '무료 시세 산정'].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-white/60">
-                    <svg width="14" height="14" fill="none" stroke="#a78bfa" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href={SELL_DIAGNOSIS_URL}
-                className="block w-full text-center bg-white text-black font-black py-3 rounded-xl text-sm hover:bg-white/90 transition-colors"
-              >
-                진단 신청하기 →
-              </Link>
-            </div>
+      {/* ── HERO ── */}
+      <section className="bg-zinc-950 text-white">
+        <div className="max-w-xl mx-auto px-6 pt-12 pb-10">
+          <div className="inline-flex items-center gap-2 bg-violet-600/20 border border-violet-500/30 rounded-full px-4 py-1.5 mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+            <span className="text-xs font-bold text-violet-300 tracking-wider">CARVIOR SELF REGISTER</span>
           </div>
 
-          {/* 옵션 2: 셀프 등록 (딜러 전용) */}
-          <div className="flex flex-col rounded-2xl border-2 border-purple-200 overflow-hidden">
-            <div className="bg-gradient-to-br from-purple-50 to-white p-6 flex-1">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center mb-4">
-                <svg width="20" height="20" fill="none" stroke="#7c3aed" strokeWidth={1.5} viewBox="0 0 24 24">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="inline-block bg-purple-100 text-purple-600 text-[10px] font-black tracking-wider uppercase px-2 py-1 rounded-full">
-                  딜러 전용
+          <h1 className="text-[2.2rem] font-black leading-[1.2] mb-4 tracking-tight">
+            직접 등록하고<br />
+            <span className="text-violet-400">더 많이 받아가세요</span>
+          </h1>
+          <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+            중간 수수료 없이 카비어 스토어에 직접 등록.<br />
+            딜러들이 경쟁해서 최고가를 제시합니다.
+          </p>
+
+          {/* 가격 비교 */}
+          <div className="bg-zinc-900 rounded-2xl p-5 border border-zinc-800 mb-8">
+            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-4">예상 수령액 차이 (예시 차량 기준)</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
+                  <span className="text-sm font-bold text-white">카비어 셀프 등록</span>
                 </div>
-                <div className="inline-block bg-purple-600 text-white text-[10px] font-black tracking-wider uppercase px-2 py-1 rounded-full">
-                  셀프 등록
+                <span className="text-lg font-black text-violet-400 tabular-nums">+200만원</span>
+              </div>
+              <div className="w-full bg-violet-600 rounded-full h-2.5" />
+
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-zinc-600" />
+                  <span className="text-sm text-zinc-500">일반 중고차 매입</span>
+                </div>
+                <span className="text-sm text-zinc-500 tabular-nums">기준가</span>
+              </div>
+              <div className="w-4/5 bg-zinc-700 rounded-full h-2.5" />
+            </div>
+            <p className="text-zinc-600 text-[10px] mt-4">* 수수료 절약 + 딜러 경쟁 입찰 효과 (차량 상태·시세에 따라 다를 수 있음)</p>
+          </div>
+
+          <Link
+            href="/sell/register"
+            className="block w-full text-center py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-900/40"
+          >
+            셀프 등록하기 →
+          </Link>
+          <p className="text-center text-zinc-600 text-[11px] mt-2.5">무료 등록 · 일반인·딜러 모두 가능 · 수출 차량 OK</p>
+        </div>
+      </section>
+
+      {/* ── 왜 셀프 등록인가 ── */}
+      <section className="bg-white py-14 px-6">
+        <div className="max-w-xl mx-auto">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">WHY SELF REGISTER</p>
+          <h2 className="text-2xl font-black text-zinc-900 text-center mb-8 leading-tight">더 받을 수 있는 이유</h2>
+
+          <div className="space-y-3">
+            {[
+              { icon: '💸', title: '수수료 0원', desc: '중간 수수료 없이 딜러와 직접 거래. 수령액이 그대로 내 몫입니다.' },
+              { icon: '🏆', title: '딜러 경쟁 입찰', desc: '카비어 네트워크의 딜러들이 내 차를 보고 경쟁적으로 최고가를 제시합니다.' },
+              { icon: '🌏', title: '수출 딜러 포함', desc: '국내뿐 아니라 수출 전문 딜러도 참여. 더 넓은 시장에서 최고가를 찾습니다.' },
+              { icon: '🔒', title: '안전한 거래', desc: '카비어가 검토한 매물만 등록. 사기·허위매물 없는 신뢰 거래 환경입니다.' },
+            ].map(item => (
+              <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl bg-zinc-50 border border-zinc-100">
+                <div className="w-11 h-11 bg-zinc-900 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                  {item.icon}
+                </div>
+                <div>
+                  <p className="font-extrabold text-zinc-900 text-sm mb-0.5">{item.title}</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
-              <h2 className="text-xl font-black text-gray-900 mb-2">셀프 매물 등록</h2>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                딜러 파트너는 직접 매물을<br />
-                등록할 수 있습니다.<br />
-                딜러 코드가 필요합니다.
-              </p>
-            </div>
-            <div className="bg-white border-t border-purple-100 p-4">
-              <ul className="space-y-2 mb-5">
-                {['직접 매물 작성', '사진 직접 업로드', '가격 자율 설정', '딜러 배지 노출'].map(f => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-gray-500">
-                    <svg width="14" height="14" fill="none" stroke="#7c3aed" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/sell/register"
-                className="block w-full text-center bg-purple-600 hover:bg-purple-500 text-white font-black py-3 rounded-xl text-sm transition-colors"
-              >
-                셀프 등록하기 →
-              </Link>
-            </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* 하단 안내 */}
-        <div className="mt-10 bg-gray-50 rounded-2xl p-6 border border-gray-100">
-          <h3 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="currentColor"/>
-            </svg>
-            판매 전 꼭 확인하세요
-          </h3>
-          <ul className="space-y-2 text-sm text-gray-500">
-            <li>• 카비어는 진단이 완료된 차량만 스토어에 등록됩니다.</li>
-            <li>• 진단 미완료 차량은 매물 등록이 불가합니다.</li>
-            <li>• 딜러 셀프 등록은 어드민 검토 후 최종 노출됩니다.</li>
-          </ul>
+      {/* ── 중간 CTA ── */}
+      <section className="bg-violet-600 py-10 px-6">
+        <div className="max-w-xl mx-auto text-center space-y-4">
+          <p className="text-violet-200 text-sm font-bold">지금 바로 시작하세요</p>
+          <p className="text-white text-2xl font-black leading-tight">
+            5분 입력으로<br />더 높은 가격에 팔기
+          </p>
+          <Link
+            href="/sell/register"
+            className="inline-block px-10 py-4 bg-white text-violet-700 font-extrabold text-base rounded-2xl hover:bg-violet-50 active:scale-95 transition-all shadow-lg"
+          >
+            무료로 셀프 등록하기 →
+          </Link>
         </div>
-      </div>
+      </section>
+
+      {/* ── 이용 방법 ── */}
+      <section className="bg-zinc-50 py-14 px-6">
+        <div className="max-w-xl mx-auto">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">HOW IT WORKS</p>
+          <h2 className="text-2xl font-black text-zinc-900 text-center mb-2 leading-tight">이용방법, 어렵지 않아요!</h2>
+          <p className="text-zinc-400 text-sm text-center mb-10">5단계, 5분이면 완료</p>
+
+          <div className="space-y-0">
+            {STEPS.map((step, i) => (
+              <div key={step.num} className="flex gap-5">
+                <div className="flex flex-col items-center">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black text-xs border-2 flex-shrink-0 z-10 ${
+                    i === 0 ? 'bg-violet-600 border-violet-600 text-white' : 'bg-white border-zinc-200 text-zinc-400'
+                  }`}>
+                    {step.num}
+                  </div>
+                  {i < STEPS.length - 1 && <div className="flex-1 w-px my-1 bg-zinc-200" style={{ minHeight: '32px' }} />}
+                </div>
+                <div className="pb-8 pt-1.5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{step.icon}</span>
+                    <p className={`font-extrabold text-sm ${i === 0 ? 'text-violet-700' : 'text-zinc-700'}`}>{step.title}</p>
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 후기 ── */}
+      <section className="bg-white py-14 px-6">
+        <div className="max-w-xl mx-auto">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">REVIEWS</p>
+          <h2 className="text-2xl font-black text-zinc-900 text-center mb-8">실제 판매자 후기</h2>
+          <div className="space-y-4">
+            {[
+              { name: '김*준', car: '기아 쏘렌토 2021', stars: 5, text: '딜러한테 직접 팔았을 때보다 230만원 더 받았어요. 카비어에 올리니까 딜러들이 먼저 연락 오더라고요.' },
+              { name: '이*영', car: '현대 투싼 2020', stars: 5, text: '수출 딜러까지 포함해서 입찰이 들어오니까 생각보다 훨씬 좋은 가격 받았습니다. 강추요!' },
+              { name: '박*수', car: '기아 K5 2019', stars: 5, text: '등록하고 3일 만에 연락 왔어요. 검토도 빠르고 딜러 매칭도 쉬웠습니다.' },
+            ].map(r => (
+              <div key={r.name} className="p-5 rounded-2xl border border-zinc-100 bg-zinc-50">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="font-extrabold text-zinc-900 text-sm">{r.name}</p>
+                    <p className="text-xs text-zinc-400">{r.car}</p>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: r.stars }).map((_, i) => (
+                      <span key={i} className="text-violet-500 text-sm">★</span>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-500 leading-relaxed">"{r.text}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="bg-zinc-50 py-14 px-6">
+        <div className="max-w-xl mx-auto">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">FAQ</p>
+          <h2 className="text-2xl font-black text-zinc-900 text-center mb-8">자주 묻는 질문</h2>
+          <div className="space-y-2">
+            {FAQS.map((faq, i) => (
+              <div key={i} className="rounded-2xl border border-zinc-200 overflow-hidden bg-white">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between p-5 text-left"
+                >
+                  <span className="text-sm font-extrabold text-zinc-900">Q. {faq.q}</span>
+                  <span className={`text-zinc-400 text-lg font-bold transition-transform ${openFaq === i ? 'rotate-45' : ''}`}>+</span>
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-5">
+                    <p className="text-sm text-zinc-500 leading-relaxed border-t border-zinc-100 pt-4">{faq.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 하단 CTA ── */}
+      <section className="bg-zinc-950 py-14 px-6">
+        <div className="max-w-xl mx-auto text-center space-y-5">
+          <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">지금 시작하세요</p>
+          <h2 className="text-2xl font-black text-white leading-tight">
+            내 차, 직접 등록하고<br />
+            <span className="text-violet-400">최고가에 판매</span>하세요
+          </h2>
+          <p className="text-zinc-400 text-sm">일반인·딜러·수출 차량 모두 등록 가능 · 검토 후 스토어 노출</p>
+          <Link
+            href="/sell/register"
+            className="inline-block w-full max-w-xs py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all"
+          >
+            셀프 등록하기 →
+          </Link>
+          <div className="pt-4 border-t border-zinc-800">
+            <p className="text-zinc-600 text-xs mb-2">등록 문의</p>
+            <a href="tel:01022856017" className="text-zinc-400 text-sm font-bold hover:text-white transition-colors">
+              📞 010-2285-6017
+            </a>
+            <p className="text-zinc-700 text-[10px] mt-1">평일 09:00 – 18:00</p>
+          </div>
+        </div>
+      </section>
+
+      <AppFooter />
+
     </div>
   );
 }
