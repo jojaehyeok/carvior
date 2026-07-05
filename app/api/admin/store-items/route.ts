@@ -13,6 +13,7 @@ function readItems(): StoreItem[] {
 }
 
 function writeItems(items: StoreItem[]) {
+  fs.mkdirSync(path.dirname(DATA_PATH), { recursive: true });
   fs.writeFileSync(DATA_PATH, JSON.stringify(items, null, 2), 'utf-8');
 }
 
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     const newItem: StoreItem = {
       ...body,
       id: String(body.bookingId),
-      status: body.status ?? 'active',   // 셀프등록은 바로 노출
+      status: 'active',
       registeredAt: new Date().toISOString(),
     };
 

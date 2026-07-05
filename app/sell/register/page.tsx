@@ -283,7 +283,7 @@ export default function SelfRegisterPage() {
         doors: 5, seats: 5,
         inspectedAt: new Date().toISOString().split('T')[0],
         registeredAt: new Date().toISOString(),
-        status: 'hidden',
+        status: 'active',
         photos,
         specs: [
           { label: 'Year', value: String(car.year) },
