@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import KakaoProvider from 'next-auth/providers/kakao';
 import NaverProvider from 'next-auth/providers/naver';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 const NEST = process.env.NEST_API_URL ?? 'http://localhost:4000/api';
 
@@ -14,18 +15,38 @@ export const authOptions: NextAuthOptions = {
       clientId:     process.env.NAVER_CLIENT_ID!,
       clientSecret: process.env.NAVER_CLIENT_SECRET!,
     }),
+    CredentialsProvider({
+      name: 'Email',
+      credentials: {
+        email:    { label: '이메일', type: 'email' },
+        password: { label: '비밀번호', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          const res = await fetch(`${NEST}/v1/users/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: credentials.email, password: credentials.password }),
+          });
+          if (!res.ok) return null;
+          const user = await res.json();
+          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role };
+        } catch { return null; }
+      },
+    }),
   ],
 
   callbacks: {
     async signIn({ user, account }) {
-      if (!account) return false;
+      if (account?.type === 'credentials') return true;
       try {
         await fetch(`${NEST}/v1/users/social`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            provider:     account.provider,
-            providerId:   account.providerAccountId,
+            provider:     account?.provider,
+            providerId:   account?.providerAccountId,
             email:        user.email  ?? undefined,
             name:         user.name   ?? undefined,
             profileImage: user.image  ?? undefined,
@@ -35,13 +56,22 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
 
-    async jwt({ token, account }) {
+    async jwt({ token, user, account }) {
+      if (user) token.role = (user as any).role;
+      // 소셜 로그인 최초 발급 시 DB에서 role 조회
+      if (account && account.type !== 'credentials' && token.email) {
+        try {
+          const res = await fetch(`${NEST}/v1/users/by-email?email=${encodeURIComponent(token.email as string)}`);
+          if (res.ok) { const u = await res.json(); token.role = u.role; }
+        } catch {}
+      }
       if (account) token.provider = account.provider;
       return token;
     },
 
     async session({ session, token }) {
       if (session.user) {
+        (session.user as any).role     = token.role;
         (session.user as any).provider = token.provider;
       }
       return session;
@@ -50,4 +80,5 @@ export const authOptions: NextAuthOptions = {
 
   pages: { signIn: '/login' },
   secret: process.env.NEXTAUTH_SECRET,
+  session: { strategy: 'jwt' },
 };
