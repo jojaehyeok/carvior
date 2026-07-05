@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { clsx } from 'clsx';
+import AppFooter from '@/components/footermodal';
 
 const CAR_TYPES = [
   { label: '전체',    icon: 'all' },
@@ -377,39 +378,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="bg-gray-950 border-t border-white/5 px-6 py-12">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-8">
-          <div>
-            <p className="font-black text-white text-lg mb-3 tracking-tight">CARVIOR</p>
-            <p className="text-xs text-white/30 leading-relaxed">
-              카비어 · 경기도 안산시 단원구 원포공원1로 59<br />
-              신명트윈타워 A동 502호<br />
-              대표: 조재혁 · 010-2285-6017
-            </p>
-            <p className="text-[10px] text-white/15 mt-4">© 2026 CARVIOR. All rights reserved.</p>
-          </div>
-          <div className="flex gap-12">
-            <div>
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-3">서비스</p>
-              <ul className="space-y-2">
-                {NAV_ITEMS.map(n => (
-                  <li key={n.href}>
-                    <Link href={n.href} className="text-xs text-white/40 hover:text-white transition-colors">{n.label}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-3">고객지원</p>
-              <ul className="space-y-2">
-                {['공지사항', '자주묻는질문', '1:1 문의'].map(t => (
-                  <li key={t}><span className="text-xs text-white/40">{t}</span></li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <AppFooter />
     </div>
   );
 }
