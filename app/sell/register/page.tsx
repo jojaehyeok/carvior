@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
 // ── 상수 ──────────────────────────────────────────────
+const MAX_PHOTOS = 40;
 const STEPS = ['차량정보', '사진', '가격·설명', '확인'] as const;
 type StepKey = 0 | 1 | 2 | 3;
 
@@ -311,13 +312,39 @@ export default function SelfRegisterPage() {
   };
 
   // ── 사진 업로드 ───────────────────────────────────
+  const resizeImage = (file: File, maxPx = 1600, quality = 0.82): Promise<File> =>
+    new Promise(resolve => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const { width, height } = img;
+        const scale = Math.min(1, maxPx / Math.max(width, height));
+        const w = Math.round(width * scale);
+        const h = Math.round(height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file);
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+
   const handlePhotoAdd = useCallback(async (catKey: CatKey, files: FileList) => {
+    const current = Object.values(photos).flat().length;
+    const remaining = MAX_PHOTOS - current;
+    if (remaining <= 0) { alert(`사진은 최대 ${MAX_PHOTOS}장까지 등록할 수 있습니다.`); return; }
+
     setUploading(catKey);
     const newUrls: string[] = [];
     const requestId = `sell-${carNumber.replace(/\s/g,'') || 'unknown'}-${Date.now()}`;
+    const limited = Array.from(files).slice(0, remaining);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    for (const raw of limited) {
+      const file = raw.type.startsWith('image/') ? await resizeImage(raw) : raw;
       const formData = new FormData();
       formData.append('file', file);
       formData.append('carNumber', carNumber.replace(/\s/g,'') || 'SELF');
@@ -336,7 +363,8 @@ export default function SelfRegisterPage() {
     }
     setPhotos(prev => ({ ...prev, [catKey]: [...prev[catKey], ...newUrls] }));
     setUploading(null);
-  }, [carNumber]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [carNumber, photos]);
 
   const handlePhotoRemove = (catKey: CatKey, idx: number) => {
     setPhotos(prev => ({ ...prev, [catKey]: prev[catKey].filter((_, i) => i !== idx) }));
