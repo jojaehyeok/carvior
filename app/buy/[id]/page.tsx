@@ -231,7 +231,7 @@ export default function CarDetailPage() {
     fetch('/api/admin/store-items')
       .then(r => r.json())
       .then((items: any[]) => {
-        const found = items.find(i => i.id === id);
+        const found = items.find(i => String(i.id) === String(id));
         if (found) {
           setCar({
             id: found.id,
