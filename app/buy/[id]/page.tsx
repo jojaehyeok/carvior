@@ -31,6 +31,7 @@ interface UnifiedCar {
   photos?: {
     exterior?: string[];
     interior?: string[];
+    extra?: string[];
     engine?: string[];
     wheel?: string[];
     dashboard?: string[];
@@ -386,7 +387,7 @@ export default function CarDetailPage() {
             {/* 썸네일 스트립 */}
             {hasPhotos && (
               <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1">
-                {photos.slice(0, 7).map((p, i) => (
+                {photos.filter(p => p.url).slice(0, 9).map((p, i) => (
                   <button
                     key={i}
                     onClick={() => setActivePhoto(i)}
@@ -394,23 +395,19 @@ export default function CarDetailPage() {
                       activePhoto === i ? 'border-black' : 'border-transparent hover:border-gray-300'
                     }`}
                   >
-                    {p.url ? (
-                      <img src={p.url} alt={p.label} className="w-full h-full object-cover" />
-                    ) : (
-                      <CarSilhouette />
-                    )}
+                    <img src={p.url} alt={p.label} className="w-full h-full object-cover" />
                   </button>
                 ))}
-                {photos.length > 7 && (
+                {photos.filter(p => p.url).length > 9 && (
                   <button
-                    onClick={() => setActivePhoto(7)}
+                    onClick={() => { setLbIdx(9); setLbZoom(1); setLbRot(0); setLightbox(true); }}
                     className="relative shrink-0 w-[90px] h-[60px] overflow-hidden border-2 border-transparent hover:border-gray-300 transition-all"
                   >
-                    {photos[7]?.url && (
-                      <img src={photos[7].url} alt="more" className="w-full h-full object-cover" />
+                    {photos.filter(p => p.url)[9]?.url && (
+                      <img src={photos.filter(p => p.url)[9].url} alt="more" className="w-full h-full object-cover" />
                     )}
                     <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-                      <span className="text-white text-xs font-black">+ {photos.length - 7}</span>
+                      <span className="text-white text-xs font-black">+ {photos.filter(p => p.url).length - 9}</span>
                       <span className="text-white text-[10px]">사진 모두보기</span>
                     </div>
                   </button>
