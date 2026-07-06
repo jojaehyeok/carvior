@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 // ── 상수 ──────────────────────────────────────────────
 const MAX_PHOTOS = 40;
@@ -243,6 +244,13 @@ function PhotoCard({
 // ── 메인 페이지 ───────────────────────────────────────
 export default function SelfRegisterPage() {
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login?callbackUrl=/sell/register');
+    }
+  }, [status, router]);
 
   const [step, setStep] = useState<StepKey>(0);
   const [submitting, setSubmitting] = useState(false);
