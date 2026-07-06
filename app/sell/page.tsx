@@ -13,103 +13,17 @@ const STEPS = [
 ];
 
 const FAQS = [
-  { q: '수수료가 있나요?', a: '셀프 등록 검토 비용 3만원만 있습니다. 딜러와 직접 거래 시 별도 수수료는 없습니다.' },
+  { q: '등록 비용이 있나요?', a: 'MVP 기간 동안 완전 무료입니다. 딜러와 직접 거래 시에도 별도 수수료는 없습니다.' },
   { q: '일반인도 등록할 수 있나요?', a: '네, 딜러가 아닌 일반 개인도 등록 가능합니다. 카비어 검토 후 스토어에 노출됩니다.' },
   { q: '수출용 차량도 등록되나요?', a: '수출 셀프 등록도 가능합니다. 차량 정보 입력 시 수출 희망 여부를 체크해주세요.' },
   { q: '사진 없이도 등록할 수 있나요?', a: '기본 정보만으로 접수는 가능하나, 사진이 있는 매물이 딜러 관심을 3배 이상 더 받습니다.' },
   { q: '등록 후 수정·삭제할 수 있나요?', a: '등록 완료 후 수정·삭제가 필요하면 고객센터(010-2285-6017)로 연락 주세요.' },
 ];
 
-// ── 요금 안내 바텀시트 모달 ──
-function FeeModal({ onClose, onProceed }: { onClose: () => void; onProceed: () => void }) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      {/* 백드롭 */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-      {/* 바텀시트 */}
-      <div className="relative w-full max-w-lg bg-white rounded-t-3xl overflow-hidden animate-slide-up">
-        {/* 핸들 바 */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 bg-zinc-200 rounded-full" />
-        </div>
-
-        <div className="px-6 pb-8 pt-4">
-          {/* 헤더 */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-[10px] font-bold text-violet-600 uppercase tracking-widest mb-0.5">CARVIOR SELF REGISTER</p>
-              <h2 className="text-xl font-black text-zinc-900">셀프 매물 등록</h2>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400 hover:bg-zinc-200 transition-colors text-lg">
-              ×
-            </button>
-          </div>
-
-          {/* 이용요금 카드 */}
-          <div className="bg-zinc-950 rounded-2xl p-5 mb-4">
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-3">이용 요금</p>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-white text-3xl font-black tabular-nums">
-                  20,000<span className="text-base font-bold text-zinc-400">원</span>
-                </p>
-                <p className="text-zinc-500 text-xs mt-1">검토 및 스토어 등록 비용 (1회)</p>
-              </div>
-              <div className="text-right">
-                <div className="bg-violet-600/20 border border-violet-500/30 rounded-xl px-3 py-1.5">
-                  <p className="text-violet-400 text-xs font-bold">딜러 수수료 0원</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 포함 항목 */}
-          <div className="space-y-2.5 mb-6">
-            {[
-              '카비어 전문가 매물 검토',
-              '카비어 스토어 노출 (딜러 전체 공개)',
-              '수출 딜러 포함 네트워크 매칭',
-              '판매 완료까지 담당자 연결',
-            ].map(item => (
-              <div key={item} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-                  <svg width="10" height="10" fill="none" stroke="#7c3aed" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                </div>
-                <p className="text-sm text-zinc-700 font-medium">{item}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* 결제 안내 */}
-          <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3 mb-5 text-xs text-amber-700 leading-relaxed">
-            등록 신청 후 <span className="font-bold">카카오뱅크 이체</span>로 요금 납부 시 검토가 시작됩니다.<br />
-            계좌: <span className="font-extrabold">3333-35-1997303 (예금주: 카비어)</span>
-          </div>
-
-          {/* CTA */}
-          <button
-            onClick={onProceed}
-            className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-200"
-          >
-            등록 시작하기 →
-          </button>
-          <p className="text-center text-zinc-400 text-[11px] mt-2.5">
-            일반인·딜러·수출 차량 모두 가능 · 본인인증 추후 추가 예정
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function SellPage() {
   const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [showFeeModal, setShowFeeModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -118,31 +32,23 @@ export default function SellPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const handleProceed = () => {
-    setShowFeeModal(false);
-    router.push('/sell/register');
-  };
-
   return (
     <div className="min-h-screen bg-white font-sans antialiased">
-
-      {/* 바텀시트 모달 */}
-      {showFeeModal && <FeeModal onClose={() => setShowFeeModal(false)} onProceed={handleProceed} />}
 
       {/* ── HERO ── */}
       <section className="bg-zinc-950 text-white">
         <div className="max-w-xl mx-auto px-5 pt-10 pb-8">
-          <div className="inline-flex items-center gap-2 bg-violet-600/20 border border-violet-500/30 rounded-full px-3 py-1.5 mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-violet-300 tracking-wider">CARVIOR SELF REGISTER</span>
+          <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/30 rounded-full px-3 py-1.5 mb-5">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-[11px] font-bold text-green-300 tracking-wider">완전 무료 · MVP 한정</span>
           </div>
 
           <h1 className="text-[1.9rem] sm:text-[2.2rem] font-black leading-[1.2] mb-3 tracking-tight">
-            직접 등록하고<br />
+            내 차를 무료로 올리고<br />
             <span className="text-violet-400">더 많이 받아가세요</span>
           </h1>
           <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-            중간 수수료 없이 카비어 스토어에 직접 등록.<br />
+            등록비 0원 · 수수료 0원 · 5분이면 완료.<br />
             딜러들이 경쟁해서 최고가를 제시합니다.
           </p>
 
@@ -174,11 +80,11 @@ export default function SellPage() {
             <p className="text-zinc-600 text-[10px] mt-3">* 차량 상태·시세에 따라 다를 수 있음</p>
           </div>
 
-          {/* 이용요금 뱃지 */}
+          {/* 무료 뱃지 */}
           <div className="flex items-center gap-3 mb-5">
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
-              <span className="text-[11px] text-zinc-400">이용요금</span>
-              <span className="text-sm font-black text-white">20,000원</span>
+            <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-full px-3 py-1.5">
+              <span className="text-[11px] text-green-400 font-bold">등록비</span>
+              <span className="text-sm font-black text-green-300">무료</span>
             </div>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
               <span className="text-[11px] text-zinc-400">딜러 수수료</span>
@@ -187,12 +93,12 @@ export default function SellPage() {
           </div>
 
           <button
-            onClick={() => setShowFeeModal(true)}
+            onClick={() => router.push('/sell/register')}
             className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-900/40"
           >
-            셀프 등록하기 →
+            무료로 등록하기 →
           </button>
-          <p className="text-center text-zinc-600 text-[11px] mt-2">일반인·딜러·수출 차량 모두 가능</p>
+          <p className="text-center text-zinc-600 text-[11px] mt-2">일반인·딜러·수출 차량 모두 가능 · 지금 바로 시작</p>
         </div>
       </section>
 
@@ -226,12 +132,12 @@ export default function SellPage() {
       {/* ── 중간 CTA ── */}
       <section className="bg-violet-600 py-10 px-5">
         <div className="max-w-xl mx-auto text-center">
-          <p className="text-violet-200 text-sm font-bold mb-2">검토비 단 3만원</p>
+          <p className="text-violet-200 text-sm font-bold mb-2">등록비 0원 · 수수료 0원</p>
           <p className="text-white text-xl font-black leading-tight mb-5">
             5분 입력으로<br />더 높은 가격에 팔기
           </p>
           <button
-            onClick={() => setShowFeeModal(true)}
+            onClick={() => router.push('/sell/register')}
             className="inline-block px-10 py-3.5 bg-white text-violet-700 font-extrabold text-sm rounded-2xl hover:bg-violet-50 active:scale-95 transition-all shadow-lg"
           >
             무료로 시작하기 →
@@ -336,10 +242,10 @@ export default function SellPage() {
           </h2>
           <p className="text-zinc-500 text-xs">일반인·딜러·수출 차량 모두 · 검토 후 스토어 노출</p>
           <button
-            onClick={() => setShowFeeModal(true)}
+            onClick={() => router.push('/sell/register')}
             className="w-full max-w-xs py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all mx-auto block"
           >
-            셀프 등록하기 →
+            무료로 등록하기 →
           </button>
           <div className="pt-4 border-t border-zinc-800">
             <p className="text-zinc-600 text-xs mb-1.5">등록 문의</p>
@@ -359,11 +265,11 @@ export default function SellPage() {
       }`}>
         <div className="max-w-xl mx-auto">
           <button
-            onClick={() => setShowFeeModal(true)}
+            onClick={() => router.push('/sell/register')}
             className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-violet-900/50 transition-all flex items-center justify-center gap-3 border border-violet-500/30"
           >
-            <span>셀프 등록하기</span>
-            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">20,000원</span>
+            <span>무료로 등록하기</span>
+            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">무료</span>
           </button>
         </div>
       </div>
