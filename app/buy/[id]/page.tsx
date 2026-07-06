@@ -161,6 +161,7 @@ function collectPhotos(car: UnifiedCar): PhotoItem[] {
   const result: PhotoItem[] = [];
   p.exterior?.forEach(url => result.push({ url, label: '외관' }));
   p.interior?.forEach(url => result.push({ url, label: '실내' }));
+  p.extra?.forEach(url => result.push({ url, label: '옵션' }));
   p.engine?.forEach(url => result.push({ url, label: '엔진룸' }));
   p.wheel?.forEach(url => result.push({ url, label: '휠' }));
   p.dashboard?.forEach(url => result.push({ url, label: '계기판' }));
