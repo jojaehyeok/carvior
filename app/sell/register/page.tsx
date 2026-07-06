@@ -67,25 +67,68 @@ function Field({ label, required, children, hint }: { label: string; required?: 
 
 const inp = 'w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-400 transition-colors bg-white';
 
-// ── 사진 업로드 카드 (드래그앤드롭) ─────────────────────
+// ── 사진 업로드 카드 (드래그앤드롭 + 순서 변경) ──────────
 function PhotoCard({
-  cat, urls, onAdd, onRemove, uploading,
+  cat, urls, onAdd, onRemove, onReorder, uploading,
 }: {
   cat: typeof PHOTO_CATS[number];
   urls: string[];
   onAdd: (files: FileList) => void;
   onRemove: (idx: number) => void;
+  onReorder: (from: number, to: number) => void;
   uploading: boolean;
 }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [dropOver, setDropOver]   = useState(false);   // 파일 드롭존
+  const [dragSrc,  setDragSrc]    = useState<number | null>(null);  // 재정렬 출발
+  const [dragDest, setDragDest]   = useState<number | null>(null);  // 재정렬 도착
+  const isReordering = useRef(false);
 
-  const handleDrop = (e: React.DragEvent) => {
+  // 파일 드롭존 — 내부 재정렬 드래그는 무시
+  const handleZoneDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setDragOver(false);
-    if (uploading) return;
+    if (isReordering.current || uploading) return;
+    setDropOver(true);
+  };
+  const handleZoneDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDropOver(false);
+    if (isReordering.current || uploading) return;
     const files = e.dataTransfer.files;
     if (files.length > 0) onAdd(files);
+  };
+
+  // 사진 아이템 재정렬
+  const handleItemDragStart = (e: React.DragEvent, i: number) => {
+    isReordering.current = true;
+    setDragSrc(i);
+    e.dataTransfer.effectAllowed = 'move';
+    // 투명 고스트 제거
+    const ghost = document.createElement('div');
+    ghost.style.position = 'fixed';
+    ghost.style.top = '-9999px';
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, 0, 0);
+    setTimeout(() => document.body.removeChild(ghost), 0);
+  };
+  const handleItemDragOver = (e: React.DragEvent, i: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dragSrc === null || dragSrc === i) return;
+    setDragDest(i);
+  };
+  const handleItemDrop = (e: React.DragEvent, i: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dragSrc !== null && dragSrc !== i) onReorder(dragSrc, i);
+    setDragSrc(null);
+    setDragDest(null);
+    isReordering.current = false;
+  };
+  const handleItemDragEnd = () => {
+    setDragSrc(null);
+    setDragDest(null);
+    isReordering.current = false;
   };
 
   return (
@@ -102,39 +145,59 @@ function PhotoCard({
       </div>
 
       <div className="p-3 space-y-2">
-        {/* 업로드된 사진 그리드 — 등록 순서대로 */}
+        {/* 사진 그리드 — 드래그로 순서 변경 */}
         {urls.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {urls.map((url, i) => (
-              <div key={url + i} className="relative aspect-square rounded-xl overflow-hidden bg-zinc-100 group">
-                <img src={url} alt="" className="w-full h-full object-cover" />
-                {/* 순서 번호 */}
-                <span className="absolute top-1.5 left-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[9px] font-black">
-                  {i + 1}
-                </span>
-                <button
-                  onClick={() => onRemove(i)}
-                  className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+          <>
+            <p className="text-[10px] text-zinc-300 px-0.5">사진을 드래그해서 순서를 바꿀 수 있어요</p>
+            <div className="grid grid-cols-3 gap-2">
+              {urls.map((url, i) => (
+                <div
+                  key={url + i}
+                  draggable
+                  onDragStart={e => handleItemDragStart(e, i)}
+                  onDragOver={e => handleItemDragOver(e, i)}
+                  onDrop={e => handleItemDrop(e, i)}
+                  onDragEnd={handleItemDragEnd}
+                  className={`
+                    relative aspect-square rounded-xl overflow-hidden bg-zinc-100 group
+                    cursor-grab active:cursor-grabbing select-none transition-all
+                    ${dragSrc === i ? 'opacity-30 scale-95' : ''}
+                    ${dragDest === i && dragSrc !== i ? 'ring-2 ring-violet-500 scale-105' : ''}
+                  `}
                 >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
+                  <img src={url} alt="" className="w-full h-full object-cover pointer-events-none" />
+                  {/* 순서 번호 */}
+                  <span className="absolute top-1.5 left-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[9px] font-black">
+                    {i + 1}
+                  </span>
+                  {/* 이동 핸들 힌트 */}
+                  <span className="absolute bottom-1.5 left-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg width="12" height="12" fill="white" viewBox="0 0 24 24"><path d="M8 6h8M8 12h8M8 18h8"/><path stroke="white" strokeWidth="2" d="M8 6h8M8 12h8M8 18h8"/></svg>
+                  </span>
+                  <button
+                    onClick={e => { e.stopPropagation(); onRemove(i); }}
+                    className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* 드래그앤드롭 존 */}
+        {/* 파일 드롭존 */}
         <div
-          onDragOver={e => { e.preventDefault(); if (!uploading) setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={handleDrop}
-          onClick={() => !uploading && ref.current?.click()}
+          onDragOver={handleZoneDragOver}
+          onDragLeave={() => setDropOver(false)}
+          onDrop={handleZoneDrop}
+          onClick={() => !uploading && fileRef.current?.click()}
           className={`
             cursor-pointer rounded-xl border-2 border-dashed transition-all
             flex flex-col items-center justify-center gap-1.5 py-5
             ${uploading
               ? 'opacity-50 cursor-not-allowed border-zinc-200 bg-zinc-50'
-              : dragOver
+              : dropOver
                 ? 'border-violet-500 bg-violet-50 scale-[1.01]'
                 : 'border-zinc-200 bg-zinc-50 hover:border-violet-400 hover:bg-violet-50'
             }
@@ -145,7 +208,7 @@ function PhotoCard({
               <span className="animate-spin text-xl text-violet-500">⟳</span>
               <p className="text-xs font-bold text-violet-500">업로드 중…</p>
             </>
-          ) : dragOver ? (
+          ) : dropOver ? (
             <>
               <svg width="22" height="22" fill="none" stroke="#7c3aed" strokeWidth={2} viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
@@ -158,13 +221,13 @@ function PhotoCard({
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
               </svg>
               <p className="text-xs font-semibold text-zinc-400">드래그하거나 클릭해서 추가</p>
-              <p className="text-[10px] text-zinc-300">여러 장 한 번에 가능 · 등록 순서 유지</p>
+              <p className="text-[10px] text-zinc-300">여러 장 한 번에 가능</p>
             </>
           )}
         </div>
 
         <input
-          ref={ref}
+          ref={fileRef}
           type="file"
           accept="image/*"
           multiple
@@ -277,6 +340,15 @@ export default function SelfRegisterPage() {
 
   const handlePhotoRemove = (catKey: CatKey, idx: number) => {
     setPhotos(prev => ({ ...prev, [catKey]: prev[catKey].filter((_, i) => i !== idx) }));
+  };
+
+  const handlePhotoReorder = (catKey: CatKey, from: number, to: number) => {
+    setPhotos(prev => {
+      const arr = [...prev[catKey]];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return { ...prev, [catKey]: arr };
+    });
   };
 
   // ── 스텝 이동 ─────────────────────────────────────
@@ -505,6 +577,7 @@ export default function SelfRegisterPage() {
               uploading={uploading === cat.key}
               onAdd={files => handlePhotoAdd(cat.key, files)}
               onRemove={idx => handlePhotoRemove(cat.key, idx)}
+              onReorder={(from, to) => handlePhotoReorder(cat.key, from, to)}
             />
           ))}
           {photos.exterior.length === 0 && (
