@@ -57,7 +57,10 @@ export const authOptions: NextAuthOptions = {
     },
 
     async jwt({ token, user, account }) {
-      if (user) token.role = (user as any).role;
+      if (user) {
+        token.role   = (user as any).role;
+        token.userId = (user as any).id;
+      }
       // 소셜 로그인 최초 발급 시 DB에서 role 조회
       if (account && account.type !== 'credentials' && token.email) {
         try {
@@ -71,6 +74,7 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
+        (session.user as any).id       = token.userId ?? token.sub;
         (session.user as any).role     = token.role;
         (session.user as any).provider = token.provider;
       }

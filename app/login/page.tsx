@@ -4,8 +4,11 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+type Tab = 'user' | 'dealer';
+
 export default function LoginPage() {
   const router = useRouter();
+  const [tab, setTab] = useState<Tab>('user');
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleSocial = async (provider: 'kakao' | 'naver') => {
@@ -14,19 +17,40 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
 
-        {/* 로고 */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <span className="text-2xl font-black text-gray-900 tracking-tight">CARVIOR</span>
           <p className="text-sm text-gray-400 mt-1">로그인 후 더 많은 서비스를 이용하세요</p>
         </div>
 
+        {/* 탭 */}
+        <div className="flex border-b border-gray-200 mb-8">
+          {([['user', '일반 회원'], ['dealer', '딜러']] as [Tab, string][]).map(([t, label]) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-3 text-sm font-bold transition-colors ${
+                tab === t
+                  ? 'text-violet-600 border-b-2 border-violet-600 -mb-px'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'dealer' && (
+          <div className="mb-6 p-4 bg-violet-50 rounded-xl border border-violet-100">
+            <p className="text-xs text-violet-700 font-semibold">딜러 회원 안내</p>
+            <p className="text-xs text-violet-500 mt-1">딜러로 가입하면 스마트옥션 및 매매 관리 기능을 이용할 수 있습니다.</p>
+          </div>
+        )}
+
         {/* 소셜 로그인 */}
         <div className="space-y-3">
-
-          {/* 카카오 */}
           <button
             onClick={() => handleSocial('kakao')}
             disabled={!!loading}
@@ -42,7 +66,6 @@ export default function LoginPage() {
             카카오로 로그인
           </button>
 
-          {/* 네이버 */}
           <button
             onClick={() => handleSocial('naver')}
             disabled={!!loading}
@@ -55,29 +78,22 @@ export default function LoginPage() {
             )}
             네이버로 로그인
           </button>
-        </div>
 
-        <div className="relative my-7">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
-          </div>
-          <div className="relative flex justify-center">
-            <span className="bg-gray-50 px-3 text-xs text-gray-400">또는</span>
-          </div>
+          <button
+            onClick={() => router.push('/login/email')}
+            className="w-full py-3.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors"
+          >
+            이메일로 로그인
+          </button>
         </div>
-
-        {/* 이메일 로그인 링크 */}
-        <button
-          onClick={() => router.push('/login/email')}
-          className="w-full py-3.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors"
-        >
-          이메일로 로그인
-        </button>
 
         <p className="text-center text-xs text-gray-400 mt-8">
           계정이 없으신가요?{' '}
-          <button onClick={() => router.push('/register')} className="text-violet-600 font-bold">
-            회원가입
+          <button
+            onClick={() => router.push(tab === 'dealer' ? '/register?role=dealer' : '/register')}
+            className="text-violet-600 font-bold"
+          >
+            {tab === 'dealer' ? '딜러로 가입' : '회원가입'}
           </button>
         </p>
       </div>

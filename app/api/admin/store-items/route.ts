@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
 
@@ -66,6 +68,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const session = await getServerSession(authOptions);
+    if (session?.user) {
+      body.userId = (session.user as any).id ? Number((session.user as any).id) : undefined;
+      body.sellerName = session.user.name ?? undefined;
+    }
 
     // NestJS 먼저 시도
     try {
