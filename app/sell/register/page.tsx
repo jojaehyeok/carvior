@@ -67,7 +67,7 @@ function Field({ label, required, children, hint }: { label: string; required?: 
 
 const inp = 'w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-400 transition-colors bg-white';
 
-// ── 사진 업로드 카드 ──────────────────────────────────
+// ── 사진 업로드 카드 (드래그앤드롭) ─────────────────────
 function PhotoCard({
   cat, urls, onAdd, onRemove, uploading,
 }: {
@@ -78,6 +78,16 @@ function PhotoCard({
   uploading: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    if (uploading) return;
+    const files = e.dataTransfer.files;
+    if (files.length > 0) onAdd(files);
+  };
+
   return (
     <div className="rounded-2xl border border-zinc-200 overflow-hidden bg-white">
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
@@ -91,16 +101,20 @@ function PhotoCard({
         <span className="text-xs font-bold text-zinc-400">{urls.length}장</span>
       </div>
 
-      <div className="p-3">
-        {/* 업로드된 사진 그리드 */}
+      <div className="p-3 space-y-2">
+        {/* 업로드된 사진 그리드 — 등록 순서대로 */}
         {urls.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-3 gap-2">
             {urls.map((url, i) => (
-              <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-zinc-100 group">
+              <div key={url + i} className="relative aspect-square rounded-xl overflow-hidden bg-zinc-100 group">
                 <img src={url} alt="" className="w-full h-full object-cover" />
+                {/* 순서 번호 */}
+                <span className="absolute top-1.5 left-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[9px] font-black">
+                  {i + 1}
+                </span>
                 <button
                   onClick={() => onRemove(i)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   ×
                 </button>
@@ -109,18 +123,46 @@ function PhotoCard({
           </div>
         )}
 
-        {/* 사진 추가 버튼 */}
-        <button
-          onClick={() => ref.current?.click()}
-          disabled={uploading}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-zinc-200 hover:border-violet-400 hover:bg-violet-50 transition-colors text-sm text-zinc-400 hover:text-violet-600 font-medium disabled:opacity-50"
+        {/* 드래그앤드롭 존 */}
+        <div
+          onDragOver={e => { e.preventDefault(); if (!uploading) setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => !uploading && ref.current?.click()}
+          className={`
+            cursor-pointer rounded-xl border-2 border-dashed transition-all
+            flex flex-col items-center justify-center gap-1.5 py-5
+            ${uploading
+              ? 'opacity-50 cursor-not-allowed border-zinc-200 bg-zinc-50'
+              : dragOver
+                ? 'border-violet-500 bg-violet-50 scale-[1.01]'
+                : 'border-zinc-200 bg-zinc-50 hover:border-violet-400 hover:bg-violet-50'
+            }
+          `}
         >
           {uploading ? (
-            <><span className="animate-spin text-base">⟳</span> 업로드 중…</>
+            <>
+              <span className="animate-spin text-xl text-violet-500">⟳</span>
+              <p className="text-xs font-bold text-violet-500">업로드 중…</p>
+            </>
+          ) : dragOver ? (
+            <>
+              <svg width="22" height="22" fill="none" stroke="#7c3aed" strokeWidth={2} viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <p className="text-xs font-bold text-violet-600">여기에 놓으세요</p>
+            </>
           ) : (
-            <><span className="text-base">+</span> 사진 추가</>
+            <>
+              <svg width="22" height="22" fill="none" stroke="#a1a1aa" strokeWidth={1.8} viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+              </svg>
+              <p className="text-xs font-semibold text-zinc-400">드래그하거나 클릭해서 추가</p>
+              <p className="text-[10px] text-zinc-300">여러 장 한 번에 가능 · 등록 순서 유지</p>
+            </>
           )}
-        </button>
+        </div>
+
         <input
           ref={ref}
           type="file"
