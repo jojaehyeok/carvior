@@ -210,6 +210,17 @@ export default function CarDetailPage() {
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryMsg, setInquiryMsg] = useState('');
+  const [offerOpen, setOfferOpen] = useState(false);
+  const [offerForm, setOfferForm] = useState({ name: '', company: '', contact: '', proposedUSD: '', message: '' });
+  const [offerSubmitting, setOfferSubmitting] = useState(false);
+  const [offerCount, setOfferCount] = useState(0);
+
+  useEffect(() => {
+    fetch(`/api/proposals?itemId=${id}`)
+      .then(r => r.json())
+      .then(d => setOfferCount(d.count ?? 0))
+      .catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     if (CAR_DB[id]) {
@@ -286,13 +297,14 @@ export default function CarDetailPage() {
     car.transmission || null,
   ].filter(Boolean) as string[];
 
+  const USD_RATE = 1350;
+  const usd = car.priceUSD > 0 ? car.priceUSD : Math.round(car.priceKRW / USD_RATE);
+
   const priceLabel = (car.hidePrice || car.status === 'sold')
     ? '거래완료'
-    : car.priceUSD > 0
-      ? `$ ${car.priceUSD.toLocaleString()}`
-      : car.priceKRW > 0
-        ? `₩ ${Math.round(car.priceKRW / 10000).toLocaleString()}만`
-        : '가격 협의';
+    : usd > 0
+      ? `$ ${usd.toLocaleString()}`
+      : '가격 협의';
 
   return (
     <div className="min-h-screen bg-white">
@@ -460,13 +472,16 @@ export default function CarDetailPage() {
               <p className="text-3xl font-black text-gray-900 tracking-tight">
                 {priceLabel}
               </p>
-              {car.priceUSD > 0 && car.priceKRW > 0 && (
+              {usd > 0 && car.priceKRW > 0 && (
                 <p className="text-sm text-gray-400 mt-1">
                   ≈ {Math.round(car.priceKRW / 10000).toLocaleString()}만원
                 </p>
               )}
               {car.priceKRW === 0 && (
                 <p className="text-sm text-gray-400 mt-1">판매가 미설정 · 카비어에 문의하세요</p>
+              )}
+              {offerCount > 0 && (
+                <p className="text-xs text-violet-600 font-bold mt-2">💬 제안 {offerCount}건 접수됨</p>
               )}
             </div>
 
@@ -488,25 +503,34 @@ export default function CarDetailPage() {
               </span>
             </div>
 
-            {/* 문의 버튼 2개 */}
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            {/* 버튼 */}
+            <div className="space-y-2 mb-3">
               <button
-                onClick={() => setInquiryOpen(true)}
-                className="bg-amber-400 hover:bg-amber-500 text-black font-black py-3.5 rounded-xl text-sm transition-colors"
+                onClick={() => setOfferOpen(true)}
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white font-black py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
               >
-                카비어 문의
+                💰 가격 제안하기
+                {offerCount > 0 && (
+                  <span className="bg-white/20 text-white text-xs font-black px-2 py-0.5 rounded-full">{offerCount}</span>
+                )}
               </button>
-              <a
-                href="https://wa.me/821022856017"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 font-black py-3.5 rounded-xl text-sm transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#059669">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                </svg>
-                WhatsApp
-              </a>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setInquiryOpen(true)}
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm transition-colors"
+                >
+                  문의하기
+                </button>
+                <a
+                  href="https://wa.me/821022856017"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] font-bold py-3 rounded-xl text-sm transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#128C7E"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                  WhatsApp
+                </a>
+              </div>
             </div>
 
             {car.hasReport && (
@@ -523,6 +547,104 @@ export default function CarDetailPage() {
           <DetailTabs car={car} />
         </div>
       </div>
+
+      {/* ── 가격 제안 모달 ── */}
+      {offerOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-gray-900">💰 가격 제안하기</h3>
+              <button onClick={() => setOfferOpen(false)} className="text-gray-400 hover:text-black">
+                <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 bg-violet-50 rounded-xl p-3 mb-4 font-medium">
+              {car.titleEn}
+              {car.priceUSD > 0 ? ` · 현재가 $${car.priceUSD.toLocaleString()}` : ''}
+            </p>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="이름 / Name *"
+                value={offerForm.name}
+                onChange={e => setOfferForm(p => ({ ...p, name: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <input
+                type="text"
+                placeholder="회사명 / Company (선택)"
+                value={offerForm.company}
+                onChange={e => setOfferForm(p => ({ ...p, company: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <input
+                type="tel"
+                placeholder="연락처 / Contact *"
+                value={offerForm.contact}
+                onChange={e => setOfferForm(p => ({ ...p, contact: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">$</span>
+                <input
+                  type="number"
+                  placeholder="제안 금액 (USD) *"
+                  value={offerForm.proposedUSD}
+                  onChange={e => setOfferForm(p => ({ ...p, proposedUSD: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:border-violet-500"
+                />
+              </div>
+              <textarea
+                placeholder="메시지 (선택)"
+                value={offerForm.message}
+                onChange={e => setOfferForm(p => ({ ...p, message: e.target.value }))}
+                rows={3}
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-violet-500 resize-none"
+              />
+            </div>
+            <button
+              onClick={async () => {
+                if (!offerForm.name || !offerForm.contact || !offerForm.proposedUSD) {
+                  alert('이름, 연락처, 제안 금액은 필수입니다.');
+                  return;
+                }
+                setOfferSubmitting(true);
+                try {
+                  const res = await fetch('/api/proposals', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      storeItemId: car.id,
+                      name: offerForm.name,
+                      company: offerForm.company,
+                      contact: offerForm.contact,
+                      proposedUSD: Number(offerForm.proposedUSD),
+                      message: offerForm.message,
+                    }),
+                  });
+                  if (res.ok) {
+                    alert('제안이 접수되었습니다! 담당자가 연락드릴 예정입니다.');
+                    setOfferOpen(false);
+                    setOfferForm({ name: '', company: '', contact: '', proposedUSD: '', message: '' });
+                  } else {
+                    alert('제출에 실패했습니다. 다시 시도해주세요.');
+                  }
+                } catch {
+                  alert('네트워크 오류가 발생했습니다.');
+                } finally {
+                  setOfferSubmitting(false);
+                }
+              }}
+              disabled={offerSubmitting}
+              className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-black py-4 rounded-xl text-sm mt-4 transition-colors"
+            >
+              {offerSubmitting ? '제출 중...' : '제안 보내기'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── 문의 모달 ── */}
       {inquiryOpen && (

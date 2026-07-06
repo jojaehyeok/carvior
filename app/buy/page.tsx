@@ -7,6 +7,8 @@ import { clsx } from 'clsx';
 
 const CAR_TYPES = ['전체', 'SUV', '세단', '해치백', '경차', '소형차', '중형', '대형', 'RV'];
 
+const USD_RATE = 1350;
+
 interface StoreItem {
   id: string;
   bookingId: number;
@@ -18,12 +20,18 @@ interface StoreItem {
   fuel: string;
   accident: boolean;
   priceKRW: number;
+  priceUSD?: number;
   category: string;
   region: string;
   inspectedAt: string;
   status: 'active' | 'sold' | 'hidden';
   photos: { exterior?: string[] };
   hasReport: boolean;
+}
+
+function getUSD(item: StoreItem) {
+  if (item.priceUSD && item.priceUSD > 0) return item.priceUSD;
+  return item.priceKRW ? Math.round(item.priceKRW / USD_RATE) : 0;
 }
 
 // 스토어 아이템이 없을 때 보여줄 데모 차량
@@ -171,7 +179,12 @@ export default function BuyPage() {
                     <span>·</span>
                     <span>{car.fuel}</span>
                   </div>
-                  <p className="text-lg font-black text-gray-900">{fmtPrice(car.priceKRW)}</p>
+                  <p className="text-lg font-black text-gray-900">
+                    {getUSD(car) > 0 ? `$ ${getUSD(car).toLocaleString()}` : '가격 협의'}
+                  </p>
+                  {car.priceKRW > 0 && (
+                    <p className="text-xs text-gray-400 mt-0.5">{fmtPrice(car.priceKRW)}</p>
+                  )}
                 </div>
               </Link>
             ))}
