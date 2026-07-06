@@ -214,6 +214,10 @@ export default function CarDetailPage() {
   const [offerForm, setOfferForm] = useState({ name: '', company: '', contact: '', proposedUSD: '', message: '' });
   const [offerSubmitting, setOfferSubmitting] = useState(false);
   const [offerCount, setOfferCount] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const [lbIdx, setLbIdx] = useState(0);
+  const [lbZoom, setLbZoom] = useState(1);
+  const [lbRot, setLbRot] = useState(0);
 
   useEffect(() => {
     fetch(`/api/proposals?itemId=${id}`)
@@ -333,7 +337,8 @@ export default function CarDetailPage() {
                 <img
                   src={photos[activePhoto].url}
                   alt={photos[activePhoto].label}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover cursor-zoom-in"
+                  onClick={() => { setLbIdx(activePhoto); setLbZoom(1); setLbRot(0); setLightbox(true); }}
                 />
               ) : (
                 <CarSilhouette />
@@ -912,6 +917,83 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
                     {r.value}
                   </span>
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 라이트박스 ── */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black flex flex-col outline-none"
+          onKeyDown={e => {
+            if (e.key === 'ArrowRight') setLbIdx(i => Math.min(i + 1, photos.length - 1));
+            if (e.key === 'ArrowLeft')  setLbIdx(i => Math.max(i - 1, 0));
+            if (e.key === 'Escape')     setLightbox(false);
+          }}
+          tabIndex={0}
+          ref={el => el?.focus()}
+        >
+          {/* 상단 바 */}
+          <div className="flex items-center justify-between px-5 py-3 text-white text-sm shrink-0">
+            <span className="font-bold">{lbIdx + 1} / {photos.length}</span>
+            <button onClick={() => setLightbox(false)} className="flex items-center gap-1.5 text-white/80 hover:text-white font-bold">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              닫기
+            </button>
+          </div>
+
+          {/* 메인 이미지 */}
+          <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+            {photos[lbIdx]?.url && (
+              <img
+                src={photos[lbIdx].url}
+                alt={photos[lbIdx].label}
+                style={{ transform: `scale(${lbZoom}) rotate(${lbRot}deg)`, transition: 'transform 0.2s' }}
+                className="max-h-full max-w-full object-contain select-none"
+                draggable={false}
+              />
+            )}
+            {lbIdx > 0 && (
+              <button onClick={() => { setLbIdx(i => i - 1); setLbZoom(1); setLbRot(0); }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors">
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+            )}
+            {lbIdx < photos.length - 1 && (
+              <button onClick={() => { setLbIdx(i => i + 1); setLbZoom(1); setLbRot(0); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-colors">
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            )}
+          </div>
+
+          {/* 하단 컨트롤 + 썸네일 */}
+          <div className="shrink-0 pb-4">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <button onClick={() => setLbRot(r => r - 90)}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors">
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              </button>
+              <button onClick={() => setLbZoom(z => Math.min(z + 0.25, 3))}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-black text-lg transition-colors">+</button>
+              <button onClick={() => { setLbZoom(1); setLbRot(0); }}
+                className="min-w-[60px] h-9 px-3 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors">
+                {Math.round(lbZoom * 100)}%
+              </button>
+              <button onClick={() => setLbZoom(z => Math.max(z - 0.25, 0.5))}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white font-black text-lg transition-colors">−</button>
+            </div>
+            <div className="flex gap-1.5 overflow-x-auto px-4 pb-1">
+              {photos.map((p, i) => (
+                <button key={i}
+                  onClick={() => { setLbIdx(i); setLbZoom(1); setLbRot(0); }}
+                  className={`shrink-0 w-16 h-11 rounded overflow-hidden border-2 transition-all ${
+                    lbIdx === i ? 'border-white' : 'border-transparent opacity-50 hover:opacity-80'
+                  }`}>
+                  {p.url && <img src={p.url} alt={p.label} className="w-full h-full object-cover" />}
+                </button>
               ))}
             </div>
           </div>
