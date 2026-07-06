@@ -18,6 +18,8 @@ interface StoreItem {
   region: string;
   photos: { exterior?: string[] };
   status: string;
+  hasReport?: boolean;
+  inspectedAt?: string;
 }
 
 function getUSD(item: StoreItem) {
@@ -25,18 +27,73 @@ function getUSD(item: StoreItem) {
   return item.priceKRW ? Math.round(item.priceKRW / USD_RATE) : 0;
 }
 
+type CarTab = 'recent' | 'popular' | 'viewed';
+
+const TAB_LABELS: Record<CarTab, string> = {
+  recent:  '최근 등록',
+  popular: '인기 매물',
+  viewed:  '주목받는 차',
+};
+
+function CarCard({ car, rank }: { car: StoreItem; rank?: number }) {
+  const thumb = car.photos?.exterior?.[0];
+  const usd   = getUSD(car);
+  return (
+    <Link href={`/buy/${car.id}`} className="group block">
+      <div className="relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden mb-3 border border-gray-100 group-hover:border-violet-400 group-hover:shadow-md transition-all">
+        {thumb ? (
+          <Image src={thumb} alt={car.titleKo} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="300px" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-300">
+              <rect x="5" y="22" width="110" height="36" rx="7" fill="currentColor"/>
+              <path d="M15 22L27 8H93L105 22Z" fill="currentColor"/>
+              <circle cx="28" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
+              <circle cx="92" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
+            </svg>
+          </div>
+        )}
+        {rank && (
+          <span className="absolute top-2.5 left-2.5 bg-violet-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center">
+            {rank}
+          </span>
+        )}
+        {car.hasReport && (
+          <span className="absolute top-2.5 right-2.5 bg-black/70 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+            진단완료
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-gray-400 mb-0.5">{car.year}년 · {car.region}</p>
+      <p className="font-bold text-gray-900 text-sm truncate mb-1">{car.titleKo}</p>
+      <p className="font-black text-gray-900">{usd > 0 ? `$${usd.toLocaleString()}` : '가격 협의'}</p>
+      <p className="text-xs text-gray-400">{car.mileage.toLocaleString()} km</p>
+    </Link>
+  );
+}
+
 export default function HomePage() {
-  const [previewCars, setPreviewCars] = useState<StoreItem[]>([]);
+  const [allCars,    setAllCars]    = useState<StoreItem[]>([]);
+  const [activeTab,  setActiveTab]  = useState<CarTab>('recent');
 
   useEffect(() => {
     fetch('/api/admin/store-items')
       .then(r => r.json())
       .then((items: StoreItem[]) => {
-        const active = items.filter(i => i.status === 'active').slice(0, 4);
-        setPreviewCars(active);
+        setAllCars(items.filter(i => i.status === 'active'));
       })
       .catch(() => {});
   }, []);
+
+  const tabCars: Record<CarTab, StoreItem[]> = {
+    recent:  [...allCars]
+      .sort((a, b) => new Date(b.inspectedAt ?? 0).getTime() - new Date(a.inspectedAt ?? 0).getTime())
+      .slice(0, 8),
+    popular: allCars.filter(c => c.hasReport).slice(0, 8),
+    viewed:  [...allCars]
+      .sort((a, b) => getUSD(b) - getUSD(a))
+      .slice(0, 8),
+  };
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -155,58 +212,66 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 최신 매물 ── */}
-      {previewCars.length > 0 && (
-        <section className="bg-gray-50 border-y border-gray-100 py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-end justify-between mb-10">
-              <div>
-                <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">지금 올라온 차</p>
-                <h2 className="text-3xl font-black text-gray-900">방금 등록된 매물</h2>
-              </div>
-              <Link href="/buy"
-                className="text-sm font-bold text-gray-400 hover:text-black transition-colors flex items-center gap-1">
-                전체보기
-                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </Link>
+      {/* ── 매물 탭 섹션 ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* 헤더 + 탭 */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10">
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">LISTINGS</p>
+              <h2 className="text-3xl font-black text-gray-900">지금 뜨는 매물</h2>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {previewCars.map(car => {
-                const thumb = car.photos?.exterior?.[0];
-                const usd = getUSD(car);
-                return (
-                  <Link key={car.id} href={`/buy/${car.id}`} className="group">
-                    <div className="relative aspect-[4/3] bg-white rounded-2xl overflow-hidden mb-3 border border-gray-200 group-hover:border-violet-400 group-hover:shadow-md transition-all">
-                      {thumb ? (
-                        <Image src={thumb} alt={car.titleKo} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="300px" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg viewBox="0 0 120 70" fill="none" className="w-24 h-14 text-gray-200">
-                            <rect x="5" y="22" width="110" height="36" rx="7" fill="currentColor"/>
-                            <path d="M15 22L27 8H93L105 22Z" fill="currentColor"/>
-                            <circle cx="28" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
-                            <circle cx="92" cy="58" r="11" fill="white" stroke="#e5e7eb" strokeWidth="2"/>
-                          </svg>
-                        </div>
-                      )}
-                      <span className="absolute top-2.5 left-2.5 bg-black/80 text-white text-[9px] font-black px-2 py-0.5 rounded-full">진단완료</span>
-                    </div>
-                    <p className="text-xs text-gray-400 mb-0.5">{car.year}년 · {car.region}</p>
-                    <p className="font-bold text-gray-900 text-sm truncate mb-1">{car.titleKo}</p>
-                    <p className="font-black text-gray-900">
-                      {usd > 0 ? `$${usd.toLocaleString()}` : '가격 협의'}
-                    </p>
-                    <p className="text-xs text-gray-400">{car.mileage.toLocaleString()} km</p>
-                  </Link>
-                );
-              })}
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 self-start sm:self-auto">
+              {(Object.keys(TAB_LABELS) as CarTab[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={clsx(
+                    'px-4 py-2 rounded-lg text-sm font-bold transition-all',
+                    activeTab === tab
+                      ? 'bg-violet-600 text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-900'
+                  )}
+                >
+                  {TAB_LABELS[tab]}
+                </button>
+              ))}
             </div>
           </div>
-        </section>
-      )}
+
+          {/* 카드 그리드 */}
+          {allCars.length === 0 ? (
+            <div className="text-center py-20 text-gray-300">
+              <p className="text-5xl mb-4">🚗</p>
+              <p className="font-semibold text-gray-400">곧 매물이 올라옵니다.</p>
+            </div>
+          ) : tabCars[activeTab].length === 0 ? (
+            <div className="text-center py-20 text-gray-400">
+              <p className="font-semibold">해당 조건의 매물이 없습니다.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {tabCars[activeTab].map((car, i) => (
+                <CarCard
+                  key={car.id}
+                  car={car}
+                  rank={activeTab === 'popular' ? i + 1 : undefined}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-10">
+            <Link href="/buy"
+              className="inline-flex items-center gap-2 border border-gray-300 hover:border-violet-500 hover:text-violet-600 text-gray-600 font-bold px-8 py-3.5 rounded-xl text-sm transition-colors">
+              전체 매물 보기
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* ── 어떻게 진행되나요? ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
