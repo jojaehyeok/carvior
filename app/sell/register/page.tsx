@@ -438,12 +438,10 @@ export default function SelfRegisterPage() {
           매물이 접수되었습니다.<br />
           1~2 영업일 내 카비어 검토 후 스토어에 노출됩니다.
         </p>
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl px-5 py-4 text-xs text-amber-700 text-left mb-8 max-w-sm w-full">
-          <p className="font-extrabold mb-1.5">이용요금 납부 안내</p>
-          <p>카카오뱅크 <span className="font-bold">3333-35-1997303</span><br />
-          예금주: 카비어 (조재혁)<br />
-          금액: <span className="font-bold">20,000원</span><br />
-          입금 후 <span className="font-bold">010-2285-6017</span>로 문자 주시면 검토가 시작됩니다.</p>
+        <div className="bg-green-50 border border-green-100 rounded-2xl px-5 py-4 text-xs text-green-800 text-left mb-8 max-w-sm w-full">
+          <p className="font-extrabold mb-1.5">🎉 MVP 기간 — 등록비 무료</p>
+          <p>별도 납부 없이 바로 검토가 시작됩니다.<br />
+          문의: <span className="font-bold">010-2285-6017</span></p>
         </div>
         <div className="flex gap-3 w-full max-w-sm">
           <button onClick={() => router.push('/buy')} className="flex-1 py-3.5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600">
@@ -705,15 +703,21 @@ export default function SelfRegisterPage() {
           {/* 이용요금 */}
           <div className="bg-zinc-950 rounded-2xl p-5">
             <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-2">이용 요금</p>
-            <p className="text-white text-3xl font-black tabular-nums mb-1">
-              20,000<span className="text-base font-bold text-zinc-400">원</span>
-            </p>
-            <p className="text-zinc-500 text-xs">매물 검토 및 스토어 등록 비용 · 딜러 수수료 별도 없음</p>
+            <div className="flex items-baseline gap-3 mb-1">
+              <span className="text-zinc-600 text-xl font-bold line-through tabular-nums">20,000원</span>
+              <span className="text-white text-3xl font-black tabular-nums">
+                0<span className="text-base font-bold text-zinc-400">원</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="bg-violet-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full">MVP 무료</span>
+              <p className="text-zinc-500 text-xs">딜러 수수료도 없음</p>
+            </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3.5 text-xs text-amber-800 leading-relaxed">
-            등록 신청 후 <strong>카카오뱅크 3333-35-1997303</strong>으로 20,000원 이체 시<br />
-            검토가 시작됩니다. 1~2 영업일 내 스토어에 노출됩니다.
+          <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3.5 text-xs text-green-800 leading-relaxed">
+            🎉 MVP 기간 동안 등록비 완전 무료입니다.<br />
+            등록 신청 후 <strong>1~2 영업일 내</strong> 검토를 거쳐 스토어에 노출됩니다.
           </div>
 
           <button
