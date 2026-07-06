@@ -222,7 +222,7 @@ export default function CarDetailPage() {
   const [lbRot, setLbRot] = useState(0);
 
   useEffect(() => {
-    fetch(`/api/proposals?itemId=${id}`)
+    fetch(`/api/v1/proposals/count?itemId=${id}`)
       .then(r => r.json())
       .then(d => setOfferCount(d.count ?? 0))
       .catch(() => {});
@@ -615,7 +615,7 @@ export default function CarDetailPage() {
                 }
                 setOfferSubmitting(true);
                 try {
-                  const res = await fetch('/api/proposals', {
+                  const res = await fetch('/api/v1/proposals', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
