@@ -65,7 +65,7 @@ export const authOptions: NextAuthOptions = {
       if (account && account.type !== 'credentials' && token.email) {
         try {
           const res = await fetch(`${NEST}/v1/users/by-email?email=${encodeURIComponent(token.email as string)}`);
-          if (res.ok) { const u = await res.json(); token.role = u.role; }
+          if (res.ok) { const u = await res.json(); token.role = u.role; token.userId = String(u.id); }
         } catch {}
       }
       if (account) token.provider = account.provider;
