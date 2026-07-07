@@ -8,7 +8,26 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: '로그인 필요' }, { status: 401 });
 
-  const userId = (session.user as any).id;
+  let userId = (session.user as any).id;
+
+  // userId가 없거나 유효하지 않으면 이메일로 DB 조회
+  if (!userId || isNaN(Number(userId))) {
+    const email = session.user.email;
+    if (email) {
+      try {
+        const userRes = await fetch(`${NEST}/v1/users/by-email?email=${encodeURIComponent(email)}`, {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (userRes.ok) {
+          const u = await userRes.json();
+          userId = u.id;
+        }
+      } catch {}
+    }
+  }
+
+  if (!userId || isNaN(Number(userId))) return NextResponse.json([]);
+
   try {
     const res = await fetch(`${NEST}/v1/admin/store-items/my?userId=${userId}`, {
       signal: AbortSignal.timeout(5000),
