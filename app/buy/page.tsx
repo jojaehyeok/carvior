@@ -27,6 +27,7 @@ interface StoreItem {
   status: 'active' | 'sold' | 'hidden';
   photos: { exterior?: string[] };
   hasReport: boolean;
+  carHash?: string;
 }
 
 function getUSD(item: StoreItem) {
@@ -162,8 +163,16 @@ export default function BuyPage() {
                     </div>
                   )}
                   <div className="absolute top-3 left-3 flex gap-1.5">
-                    {car.hasReport && (
-                      <span className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">진단완료</span>
+                    {car.hasReport && car.carHash && (
+                      <a
+                        href={`/report/${car.carHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full hover:bg-black transition-colors"
+                      >
+                        진단완료
+                      </a>
                     )}
                     {car.accident && (
                       <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">사고</span>

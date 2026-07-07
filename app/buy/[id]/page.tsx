@@ -22,6 +22,7 @@ interface UnifiedCar {
   hidePrice?: boolean;
   status?: string;
   hasReport: boolean;
+  carHash?: string;
   location: string;
   category: string;
   region: string;
@@ -254,6 +255,7 @@ export default function CarDetailPage() {
             priceKRW: found.priceKRW || 0,
             priceUSD: found.priceUSD || Math.round((found.priceKRW || 0) / 1350),
             hasReport: found.hasReport ?? true,
+            carHash: found.carHash ?? undefined,
             location: found.location || 'Korea',
             category: found.category || 'SUV',
             region: found.region || '서울',
@@ -536,11 +538,18 @@ export default function CarDetailPage() {
               </div>
             </div>
 
-            {car.hasReport && (
-              <p className="text-center text-xs text-gray-400 leading-relaxed">
-                카비어 공인 진단사가 직접 방문하여 진단한 차량입니다.<br />
-                진단 리포트 열람 및 수출 지원은 카비어를 통해 문의해 주세요.
-              </p>
+            {car.hasReport && car.carHash && (
+              <a
+                href={`/report/${car.carHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full border border-[#1a2e6b] text-[#1a2e6b] font-bold py-3 rounded-xl text-sm hover:bg-[#1a2e6b]/5 transition-colors"
+              >
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                진단 리포트 보기
+              </a>
             )}
           </div>
         </div>
