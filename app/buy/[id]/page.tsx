@@ -253,7 +253,7 @@ export default function CarDetailPage() {
             colorKo: found.colorKo || found.color || '',
             accident: found.accident || false,
             priceKRW: found.priceKRW || 0,
-            priceUSD: found.priceUSD || Math.round((found.priceKRW || 0) / 1350),
+            priceUSD: Number(found.priceUSD) || Math.round((Number(found.priceKRW) || 0) / 1350),
             hasReport: found.hasReport ?? true,
             carHash: found.carHash ?? undefined,
             location: found.location || 'Korea',
