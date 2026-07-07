@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "카비어(Carvior) - 중고차 진단 플랫폼",
+  name: "카비어(Carvior) - 중고차 진단 수출 플랫폼",
   description: "R&D 용",
   navItems: [
     {
