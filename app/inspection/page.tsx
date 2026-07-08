@@ -7,17 +7,8 @@ const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6
 const AMOUNT      = 88_000;
 const AMOUNT_BASE = 80_000;
 
-const BANK_INFO = {
-  bank:   '카카오뱅크',
-  number: '3333-35-1997303',
-  holder: '(주)카비어',
-};
-
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
-
-type PayMethod = 'widget' | 'direct';
 
 interface Form {
   carNumber:     string;
@@ -28,7 +19,6 @@ interface Form {
   addressDetail: string;
 }
 
-// 오늘부터 14일치 날짜 생성 (내일부터 시작)
 function getAvailableDays() {
   return Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
@@ -44,15 +34,12 @@ export default function InspectionCheckoutPage() {
   });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
-  const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
   const [widgetReady, setWidgetReady]   = useState(false);
-  const [transferDone, setTransferDone] = useState(false);
   const widgetsRef = useRef<any>(null);
 
   const days = getAvailableDays();
 
-  // v2 위젯 초기화
   useEffect(() => {
     const init = async () => {
       const TP      = (window as any).TossPayments;
@@ -72,7 +59,6 @@ export default function InspectionCheckoutPage() {
     document.head.appendChild(s);
   }, []);
 
-  // 카카오(다음) 주소 검색 — marketing 페이지와 동일
   const openAddressSearch = () => {
     if (!(window as any).daum?.Postcode) {
       alert('주소 검색 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.'); return;
@@ -140,65 +126,6 @@ export default function InspectionCheckoutPage() {
     }
   };
 
-  const submitTransfer = async () => {
-    if (!validate()) return;
-    setLoading(true);
-    try {
-      await fetch('https://carvior.store/api/v1/external/request', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source:            'CARVIOR_INSPECTION',
-          carNumber:         form.carNumber,
-          carOwner:          form.ownerName,
-          contact:           form.phone.replace(/-/g, ''),
-          address:           `${form.address} ${form.addressDetail}`.trim(),
-          preferredDateTime,
-          paymentMethod:     'BANK_TRANSFER',
-          amount:            AMOUNT,
-        }),
-      });
-      setTransferDone(true);
-    } catch {
-      alert('신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (transferDone) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 max-w-md w-full text-center">
-          <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🏦</div>
-          <h1 className="text-xl font-black text-gray-900 mb-1">입금 신청이 완료되었습니다</h1>
-          <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-            아래 계좌로 <strong className="text-gray-700">88,000원</strong>을 이체해 주세요.<br />
-            입금 확인 후 담당자가 연락드립니다.
-          </p>
-          <div className="bg-gray-50 rounded-xl p-4 text-left mb-6">
-            <p className="text-xs text-gray-400 mb-3 font-bold uppercase tracking-wider">입금 계좌</p>
-            <div className="space-y-1.5">
-              {[['은행', BANK_INFO.bank], ['계좌번호', BANK_INFO.number], ['예금주', BANK_INFO.holder]].map(([l, v]) => (
-                <div key={l} className="flex justify-between text-sm">
-                  <span className="text-gray-400">{l}</span>
-                  <span className="font-bold text-gray-900 font-mono">{v}</span>
-                </div>
-              ))}
-              <div className="border-t border-gray-100 pt-2 flex justify-between text-sm">
-                <span className="text-gray-400">입금액</span>
-                <span className="font-black text-violet-600">88,000원</span>
-              </div>
-            </div>
-          </div>
-          <Link href="/" className="block w-full bg-gray-900 text-white font-black py-3.5 rounded-xl text-sm text-center">
-            홈으로 돌아가기
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-100">
@@ -258,14 +185,13 @@ export default function InspectionCheckoutPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-5">방문 일정</h2>
 
-              {/* 날짜 */}
               <p className="text-xs font-bold text-gray-500 mb-2.5">방문 날짜 <span className="text-red-500">*</span></p>
-              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
                 {days.map(d => {
-                  const iso     = d.toISOString().slice(0, 10);
-                  const isSat   = d.getDay() === 6;
-                  const isSun   = d.getDay() === 0;
-                  const active  = selectedDate === iso;
+                  const iso    = d.toISOString().slice(0, 10);
+                  const isSat  = d.getDay() === 6;
+                  const isSun  = d.getDay() === 0;
+                  const active = selectedDate === iso;
                   return (
                     <button
                       key={iso}
@@ -287,16 +213,18 @@ export default function InspectionCheckoutPage() {
                 })}
               </div>
 
-              {/* 시간 */}
               <p className="text-xs font-bold text-gray-500 mt-5 mb-2.5">방문 시간 <span className="text-red-500">*</span></p>
               <div className="grid grid-cols-4 gap-2">
                 {TIME_SLOTS.map(t => (
                   <button
                     key={t}
                     onClick={() => setSelectedTime(t)}
+                    disabled={!selectedDate}
                     className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
                       selectedTime === t
                         ? 'border-blue-500 bg-blue-500 text-white'
+                        : !selectedDate
+                        ? 'border-gray-100 text-gray-300 cursor-not-allowed'
                         : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
                     }`}
                   >
@@ -313,9 +241,8 @@ export default function InspectionCheckoutPage() {
                 <div className="flex gap-2">
                   <input
                     value={form.address}
-                    onChange={set('address')}
-                    placeholder="주소 검색"
                     readOnly
+                    placeholder="주소 검색"
                     className={`${inputCls} flex-1 bg-gray-50 cursor-pointer`}
                     onClick={openAddressSearch}
                   />
@@ -336,11 +263,8 @@ export default function InspectionCheckoutPage() {
               </div>
             </div>
 
-            {/* 토스 결제 위젯 (widget mode일 때, DOM에 항상 존재) */}
-            <div
-              className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
-              style={{ display: payMethod === 'widget' ? 'block' : 'none' }}
-            >
+            {/* 토스 결제 위젯 */}
+            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
               {!widgetReady && (
                 <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
                   <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
@@ -356,90 +280,8 @@ export default function InspectionCheckoutPage() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
 
-              {/* 결제 방법 */}
-              <div>
-                <p className="text-sm font-black text-gray-900 mb-3">결제 방법</p>
-
-                <button
-                  onClick={() => setPayMethod('widget')}
-                  className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all mb-2 ${
-                    payMethod === 'widget'
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-blue-500 shrink-0">
-                    <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth={1.8}/>
-                    <path d="M2 10h20" stroke="currentColor" strokeWidth={1.8}/>
-                    <path d="M6 15h4" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round"/>
-                  </svg>
-                  <div className="text-left">
-                    <p className={`text-sm font-black ${payMethod === 'widget' ? 'text-blue-700' : 'text-gray-700'}`}>
-                      카드·계좌이체·간편결제
-                    </p>
-                    <p className="text-[10px] text-gray-400">토스페이먼츠 결제 위젯</p>
-                  </div>
-                  {payMethod === 'widget' && (
-                    <span className="ml-auto text-[10px] font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full shrink-0">추천</span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setPayMethod('direct')}
-                  className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all ${
-                    payMethod === 'direct'
-                      ? 'border-gray-700 bg-gray-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-gray-500 shrink-0">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth={1.8}/>
-                    <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth={1.8}/>
-                  </svg>
-                  <div className="text-left">
-                    <p className={`text-sm font-black ${payMethod === 'direct' ? 'text-gray-900' : 'text-gray-600'}`}>
-                      직접 계좌이체
-                    </p>
-                    <p className="text-[10px] text-gray-400">카비어 계좌로 직접 입금</p>
-                  </div>
-                </button>
-
-                {payMethod === 'direct' && (
-                  <div className="mt-3 bg-gray-50 rounded-xl p-3 space-y-1.5">
-                    <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">입금 계좌</p>
-                    {[
-                      ['은행',     BANK_INFO.bank],
-                      ['계좌번호', BANK_INFO.number],
-                      ['예금주',   BANK_INFO.holder],
-                    ].map(([l, v]) => (
-                      <div key={l} className="flex justify-between text-xs">
-                        <span className="text-gray-400">{l}</span>
-                        <span className="font-bold text-gray-800 font-mono">{v}</span>
-                      </div>
-                    ))}
-                    <div className="border-t border-gray-200 pt-2 flex justify-between text-xs">
-                      <span className="text-gray-400">입금액</span>
-                      <span className="font-black text-gray-900">88,000원</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-2.5 space-y-1">
-                  <p className="text-[11px] text-gray-400 flex items-start gap-1">
-                    <span className="shrink-0">•</span>
-                    {payMethod === 'direct'
-                      ? '입금 확인 후 담당자가 24시간 내 연락드립니다.'
-                      : '결제 후 담당자가 일정을 확인하여 안내드립니다.'}
-                  </p>
-                  <p className="text-[11px] text-gray-400 flex items-start gap-1">
-                    <span className="shrink-0">•</span>
-                    검차 전날 18시까지 100% 환불 가능합니다.
-                  </p>
-                </div>
-              </div>
-
               {/* 결제 금액 */}
-              <div className="border-t border-gray-100 pt-5">
+              <div>
                 <p className="text-sm font-black text-gray-900 mb-3">결제 금액</p>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -478,27 +320,17 @@ export default function InspectionCheckoutPage() {
                   </div>
                 )}
 
-                <p className="text-[10px] text-gray-400 text-right mt-1">검차 전날 18시까지 100% 환불 가능해요</p>
+                <p className="text-[10px] text-gray-400 text-right mt-2">검차 전날 18시까지 100% 환불 가능해요</p>
               </div>
 
               {/* 결제 버튼 */}
-              {payMethod === 'direct' ? (
-                <button
-                  onClick={submitTransfer}
-                  disabled={loading}
-                  className="w-full bg-gray-900 hover:bg-gray-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
-                >
-                  {loading ? '신청 중...' : '직접 계좌이체 신청하기'}
-                </button>
-              ) : (
-                <button
-                  onClick={payWithWidget}
-                  disabled={loading || !widgetReady}
-                  className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
-                >
-                  {loading ? '결제 처리 중...' : !widgetReady ? '로딩 중...' : '결제하기'}
-                </button>
-              )}
+              <button
+                onClick={payWithWidget}
+                disabled={loading || !widgetReady}
+                className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
+              >
+                {loading ? '결제 처리 중...' : !widgetReady ? '로딩 중...' : '결제하기'}
+              </button>
 
               <p className="text-center text-[10px] text-gray-400">
                 • 왼쪽 결제창에서 수단 선택 및 약관 동의 후 결제하기를 눌러주세요.
