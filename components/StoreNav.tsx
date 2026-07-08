@@ -33,7 +33,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
 
         {/* 로고 */}
         <Link href="/" className="flex items-center shrink-0">
-          <Image src="/logo.png" alt="카비어" width={110} height={36} className="object-contain" priority />
+          <Image src="/logo.png" alt="카비어" width={90} height={44} className="object-contain h-11 w-auto" priority />
         </Link>
 
         {/* 데스크탑 메뉴 */}
