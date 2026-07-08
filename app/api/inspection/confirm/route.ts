@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const SECRET_KEY = process.env.TOSS_SECRET_KEY ?? 'test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R';
+const SECRET_KEY = process.env.TOSS_SECRET_KEY ?? 'live_gsk_EP59LybZ8BlWyb9jXnmkV6GYo7pR';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();

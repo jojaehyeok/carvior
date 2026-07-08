@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import StoreNav from '@/components/StoreNav';
 
-const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
+const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
 const AMOUNT      = 88_000;
 const AMOUNT_BASE = 80_000;
 
@@ -32,7 +32,8 @@ export default function InspectionCheckoutPage() {
     address: '', addressDetail: '', preferredDate: '',
   });
   const [payMethod, setPayMethod] = useState<PayMethod>('toss');
-  const [agreed, setAgreed]       = useState(false);
+  const [agreements, setAgreements] = useState({ scope: false, warranty: false, refund: false });
+  const allAgreed = agreements.scope && agreements.warranty && agreements.refund;
   const [loading, setLoading]     = useState(false);
   const [sdkReady, setSdkReady]   = useState(false);
   const [transferDone, setTransferDone] = useState(false);
@@ -52,7 +53,7 @@ export default function InspectionCheckoutPage() {
     if (!form.name || !form.phone || !form.carNumber || !form.address || !form.preferredDate) {
       alert('필수 항목을 모두 입력해주세요.'); return false;
     }
-    if (!agreed) { alert('결제 동의가 필요합니다.'); return false; }
+    if (!allAgreed) { alert('필수 약관에 모두 동의해주세요.'); return false; }
     return true;
   };
 
@@ -345,28 +346,37 @@ export default function InspectionCheckoutPage() {
                 <p className="text-sm font-black text-gray-900 mb-3">
                   약관 동의 <span className="text-red-500">*</span>
                 </p>
+                {/* 전체 동의 */}
                 <label className="flex items-center gap-2.5 cursor-pointer mb-3">
                   <input
                     type="checkbox"
-                    checked={agreed}
-                    onChange={e => setAgreed(e.target.checked)}
+                    checked={allAgreed}
+                    onChange={e => setAgreements({ scope: e.target.checked, warranty: e.target.checked, refund: e.target.checked })}
                     className="w-4 h-4 accent-blue-600 rounded"
                   />
                   <span className="text-xs font-bold text-gray-700">약관에 모두 동의합니다.</span>
                 </label>
-                <div className="space-y-1.5">
-                  {['(필수) 검수 범위 및 책임고지 동의', '(필수) 서비스 보증범위 동의', '(필수) 환불규정 동의'].map(t => (
-                    <p key={t} className="text-[11px] text-gray-400 flex items-center justify-between">
-                      <span className="flex items-center gap-1">
-                        <svg className="w-3 h-3 text-blue-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        {t}
-                      </span>
-                      <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                {/* 개별 항목 */}
+                <div className="space-y-2 pl-0.5">
+                  {([
+                    { key: 'scope',   label: '(필수) 검수 범위 및 책임고지 동의' },
+                    { key: 'warranty', label: '(필수) 서비스 보증범위 동의' },
+                    { key: 'refund',  label: '(필수) 환불규정 동의' },
+                  ] as const).map(({ key, label }) => (
+                    <label key={key} className="flex items-center justify-between cursor-pointer group">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={agreements[key]}
+                          onChange={e => setAgreements(prev => ({ ...prev, [key]: e.target.checked }))}
+                          className="w-3.5 h-3.5 accent-blue-600 shrink-0"
+                        />
+                        <span className="text-[11px] text-gray-500 group-hover:text-gray-700 transition-colors">{label}</span>
+                      </div>
+                      <svg className="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path d="M9 18l6-6-6-6"/>
                       </svg>
-                    </p>
+                    </label>
                   ))}
                 </div>
               </div>
