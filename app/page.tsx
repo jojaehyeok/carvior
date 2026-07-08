@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { clsx } from 'clsx';
 import AppFooter from '@/components/footermodal';
+import InspectionPromoPopup from '@/components/InspectionPromoPopup';
 
 const USD_RATE = 1350;
 
@@ -85,9 +86,19 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
+  function agePenalty(inspectedAt?: string) {
+    if (!inspectedAt) return 2;
+    const days = (Date.now() - new Date(inspectedAt).getTime()) / 86400000;
+    return days > 30 ? 2 : days > 14 ? 1 : 0;
+  }
+
   const tabCars: Record<CarTab, StoreItem[]> = {
-    recent:  [...allCars]
-      .sort((a, b) => new Date(b.inspectedAt ?? 0).getTime() - new Date(a.inspectedAt ?? 0).getTime())
+    recent: [...allCars]
+      .sort((a, b) => {
+        const pa = agePenalty(a.inspectedAt), pb = agePenalty(b.inspectedAt);
+        if (pa !== pb) return pa - pb;
+        return new Date(b.inspectedAt ?? 0).getTime() - new Date(a.inspectedAt ?? 0).getTime();
+      })
       .slice(0, 8),
     popular: allCars.filter(c => c.hasReport).slice(0, 8),
     viewed:  [...allCars]
@@ -97,6 +108,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      <InspectionPromoPopup />
 
       {/* ── 히어로 ── */}
       <section className="relative bg-zinc-900 overflow-hidden">

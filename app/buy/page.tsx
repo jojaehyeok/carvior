@@ -45,12 +45,78 @@ const DEMO_CARS: StoreItem[] = [
   { id: '9',  bookingId: 9,  titleKo: '현대 투싼 NX4',     titleEn: 'Hyundai Tucson',   trim: 'Prestige', year: 2023, mileage: 15000,  fuel: '하이브리드', accident: false, priceKRW: 34_500_000, category: 'SUV', region: '부산', inspectedAt: '2026-05-08', status: 'active', photos: {}, hasReport: true },
 ];
 
+function isStaleItem(inspectedAt: string) {
+  return (Date.now() - new Date(inspectedAt).getTime()) / 86400000 > 30;
+}
+
 function fmtMileage(n: number) {
   return n.toLocaleString() + ' km';
 }
 function fmtPrice(n: number) {
   if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(1)}억`;
   return `${Math.round(n / 10_000)}만원`;
+}
+
+function BuyCard({ car }: { car: StoreItem }) {
+  const stale = isStaleItem(car.inspectedAt);
+  return (
+    <Link
+      href={`/buy/${car.id}`}
+      className={clsx(
+        'group block rounded-2xl overflow-hidden border hover:shadow-lg transition-all',
+        stale ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
+      )}
+    >
+      <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
+        {car.photos?.exterior?.[0] ? (
+          <img src={car.photos.exterior[0]} alt={car.titleKo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <svg viewBox="0 0 500 280" fill="none" className="w-4/5 opacity-20">
+              <rect x="40" y="140" width="420" height="100" rx="20" fill="#000"/>
+              <path d="M110 140 L155 75 H345 L390 140Z" fill="#000"/>
+              <circle cx="130" cy="220" r="40" fill="#333"/>
+              <circle cx="370" cy="220" r="40" fill="#333"/>
+            </svg>
+          </div>
+        )}
+        <div className="absolute top-3 left-3 flex gap-1.5">
+          {stale && (
+            <span className="bg-gray-500/70 text-white text-[9px] font-bold px-2 py-1 rounded-full">오래된 매물</span>
+          )}
+          {car.hasReport && car.carHash && (
+            <a
+              href={`/report/${car.carHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full hover:bg-black transition-colors"
+            >
+              진단완료
+            </a>
+          )}
+          {car.accident && (
+            <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">사고</span>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="text-xs text-gray-400 mb-0.5">{car.year}년 · {car.region}</p>
+        <h3 className="font-bold text-gray-900 leading-snug mb-2 line-clamp-1">{car.titleKo}</h3>
+        <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+          <span>{fmtMileage(car.mileage)}</span>
+          <span>·</span>
+          <span>{car.fuel}</span>
+        </div>
+        <p className="text-lg font-black text-gray-900">
+          {getUSD(car) > 0 ? `$ ${getUSD(car).toLocaleString()}` : '가격 협의'}
+        </p>
+        {car.priceKRW > 0 && (
+          <p className="text-xs text-gray-400 mt-0.5">{fmtPrice(car.priceKRW)}</p>
+        )}
+      </div>
+    </Link>
+  );
 }
 
 export default function BuyPage() {
@@ -78,6 +144,14 @@ export default function BuyPage() {
       if (sortBy === 'price_asc')  return a.priceKRW - b.priceKRW;
       if (sortBy === 'price_desc') return b.priceKRW - a.priceKRW;
       if (sortBy === 'mileage')    return a.mileage - b.mileage;
+      // 최신순: 30일+ → 뒤로, 14일+ → 중간, 신규 → 앞
+      const now = Date.now();
+      const penalty = (d: string) => {
+        const age = (now - new Date(d).getTime()) / 86400000;
+        return age > 30 ? 2 : age > 14 ? 1 : 0;
+      };
+      const pa = penalty(a.inspectedAt), pb = penalty(b.inspectedAt);
+      if (pa !== pb) return pa - pb;
       return new Date(b.inspectedAt).getTime() - new Date(a.inspectedAt).getTime();
     });
 
@@ -147,55 +221,7 @@ export default function BuyPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map(car => (
-              <Link key={car.id} href={`/buy/${car.id}`} className="group block rounded-2xl overflow-hidden border border-gray-100 hover:border-gray-300 hover:shadow-lg transition-all">
-                {/* 썸네일 */}
-                <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
-                  {car.photos?.exterior?.[0] ? (
-                    <img src={car.photos.exterior[0]} alt={car.titleKo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <svg viewBox="0 0 500 280" fill="none" className="w-4/5 opacity-20">
-                        <rect x="40" y="140" width="420" height="100" rx="20" fill="#000"/>
-                        <path d="M110 140 L155 75 H345 L390 140Z" fill="#000"/>
-                        <circle cx="130" cy="220" r="40" fill="#333"/>
-                        <circle cx="370" cy="220" r="40" fill="#333"/>
-                      </svg>
-                    </div>
-                  )}
-                  <div className="absolute top-3 left-3 flex gap-1.5">
-                    {car.hasReport && car.carHash && (
-                      <a
-                        href={`/report/${car.carHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => e.stopPropagation()}
-                        className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full hover:bg-black transition-colors"
-                      >
-                        진단완료
-                      </a>
-                    )}
-                    {car.accident && (
-                      <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">사고</span>
-                    )}
-                  </div>
-                </div>
-                {/* 정보 */}
-                <div className="p-4">
-                  <p className="text-xs text-gray-400 mb-0.5">{car.year}년 · {car.region}</p>
-                  <h3 className="font-bold text-gray-900 leading-snug mb-2 line-clamp-1">{car.titleKo}</h3>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-                    <span>{fmtMileage(car.mileage)}</span>
-                    <span>·</span>
-                    <span>{car.fuel}</span>
-                  </div>
-                  <p className="text-lg font-black text-gray-900">
-                    {getUSD(car) > 0 ? `$ ${getUSD(car).toLocaleString()}` : '가격 협의'}
-                  </p>
-                  {car.priceKRW > 0 && (
-                    <p className="text-xs text-gray-400 mt-0.5">{fmtPrice(car.priceKRW)}</p>
-                  )}
-                </div>
-              </Link>
+              <BuyCard key={car.id} car={car} />
             ))}
           </div>
         )}

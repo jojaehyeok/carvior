@@ -12,7 +12,7 @@ import Script from "next/script"; // 카카오 지도 위해 추가
 export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
-  icons: { icon: "/logo.png" },
+  icons: { icon: "/logo-icon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
