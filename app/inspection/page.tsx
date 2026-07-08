@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import StoreNav from '@/components/StoreNav';
 
@@ -14,7 +14,7 @@ const BANK_INFO = {
   holder: '(주)카비어',
 };
 
-type PayMethod = 'toss' | 'direct';
+type PayMethod = 'widget' | 'direct';
 
 interface Form {
   name: string;
@@ -31,19 +31,38 @@ export default function InspectionCheckoutPage() {
     name: '', email: '', phone: '', carNumber: '',
     address: '', addressDetail: '', preferredDate: '',
   });
-  const [payMethod, setPayMethod] = useState<PayMethod>('toss');
-  const [agreements, setAgreements] = useState({ scope: false, warranty: false, refund: false });
-  const allAgreed = agreements.scope && agreements.warranty && agreements.refund;
-  const [loading, setLoading]     = useState(false);
-  const [sdkReady, setSdkReady]   = useState(false);
+  const [payMethod, setPayMethod]     = useState<PayMethod>('widget');
+  const [loading, setLoading]         = useState(false);
+  const [widgetReady, setWidgetReady] = useState(false);
   const [transferDone, setTransferDone] = useState(false);
+  const widgetsRef = useRef<any>(null);
 
+  // v2 위젯 초기화
   useEffect(() => {
-    if ((window as any).TossPayments) { setSdkReady(true); return; }
-    const script = document.createElement('script');
-    script.src = 'https://js.tosspayments.com/v1/payment';
-    script.onload = () => setSdkReady(true);
-    document.head.appendChild(script);
+    const init = async () => {
+      const TP      = (window as any).TossPayments;
+      const widgets = TP(TOSS_CLIENT_KEY).widgets({ customerKey: TP.ANONYMOUS });
+      widgetsRef.current = widgets;
+
+      await widgets.setAmount({ currency: 'KRW', value: AMOUNT });
+      await Promise.all([
+        widgets.renderPaymentMethods({
+          selector:   '#toss-payment-widget',
+          variantKey: 'DEFAULT',
+        }),
+        widgets.renderAgreement({
+          selector:   '#toss-agreement-widget',
+          variantKey: 'AGREEMENT',
+        }),
+      ]);
+      setWidgetReady(true);
+    };
+
+    if ((window as any).TossPayments) { init(); return; }
+    const s  = document.createElement('script');
+    s.src    = 'https://js.tosspayments.com/v2/standard';
+    s.onload = () => init();
+    document.head.appendChild(s);
   }, []);
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -53,18 +72,17 @@ export default function InspectionCheckoutPage() {
     if (!form.name || !form.phone || !form.carNumber || !form.address || !form.preferredDate) {
       alert('필수 항목을 모두 입력해주세요.'); return false;
     }
-    if (!allAgreed) { alert('필수 약관에 모두 동의해주세요.'); return false; }
     return true;
   };
 
-  const payByToss = async (method: '계좌이체') => {
+  const payWithWidget = async () => {
     if (!validate()) return;
+    if (!widgetReady || !widgetsRef.current) {
+      alert('결제 준비 중입니다. 잠시 후 다시 시도해주세요.'); return;
+    }
     setLoading(true);
     try {
-      const toss = (window as any).TossPayments(TOSS_CLIENT_KEY);
       const orderId = `CARVIOR-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-
-      // Toss 리디렉트 후에도 주문자 정보를 복원할 수 있도록 저장
       sessionStorage.setItem(`order_${orderId}`, JSON.stringify({
         carNumber:         form.carNumber,
         carOwner:          form.name,
@@ -73,16 +91,14 @@ export default function InspectionCheckoutPage() {
         preferredDateTime: form.preferredDate,
         email:             form.email || '',
       }));
-
-      await toss.requestPayment(method, {
-        amount:              AMOUNT,
+      await widgetsRef.current.requestPayment({
         orderId,
         orderName:           '카비어 공인 검차 서비스 (VAT 포함)',
+        successUrl:          `${window.location.origin}/inspection/success`,
+        failUrl:             `${window.location.origin}/inspection/fail`,
         customerName:        form.name,
         customerEmail:       form.email || undefined,
         customerMobilePhone: form.phone.replace(/-/g, ''),
-        successUrl: `${window.location.origin}/inspection/success`,
-        failUrl:    `${window.location.origin}/inspection/fail`,
       });
     } catch (e: any) {
       if (e?.code !== 'USER_CANCEL') alert('결제 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -95,17 +111,17 @@ export default function InspectionCheckoutPage() {
     setLoading(true);
     try {
       await fetch('https://carvior.store/api/v1/external/request', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          source: 'CARVIOR_INSPECTION',
-          carNumber: form.carNumber,
-          carOwner: form.name,
-          contact: form.phone.replace(/-/g, ''),
-          address: `${form.address} ${form.addressDetail}`.trim(),
+          source:            'CARVIOR_INSPECTION',
+          carNumber:         form.carNumber,
+          carOwner:          form.name,
+          contact:           form.phone.replace(/-/g, ''),
+          address:           `${form.address} ${form.addressDetail}`.trim(),
           preferredDateTime: form.preferredDate,
-          paymentMethod: 'BANK_TRANSFER',
-          amount: AMOUNT,
+          paymentMethod:     'BANK_TRANSFER',
+          amount:            AMOUNT,
         }),
       });
       setTransferDone(true);
@@ -129,18 +145,12 @@ export default function InspectionCheckoutPage() {
           <div className="bg-gray-50 rounded-xl p-4 text-left mb-6">
             <p className="text-xs text-gray-400 mb-3 font-bold uppercase tracking-wider">입금 계좌</p>
             <div className="space-y-1.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">은행</span>
-                <span className="font-bold text-gray-900">{BANK_INFO.bank}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">계좌번호</span>
-                <span className="font-mono font-bold text-gray-900">{BANK_INFO.number}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">예금주</span>
-                <span className="font-bold text-gray-900">{BANK_INFO.holder}</span>
-              </div>
+              {[['은행', BANK_INFO.bank], ['계좌번호', BANK_INFO.number], ['예금주', BANK_INFO.holder]].map(([l, v]) => (
+                <div key={l} className="flex justify-between text-sm">
+                  <span className="text-gray-400">{l}</span>
+                  <span className="font-bold text-gray-900 font-mono">{v}</span>
+                </div>
+              ))}
               <div className="border-t border-gray-100 pt-2 flex justify-between text-sm">
                 <span className="text-gray-400">입금액</span>
                 <span className="font-black text-violet-600">88,000원</span>
@@ -175,7 +185,7 @@ export default function InspectionCheckoutPage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
 
-          {/* 왼쪽: 주문 정보 */}
+          {/* ── 왼쪽: 주문 정보 + 결제 위젯 ── */}
           <div className="lg:col-span-3 space-y-4">
 
             {/* 주문 상품 */}
@@ -225,23 +235,37 @@ export default function InspectionCheckoutPage() {
                 </Field>
               </div>
             </div>
+
+            {/* ── 토스 결제 위젯 ── */}
+            {/* display:none으로 숨겨도 DOM에 존재해야 위젯이 정상 동작함 */}
+            <div
+              className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+              style={{ display: payMethod === 'widget' ? 'block' : 'none' }}
+            >
+              {!widgetReady && (
+                <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
+                  <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                  결제 모듈 로딩 중...
+                </div>
+              )}
+              <div id="toss-payment-widget" />
+              <div id="toss-agreement-widget" />
+            </div>
           </div>
 
-          {/* 오른쪽: 주문 요약 */}
+          {/* ── 오른쪽: 결제 방법 + 금액 + 버튼 ── */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
 
-              {/* ── 결제 방법 ── */}
+              {/* 결제 방법 선택 */}
               <div>
-                <p className="text-sm font-black text-gray-900 mb-3">
-                  결제 방법 <span className="text-red-500">*</span>
-                </p>
+                <p className="text-sm font-black text-gray-900 mb-3">결제 방법</p>
 
-                {/* 토스 퀵계좌이체 */}
+                {/* 위젯 결제 */}
                 <button
-                  onClick={() => setPayMethod('toss')}
+                  onClick={() => setPayMethod('widget')}
                   className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all mb-2 ${
-                    payMethod === 'toss'
+                    payMethod === 'widget'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
@@ -252,13 +276,13 @@ export default function InspectionCheckoutPage() {
                     <path d="M6 15h4" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round"/>
                   </svg>
                   <div className="text-left">
-                    <p className={`text-sm font-black ${payMethod === 'toss' ? 'text-blue-700' : 'text-gray-700'}`}>
-                      토스 퀵계좌이체
+                    <p className={`text-sm font-black ${payMethod === 'widget' ? 'text-blue-700' : 'text-gray-700'}`}>
+                      카드 / 계좌이체 / 간편결제
                     </p>
-                    <p className="text-[10px] text-gray-400">토스페이먼츠 실시간 계좌이체</p>
+                    <p className="text-[10px] text-gray-400">토스페이먼츠 결제 위젯</p>
                   </div>
-                  {payMethod === 'toss' && (
-                    <span className="ml-auto text-[10px] font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">추천</span>
+                  {payMethod === 'widget' && (
+                    <span className="ml-auto text-[10px] font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full shrink-0">추천</span>
                   )}
                 </button>
 
@@ -283,7 +307,7 @@ export default function InspectionCheckoutPage() {
                   </div>
                 </button>
 
-                {/* 직접 계좌이체 안내 */}
+                {/* 직접 이체 계좌 안내 */}
                 {payMethod === 'direct' && (
                   <div className="mt-3 bg-gray-50 rounded-xl p-3 space-y-1.5">
                     <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">입금 계좌</p>
@@ -304,7 +328,6 @@ export default function InspectionCheckoutPage() {
                   </div>
                 )}
 
-                {/* 안내 문구 */}
                 <div className="mt-2.5 space-y-1">
                   <p className="text-[11px] text-gray-400 flex items-start gap-1">
                     <span className="shrink-0">•</span>
@@ -319,7 +342,7 @@ export default function InspectionCheckoutPage() {
                 </div>
               </div>
 
-              {/* ── 결제 금액 ── */}
+              {/* 결제 금액 */}
               <div className="border-t border-gray-100 pt-5">
                 <p className="text-sm font-black text-gray-900 mb-3">결제 금액</p>
                 <div className="space-y-2">
@@ -328,7 +351,7 @@ export default function InspectionCheckoutPage() {
                     <span className="font-semibold text-gray-700">{AMOUNT_BASE.toLocaleString()}원</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">카비오 안심케어</span>
+                    <span className="text-gray-500">카비어 안심케어</span>
                     <span className="font-semibold text-gray-400">무료</span>
                   </div>
                 </div>
@@ -341,47 +364,7 @@ export default function InspectionCheckoutPage() {
                 <p className="text-[10px] text-gray-400 text-right mt-1">검차 전날 18시까지 100% 환불 가능해요</p>
               </div>
 
-              {/* ── 약관 동의 ── */}
-              <div className="border-t border-gray-100 pt-5">
-                <p className="text-sm font-black text-gray-900 mb-3">
-                  약관 동의 <span className="text-red-500">*</span>
-                </p>
-                {/* 전체 동의 */}
-                <label className="flex items-center gap-2.5 cursor-pointer mb-3">
-                  <input
-                    type="checkbox"
-                    checked={allAgreed}
-                    onChange={e => setAgreements({ scope: e.target.checked, warranty: e.target.checked, refund: e.target.checked })}
-                    className="w-4 h-4 accent-blue-600 rounded"
-                  />
-                  <span className="text-xs font-bold text-gray-700">약관에 모두 동의합니다.</span>
-                </label>
-                {/* 개별 항목 */}
-                <div className="space-y-2 pl-0.5">
-                  {([
-                    { key: 'scope',   label: '(필수) 검수 범위 및 책임고지 동의' },
-                    { key: 'warranty', label: '(필수) 서비스 보증범위 동의' },
-                    { key: 'refund',  label: '(필수) 환불규정 동의' },
-                  ] as const).map(({ key, label }) => (
-                    <label key={key} className="flex items-center justify-between cursor-pointer group">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={agreements[key]}
-                          onChange={e => setAgreements(prev => ({ ...prev, [key]: e.target.checked }))}
-                          className="w-3.5 h-3.5 accent-blue-600 shrink-0"
-                        />
-                        <span className="text-[11px] text-gray-500 group-hover:text-gray-700 transition-colors">{label}</span>
-                      </div>
-                      <svg className="w-3 h-3 text-gray-300 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path d="M9 18l6-6-6-6"/>
-                      </svg>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* ── 결제 버튼 ── */}
+              {/* 결제 버튼 */}
               {payMethod === 'direct' ? (
                 <button
                   onClick={submitTransfer}
@@ -392,19 +375,20 @@ export default function InspectionCheckoutPage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => payByToss('계좌이체')}
-                  disabled={loading || !sdkReady}
+                  onClick={payWithWidget}
+                  disabled={loading || !widgetReady}
                   className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
                 >
-                  {loading ? '결제 처리 중...' : '토스 퀵계좌이체로 결제하기'}
+                  {loading ? '결제 처리 중...' : !widgetReady ? '로딩 중...' : '결제하기'}
                 </button>
               )}
 
               <p className="text-center text-[10px] text-gray-400">
-                • 정비사가 예약을 승인하면 정비사의 연락처를 공유드릴게요.
+                • 왼쪽 결제창에서 수단 선택 및 약관 동의 후 결제하기를 눌러주세요.
               </p>
             </div>
           </div>
+
         </div>
       </div>
     </div>
