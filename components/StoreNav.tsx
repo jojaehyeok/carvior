@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -33,7 +32,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
 
         {/* 로고 */}
         <Link href="/" className="flex items-center shrink-0">
-          <img src="/logo.svg" alt="카비어" style={{ height: '52px', width: 'auto' }} />
+          <img src="/logo.png" alt="카비어" style={{ height: '52px', width: 'auto' }} />
         </Link>
 
         {/* 데스크탑 메뉴 */}
