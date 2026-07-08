@@ -10,9 +10,10 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function AppFooter() {
+  const router = useRouter();
   const { 
     isOpen: isTermsOpen, 
     onOpen: onTermsOpen, 

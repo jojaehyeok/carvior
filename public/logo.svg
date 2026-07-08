@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" fill="none">
+  <defs>
+    <linearGradient id="arcG" gradientUnits="userSpaceOnUse" x1="43" y1="51" x2="46" y2="5">
+      <stop offset="0%" stop-color="#52525B"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="viorG" gradientUnits="userSpaceOnUse" x1="148" y1="0" x2="258" y2="0">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- C arc: center≈(32,32) r=22 | from 5 o'clock (43,51) CCW long-way to 1 o'clock (43,13) -->
+  <path d="M 43 51 A 22 22 0 1 0 43 13"
+        stroke="url(#arcG)" stroke-width="5.5" stroke-linecap="round"/>
+
+  <!-- Arrow head at 1 o'clock (43,13) pointing upper-right -->
+  <polyline points="36,13 43,5 51,13"
+            stroke="#7C3AED" stroke-width="5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- CAR in zinc-500 -->
+  <text x="76" y="45"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-size="28" font-weight="700" letter-spacing="2"
+        fill="#71717A">CAR</text>
+
+  <!-- VIOR in purple→indigo gradient -->
+  <text x="148" y="45"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-size="28" font-weight="700" letter-spacing="2"
+        fill="url(#viorG)">VIOR</text>
+</svg>
