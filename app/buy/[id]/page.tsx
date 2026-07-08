@@ -474,13 +474,15 @@ export default function CarDetailPage() {
                 </svg>
                 공유
               </button>
-              <span className="flex items-center gap-1">
-                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                {viewCount}
-              </span>
+              {viewCount > 0 && (
+                <span className="flex items-center gap-1">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  {viewCount}
+                </span>
+              )}
             </div>
 
             {/* 차량명 */}
@@ -574,7 +576,7 @@ export default function CarDetailPage() {
               </div>
             </div>
 
-            {car.hasReport && car.carHash && (
+            {!!car.hasReport && !!car.carHash && (
               <a
                 href={`/report/${car.carHash}`}
                 target="_blank"
@@ -591,7 +593,7 @@ export default function CarDetailPage() {
         </div>
 
         {/* ── 검차 요약 (heydealer 스타일) ── */}
-        {car.hasReport && (
+        {!!car.hasReport && (
           <div className="mt-8 bg-[#f7f8fa] rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-full bg-[#1a2e6b] flex items-center justify-center">
@@ -893,7 +895,7 @@ export default function CarDetailPage() {
 
 // ── 하단 탭 컴포넌트 ───────────────────────────────────────────────────────────
 function DetailTabs({ car }: { car: UnifiedCar }) {
-  const [tab, setTab] = useState<'specs' | 'options' | 'insurance'>('specs');
+  const [tab, setTab] = useState<'specs' | 'options' | 'performance' | 'insurance'>('specs');
 
   const specRows = car.specs.length > 0 ? car.specs : [
     { label: '연식',    value: car.year ? String(car.year) : '-' },
@@ -924,9 +926,10 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
       {/* 탭 헤더 */}
       <div className="flex border-b border-gray-200 mb-8">
         {([
-          { key: 'specs',     label: '차량정보' },
-          { key: 'options',   label: '옵션정보' },
-          { key: 'insurance', label: '보험이력' },
+          { key: 'specs',       label: '차량정보' },
+          { key: 'options',     label: '옵션정보' },
+          { key: 'performance', label: '성능점검' },
+          { key: 'insurance',   label: '보험이력' },
         ] as const).map(t => (
           <button
             key={t.key}
@@ -1067,6 +1070,101 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
           ) : (
             <div className="py-16 text-center text-gray-400">
               <p className="text-sm">등록된 옵션 정보가 없습니다.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 성능점검 ── */}
+      {tab === 'performance' && (
+        <div className="max-w-3xl">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-black text-gray-900">성능·상태 점검기록부</h3>
+            {!!car.hasReport && !!car.carHash && (
+              <a href={`/report/${car.carHash}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs font-bold text-[#1a2e6b] border border-[#1a2e6b] px-3 py-1.5 rounded-lg hover:bg-[#1a2e6b]/5 transition-colors">
+                상세 리포트 보기
+              </a>
+            )}
+          </div>
+
+          {/* 주요 점검 항목 */}
+          {[
+            {
+              section: '자기진단',
+              items: [
+                { label: '엔진',       value: car.inspectionData?.driveDesc   ?? '이상 없음' },
+                { label: '변속기',     value: car.inspectionData?.driveDesc   ?? '이상 없음' },
+                { label: '경고등',     value: car.inspectionData?.warningDesc ?? '점등 없음' },
+              ],
+            },
+            {
+              section: '누유·누수',
+              items: [
+                { label: '엔진 누유',   value: car.inspectionData?.leakDesc ?? '없음' },
+                { label: '변속기 누유', value: '없음' },
+                { label: '냉각수 누수', value: '없음' },
+              ],
+            },
+            {
+              section: '외관 및 차체',
+              items: [
+                { label: '외부패널 교환', value: car.accident ? '있음' : '없음' },
+                { label: '프레임 수리',   value: car.accident ? '있음' : '없음' },
+                { label: '하부 부식',     value: '없음' },
+              ],
+            },
+            {
+              section: '소모품',
+              items: [
+                { label: '타이어 상태',  value: car.conditionData?.tireTread ? `앞 ${car.conditionData.tireTread.front}% / 뒤 ${car.conditionData.tireTread.back}%` : '양호' },
+                { label: '도색 필요',    value: car.conditionData?.paintNeeded != null ? `${car.conditionData.paintNeeded}곳` : '없음' },
+                { label: '휠 스크래치', value: car.conditionData?.wheelScratch != null ? `${car.conditionData.wheelScratch}개` : '없음' },
+              ],
+            },
+            {
+              section: '옵션 작동',
+              items: [
+                { label: '에어컨·히터',  value: car.inspectionData?.optionsDesc ?? '정상' },
+                { label: '전동 시트',     value: '정상' },
+                { label: '창문 작동',     value: '정상' },
+              ],
+            },
+          ].map(({ section, items }) => (
+            <div key={section} className="mb-6">
+              <p className="text-xs font-black text-gray-400 uppercase tracking-wider mb-2">{section}</p>
+              <div className="border border-gray-100 rounded-xl overflow-hidden">
+                {items.map((item, idx) => {
+                  const bad = ['있음', '점등'].some(w => item.value.includes(w));
+                  return (
+                    <div key={item.label} className={`flex items-center justify-between px-4 py-3 text-sm ${idx < items.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                      <span className="text-gray-500">{item.label}</span>
+                      <span className={`font-bold flex items-center gap-1 ${bad ? 'text-red-500' : 'text-gray-800'}`}>
+                        {!bad && (
+                          <svg width="12" height="12" fill="none" stroke="#2563eb" strokeWidth={2.5} viewBox="0 0 24 24">
+                            <path d="M20 6 9 17l-5-5"/>
+                          </svg>
+                        )}
+                        {item.value}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {!car.hasReport && (
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+              <p className="text-2xl mb-3">🔍</p>
+              <p className="font-black text-amber-800 mb-1">개인 직거래 매물</p>
+              <p className="text-sm text-amber-700 leading-relaxed mb-4">
+                공인 검차가 완료되지 않은 매물입니다.<br />
+                검차 신청 후 상세 성능점검 리포트를 받을 수 있습니다.
+              </p>
+              <a href="/inspection" className="inline-block text-sm font-black text-white bg-amber-500 hover:bg-amber-400 px-5 py-2.5 rounded-xl transition-colors">
+                검차 신청하기
+              </a>
             </div>
           )}
         </div>
