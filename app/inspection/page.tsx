@@ -7,16 +7,14 @@ import StoreNav from '@/components/StoreNav';
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
 const AMOUNT      = 88_000;
 const AMOUNT_BASE = 80_000;
-const AMOUNT_VAT  = 8_000;
 
-// 계좌이체 수령 계좌 — 실제 계좌로 변경 필요
 const BANK_INFO = {
   bank:   '카카오뱅크',
-  number: '3333-00-0000000',   // ← 실제 계좌번호로 변경하세요
+  number: '3333-35-1997303',
   holder: '(주)카비어',
 };
 
-type PayMethod = 'transfer' | 'card' | 'kakaopay';
+type PayMethod = 'toss' | 'direct';
 
 interface Form {
   name: string;
@@ -33,7 +31,7 @@ export default function InspectionCheckoutPage() {
     name: '', email: '', phone: '', carNumber: '',
     address: '', addressDetail: '', preferredDate: '',
   });
-  const [payMethod, setPayMethod] = useState<PayMethod>('card');
+  const [payMethod, setPayMethod] = useState<PayMethod>('toss');
   const [agreed, setAgreed]       = useState(false);
   const [loading, setLoading]     = useState(false);
   const [sdkReady, setSdkReady]   = useState(false);
@@ -58,7 +56,7 @@ export default function InspectionCheckoutPage() {
     return true;
   };
 
-  const payByToss = async (method: '카드' | '카카오페이' | '계좌이체') => {
+  const payByToss = async (method: '계좌이체') => {
     if (!validate()) return;
     setLoading(true);
     try {
@@ -227,11 +225,11 @@ export default function InspectionCheckoutPage() {
                   결제 방법 <span className="text-red-500">*</span>
                 </p>
 
-                {/* 계좌이체 — 메인 버튼 */}
+                {/* 토스 퀵계좌이체 */}
                 <button
-                  onClick={() => setPayMethod('transfer')}
+                  onClick={() => setPayMethod('toss')}
                   className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all mb-2 ${
-                    payMethod === 'transfer'
+                    payMethod === 'toss'
                       ? 'border-blue-500 bg-blue-50'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
@@ -239,41 +237,42 @@ export default function InspectionCheckoutPage() {
                   <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-blue-500 shrink-0">
                     <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth={1.8}/>
                     <path d="M2 10h20" stroke="currentColor" strokeWidth={1.8}/>
+                    <path d="M6 15h4" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round"/>
                   </svg>
                   <div className="text-left">
-                    <p className={`text-sm font-black ${payMethod === 'transfer' ? 'text-blue-700' : 'text-gray-700'}`}>
-                      계좌이체
+                    <p className={`text-sm font-black ${payMethod === 'toss' ? 'text-blue-700' : 'text-gray-700'}`}>
+                      토스 퀵계좌이체
                     </p>
-                    <p className="text-[10px] text-gray-400">회사 계좌로 직접 이체</p>
+                    <p className="text-[10px] text-gray-400">토스페이먼츠 실시간 계좌이체</p>
+                  </div>
+                  {payMethod === 'toss' && (
+                    <span className="ml-auto text-[10px] font-black text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">추천</span>
+                  )}
+                </button>
+
+                {/* 직접 계좌이체 */}
+                <button
+                  onClick={() => setPayMethod('direct')}
+                  className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all ${
+                    payMethod === 'direct'
+                      ? 'border-gray-700 bg-gray-50'
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-gray-500 shrink-0">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth={1.8}/>
+                    <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth={1.8}/>
+                  </svg>
+                  <div className="text-left">
+                    <p className={`text-sm font-black ${payMethod === 'direct' ? 'text-gray-900' : 'text-gray-600'}`}>
+                      직접 계좌이체
+                    </p>
+                    <p className="text-[10px] text-gray-400">카비어 계좌로 직접 입금</p>
                   </div>
                 </button>
 
-                {/* 카드 / 카카오페이 */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setPayMethod('card')}
-                    className={`py-3 rounded-xl border-2 text-xs font-bold transition-all ${
-                      payMethod === 'card'
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    💳 카드
-                  </button>
-                  <button
-                    onClick={() => setPayMethod('kakaopay')}
-                    className={`py-3 rounded-xl border-2 text-xs font-bold transition-all ${
-                      payMethod === 'kakaopay'
-                        ? 'border-yellow-400 bg-yellow-50 text-yellow-800'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    <span className="text-yellow-500">●</span> 카카오페이
-                  </button>
-                </div>
-
-                {/* 계좌이체 안내 */}
-                {payMethod === 'transfer' && (
+                {/* 직접 계좌이체 안내 */}
+                {payMethod === 'direct' && (
                   <div className="mt-3 bg-gray-50 rounded-xl p-3 space-y-1.5">
                     <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">입금 계좌</p>
                     {[
@@ -288,7 +287,7 @@ export default function InspectionCheckoutPage() {
                     ))}
                     <div className="border-t border-gray-200 pt-2 flex justify-between text-xs">
                       <span className="text-gray-400">입금액</span>
-                      <span className="font-black text-blue-600">88,000원</span>
+                      <span className="font-black text-gray-900">88,000원</span>
                     </div>
                   </div>
                 )}
@@ -297,7 +296,7 @@ export default function InspectionCheckoutPage() {
                 <div className="mt-2.5 space-y-1">
                   <p className="text-[11px] text-gray-400 flex items-start gap-1">
                     <span className="shrink-0">•</span>
-                    {payMethod === 'transfer'
+                    {payMethod === 'direct'
                       ? '입금 확인 후 담당자가 24시간 내 연락드립니다.'
                       : '결제 후 담당자가 일정을 확인하여 안내드립니다.'}
                   </p>
@@ -362,21 +361,21 @@ export default function InspectionCheckoutPage() {
               </div>
 
               {/* ── 결제 버튼 ── */}
-              {payMethod === 'transfer' ? (
+              {payMethod === 'direct' ? (
                 <button
                   onClick={submitTransfer}
                   disabled={loading}
-                  className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
+                  className="w-full bg-gray-900 hover:bg-gray-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
                 >
-                  {loading ? '신청 중...' : '계좌이체 신청하기'}
+                  {loading ? '신청 중...' : '직접 계좌이체 신청하기'}
                 </button>
               ) : (
                 <button
-                  onClick={() => payByToss(payMethod === 'card' ? '카드' : '카카오페이')}
+                  onClick={() => payByToss('계좌이체')}
                   disabled={loading || !sdkReady}
                   className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors"
                 >
-                  {loading ? '결제 처리 중...' : '결제하기'}
+                  {loading ? '결제 처리 중...' : '토스 퀵계좌이체로 결제하기'}
                 </button>
               )}
 

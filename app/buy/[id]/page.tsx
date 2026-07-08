@@ -210,6 +210,7 @@ export default function CarDetailPage() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryMsg, setInquiryMsg] = useState('');
@@ -227,6 +228,29 @@ export default function CarDetailPage() {
       .then(r => r.json())
       .then(d => setOfferCount(d.count ?? 0))
       .catch(() => {});
+  }, [id]);
+
+  // 조회수/좋아요 fetch + 조회수 increment
+  useEffect(() => {
+    if (!id) return;
+    // 로컬스토리지로 좋아요 상태 복원
+    const storedLiked = localStorage.getItem(`liked_${id}`) === '1';
+    setLiked(storedLiked);
+    // 스탯 fetch
+    fetch(`/api/item-stats/${id}`)
+      .then(r => r.json())
+      .then(d => { setViewCount(d.views ?? 0); setLikeCount(d.likes ?? 0); })
+      .catch(() => {});
+    // 조회수 +1 (중복 방지: 세션당 1회)
+    const key = `viewed_${id}`;
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      fetch(`/api/item-stats/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'view' }),
+      }).then(r => r.json()).then(d => setViewCount(d.views ?? 0)).catch(() => {});
+    }
   }, [id]);
 
   useEffect(() => {
@@ -423,15 +447,27 @@ export default function CarDetailPage() {
             {/* 소셜 stats */}
             <div className="flex items-center justify-end gap-4 mb-4 text-sm text-gray-400">
               <button
-                onClick={() => { setLiked(v => !v); setLikeCount(n => n + (liked ? -1 : 1)); }}
-                className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                onClick={() => {
+                  const next = !liked;
+                  setLiked(next);
+                  localStorage.setItem(`liked_${id}`, next ? '1' : '0');
+                  fetch(`/api/item-stats/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: next ? 'like' : 'unlike' }),
+                  }).then(r => r.json()).then(d => setLikeCount(d.likes ?? 0)).catch(() => {});
+                }}
+                className={`flex items-center gap-1 transition-colors ${liked ? 'text-red-500' : 'hover:text-red-500'}`}
               >
                 <svg width="16" height="16" fill={liked ? '#ef4444' : 'none'} stroke={liked ? '#ef4444' : 'currentColor'} strokeWidth={2} viewBox="0 0 24 24">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
-                ({likeCount})
+                {likeCount > 0 && <span>{likeCount}</span>}
               </button>
-              <button className="flex items-center gap-1 hover:text-black transition-colors">
+              <button
+                onClick={() => navigator.share?.({ title: car.titleEn, url: window.location.href }).catch(() => {})}
+                className="flex items-center gap-1 hover:text-black transition-colors"
+              >
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                   <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
@@ -443,7 +479,7 @@ export default function CarDetailPage() {
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
-                {Math.floor(Math.random() * 50) + 10}
+                {viewCount}
               </span>
             </div>
 
@@ -553,6 +589,96 @@ export default function CarDetailPage() {
             )}
           </div>
         </div>
+
+        {/* ── 검차 요약 (heydealer 스타일) ── */}
+        {car.hasReport && (
+          <div className="mt-8 bg-[#f7f8fa] rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-7 h-7 rounded-full bg-[#1a2e6b] flex items-center justify-center">
+                <svg width="13" height="13" fill="none" stroke="white" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M20 6 9 17l-5-5"/>
+                </svg>
+              </div>
+              <p className="font-black text-[#1a2e6b] text-sm tracking-tight">카비어 공인진단 요약</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* 사고이력 */}
+              <div className="bg-white rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="#2563eb" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                    <p className="text-sm font-black text-gray-900">{car.accident ? '사고이력 있음' : '완전무사고'}</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">외부패널</span>
+                    <span className="font-bold text-gray-700">교환된 곳 없음</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">프레임</span>
+                    <span className="font-bold text-gray-700">수리된 곳 없음</span>
+                  </div>
+                </div>
+              </div>
+              {/* 하부 상태 */}
+              <div className="bg-white rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <svg width="13" height="13" fill="none" stroke="#2563eb" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                    <p className="text-sm font-black text-gray-900">하부 정상</p>
+                  </div>
+                  {car.carHash && (
+                    <a href={`/report/${car.carHash}`} target="_blank" rel="noopener noreferrer"
+                      className="text-[10px] text-blue-600 font-bold hover:underline">사진보기</a>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {[
+                    { label: '누유', value: car.inspectionData?.leakDesc ?? '없음' },
+                    { label: '파손', value: '없음' },
+                  ].map(r => (
+                    <div key={r.label} className="flex justify-between text-xs">
+                      <span className="text-gray-400">{r.label}</span>
+                      <span className={`font-bold ${r.value === '없음' || r.value === '이상 없음' ? 'text-gray-700' : 'text-amber-600'}`}>{r.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* 하단 버튼 */}
+            <div className="flex gap-2 mt-4">
+              <a href="#insurance"
+                onClick={e => { e.preventDefault(); document.querySelector('[data-tab="insurance"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); }}
+                className="flex-1 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold text-gray-600 text-center hover:bg-gray-50 transition-colors">
+                보험이력
+              </a>
+              {car.carHash && (
+                <a href={`/report/${car.carHash}`} target="_blank" rel="noopener noreferrer"
+                  className="flex-1 py-2 border border-gray-300 bg-white rounded-lg text-xs font-bold text-gray-600 text-center hover:bg-gray-50 transition-colors">
+                  성능점검
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── 판매자 차량 소개 ── */}
+        {(car as any).adminMemo && (
+          <div className="mt-6 bg-white border border-gray-100 rounded-2xl p-6">
+            <h3 className="text-sm font-black text-gray-900 mb-3 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 text-[10px] font-black">✎</span>
+              판매자 차량 소개
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+              {(car as any).adminMemo}
+            </p>
+          </div>
+        )}
 
         {/* ── 하단: 상세 정보 탭 ── */}
         <div className="mt-10 border-t border-gray-100">
