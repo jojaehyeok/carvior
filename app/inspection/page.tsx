@@ -62,12 +62,23 @@ export default function InspectionCheckoutPage() {
     try {
       const toss = (window as any).TossPayments(TOSS_CLIENT_KEY);
       const orderId = `CARVIOR-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+
+      // Toss 리디렉트 후에도 주문자 정보를 복원할 수 있도록 저장
+      sessionStorage.setItem(`order_${orderId}`, JSON.stringify({
+        carNumber:         form.carNumber,
+        carOwner:          form.name,
+        contact:           form.phone.replace(/-/g, ''),
+        address:           `${form.address} ${form.addressDetail}`.trim(),
+        preferredDateTime: form.preferredDate,
+        email:             form.email || '',
+      }));
+
       await toss.requestPayment(method, {
-        amount: AMOUNT,
+        amount:              AMOUNT,
         orderId,
-        orderName: '카비어 공인 검차 서비스 (VAT 포함)',
-        customerName: form.name,
-        customerEmail: form.email || undefined,
+        orderName:           '카비어 공인 검차 서비스 (VAT 포함)',
+        customerName:        form.name,
+        customerEmail:       form.email || undefined,
         customerMobilePhone: form.phone.replace(/-/g, ''),
         successUrl: `${window.location.origin}/inspection/success`,
         failUrl:    `${window.location.origin}/inspection/fail`,
