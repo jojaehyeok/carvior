@@ -27,13 +27,13 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
   return (
     <nav className={clsx(
       'sticky top-0 z-50 border-b transition-colors',
-      transparent ? 'bg-transparent border-white/10' : 'bg-zinc-800 border-white/10'
+      transparent ? 'bg-transparent border-black/10' : 'bg-white border-gray-200'
     )}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         {/* 로고 */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <Image src="/logo.png" alt="카비어" width={120} height={40} className="object-contain mix-blend-screen" priority />
+        <Link href="/" className="flex items-center shrink-0">
+          <Image src="/logo.png" alt="카비어" width={110} height={36} className="object-contain" priority />
         </Link>
 
         {/* 데스크탑 메뉴 */}
@@ -49,7 +49,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                   href={l.href}
                   className={clsx(
                     'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors',
-                    active ? 'text-white bg-white/10' : 'text-white/60 hover:text-white hover:bg-white/5'
+                    active ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
                   )}
                 >
                   {l.label}
@@ -68,7 +68,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
             <div className="relative hidden lg:block">
               <button
                 onClick={() => setProfileOpen(v => !v)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 {user?.image ? (
                   <img src={user.image} alt="" className="w-6 h-6 rounded-full object-cover" />
@@ -77,8 +77,8 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                     {user?.name?.[0] ?? '?'}
                   </div>
                 )}
-                <span className="text-xs text-white font-semibold max-w-[80px] truncate">{user?.name}</span>
-                {isDealer && <span className="text-[9px] font-black text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded-full">딜러</span>}
+                <span className="text-xs text-gray-800 font-semibold max-w-[80px] truncate">{user?.name}</span>
+                {isDealer && <span className="text-[9px] font-black text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-full">딜러</span>}
               </button>
 
               {profileOpen && (
@@ -102,7 +102,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
           ) : (
             <Link
               href="/login"
-              className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-white/60 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5"
+              className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50"
             >
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -111,14 +111,14 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
             </Link>
           )}
 
-          <button className="p-2.5 text-white/50 hover:text-white transition-colors rounded-lg hover:bg-white/5" aria-label="검색">
+          <button className="p-2.5 text-gray-400 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-50" aria-label="검색">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
           </button>
           <button
             onClick={() => setOpen(v => !v)}
-            className="p-2.5 text-white/50 hover:text-white transition-colors rounded-lg hover:bg-white/5 lg:hidden"
+            className="p-2.5 text-gray-400 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-50 lg:hidden"
             aria-label="메뉴"
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -133,7 +133,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
 
       {/* 모바일 메뉴 */}
       {open && (
-        <div className="lg:hidden bg-zinc-800 border-t border-white/10">
+        <div className="lg:hidden bg-white border-t border-gray-100">
           {NAV_LINKS.map(l => {
             if (l.href === '/auction' && !isDealer) return null;
             return (
@@ -141,7 +141,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between px-6 py-4 text-sm font-semibold text-white/70 hover:text-white hover:bg-white/5 border-b border-white/5 transition-colors"
+                className="flex items-center justify-between px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
               >
                 <span>{l.label}</span>
                 {l.href === '/auction' && (
@@ -153,14 +153,14 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
           {session ? (
             <div className="px-6 py-4 flex items-center justify-between border-b border-white/5">
               <div>
-                <p className="text-sm text-white font-semibold">{user?.name}</p>
-                <p className="text-xs text-white/40">{user?.email}</p>
+                <p className="text-sm text-gray-900 font-semibold">{user?.name}</p>
+                <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
               <button onClick={() => signOut({ callbackUrl: '/' })} className="text-xs text-red-400 font-semibold">로그아웃</button>
             </div>
           ) : (
             <Link href="/login" onClick={() => setOpen(false)}
-              className="flex items-center px-6 py-4 text-sm font-semibold text-white/70 hover:text-white hover:bg-white/5">
+              className="flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50">
               로그인 / 회원가입
             </Link>
           )}
