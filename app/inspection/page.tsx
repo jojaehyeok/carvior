@@ -72,13 +72,22 @@ export default function InspectionCheckoutPage() {
     document.head.appendChild(s);
   }, []);
 
-  // 다음 주소 검색 팝업
+  // 카카오(다음) 주소 검색 — marketing 페이지와 동일
   const openAddressSearch = () => {
-    const daum = (window as any).daum;
-    if (!daum) return;
-    new daum.Postcode({
+    if (!(window as any).daum?.Postcode) {
+      alert('주소 검색 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.'); return;
+    }
+    new (window as any).daum.Postcode({
       oncomplete: (data: any) => {
-        setForm(p => ({ ...p, address: data.roadAddress || data.jibunAddress }));
+        let full = data.address;
+        if (data.addressType === 'R') {
+          let extra = '';
+          if (data.bname) extra += data.bname;
+          if (data.buildingName) extra += extra ? `, ${data.buildingName}` : data.buildingName;
+          if (extra) full += ` (${extra})`;
+        }
+        setForm(p => ({ ...p, address: full }));
+        document.getElementById('inspection-detail-address')?.focus();
       },
     }).open();
   };
@@ -318,6 +327,7 @@ export default function InspectionCheckoutPage() {
                   </button>
                 </div>
                 <input
+                  id="inspection-detail-address"
                   value={form.addressDetail}
                   onChange={set('addressDetail')}
                   placeholder="상세주소 (동/호수, 층 등)"
