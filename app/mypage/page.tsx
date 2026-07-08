@@ -189,35 +189,45 @@ export default function MypagePage() {
                       </div>
 
                       {/* 액션 버튼 */}
-                      <div className="mt-3 flex gap-2">
+                      <div className="mt-3 flex flex-wrap gap-2">
                         {item.status === 'active' && (
-                          <button
-                            onClick={() => markSold(item)}
-                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-                          >
-                            판매완료
-                          </button>
-                        )}
-                        {item.status === 'sold' && (
                           <>
-                            <button
-                              onClick={() => { setModal({ item, type: 'inspection' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
-                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition-colors"
+                            <a
+                              href="/inspection"
+                              className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
                             >
-                              검차 신청
-                            </button>
+                              ✦ 검차 신청
+                            </a>
                             <button
-                              onClick={() => { setModal({ item, type: 'transport' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
-                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-zinc-700 text-white hover:bg-zinc-800 transition-colors"
+                              onClick={() => markSold(item)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
                             >
-                              탁송 신청
+                              판매완료
                             </button>
                           </>
+                        )}
+                        {item.status === 'sold' && (
+                          <button
+                            onClick={() => { setModal({ item, type: 'transport' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
+                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-zinc-700 text-white hover:bg-zinc-800 transition-colors"
+                          >
+                            탁송 신청
+                          </button>
                         )}
                         {item.status === 'pending' && (
                           <p className="text-[11px] text-yellow-600 font-semibold">관리자 검토 후 활성화됩니다</p>
                         )}
                       </div>
+
+                      {/* 검차 유도 메시지 (active & 미진단) */}
+                      {item.status === 'active' && (
+                        <div className="mt-2 flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                          <span className="text-amber-500 text-xs">💡</span>
+                          <p className="text-[10px] text-amber-700 font-semibold leading-snug">
+                            검차받은 매물은 평균 <strong>3배 빠르게</strong> 판매됩니다
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

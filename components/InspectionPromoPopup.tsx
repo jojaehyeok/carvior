@@ -10,7 +10,7 @@ export default function InspectionPromoPopup() {
     const stored = localStorage.getItem('inspection_popup_dismissed_at');
     if (!stored) { setVisible(true); return; }
     const daysSince = (Date.now() - Number(stored)) / 86400000;
-    if (daysSince >= 7) setVisible(true);
+    if (daysSince >= 1) setVisible(true);
   }, []);
 
   const dismissForWeek = () => {
@@ -21,62 +21,56 @@ export default function InspectionPromoPopup() {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setVisible(false)} />
-      <div className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-        <div className="bg-gradient-to-br from-violet-600 to-violet-900 px-6 pt-8 pb-12 text-center">
-          <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">🔍</span>
+    <div className="fixed top-20 left-6 z-[200] w-80 max-w-[calc(100vw-3rem)]">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+        {/* 상단 헤더 */}
+        <div className="bg-gradient-to-r from-violet-600 to-violet-700 px-5 py-4 flex items-center gap-3">
+          <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center text-lg shrink-0">🔍</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-black text-sm leading-tight">검차받고 빠르게 팔자</p>
+            <p className="text-violet-200 text-[10px] mt-0.5">공인진단 매물은 3배 빠르게 판매됩니다</p>
           </div>
-          <p className="text-violet-200 text-[10px] font-bold tracking-[0.2em] uppercase mb-2">카비어 공인 서비스</p>
-          <h2 className="text-white font-black text-2xl leading-tight">
-            내 차 상태<br />확실히 알고 팔자
-          </h2>
+          <button onClick={() => setVisible(false)} className="text-white/50 hover:text-white transition-colors shrink-0 text-lg leading-none">×</button>
         </div>
 
-        <div className="relative -mt-6 bg-white rounded-t-3xl px-6 pt-6 pb-6">
-          <div className="space-y-2.5 mb-5">
+        {/* 내용 */}
+        <div className="px-5 py-4">
+          <div className="space-y-2 mb-4">
             {[
               '공인 평가사 직접 방문 점검',
-              '30개 항목 정밀 진단 리포트',
-              '해외 바이어 신뢰도 상승',
+              '100+ 항목 진단 · 디지털 리포트',
+              '해외 바이어 신뢰도 3배 상승',
             ].map(text => (
-              <div key={text} className="flex items-center gap-2 text-sm text-gray-700">
-                <svg className="w-4 h-4 text-violet-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+              <div key={text} className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="text-amber-500 font-black">✦</span>
                 {text}
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between bg-violet-50 border border-violet-100 rounded-xl px-4 py-3 mb-5">
-            <span className="text-sm font-bold text-gray-700">검차 서비스 요금</span>
-            <span className="font-black text-violet-600 text-lg">80,000원</span>
+          <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 mb-4">
+            <span className="text-xs font-bold text-gray-600">검차 서비스 요금</span>
+            <span className="font-black text-violet-600">80,000원</span>
           </div>
 
           <Link
             href="/inspection"
             onClick={() => setVisible(false)}
-            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-4 rounded-xl text-sm text-center transition-colors mb-2"
+            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-3 rounded-xl text-xs text-center transition-colors mb-2"
           >
             지금 검차 신청하기 →
           </Link>
           <Link
             href="/marketing/carvior-inspection"
             onClick={() => setVisible(false)}
-            className="block w-full text-center text-xs text-violet-500 hover:text-violet-700 py-2 transition-colors mb-2"
+            className="block w-full text-center text-[11px] text-gray-400 hover:text-violet-500 transition-colors mb-3"
           >
             서비스 자세히 보기
           </Link>
 
-          <div className="flex items-center justify-center gap-4">
-            <button onClick={dismissForWeek} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              일주일간 보지않기
-            </button>
-            <span className="text-gray-200">|</span>
-            <button onClick={() => setVisible(false)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              닫기
+          <div className="flex items-center justify-center gap-3">
+            <button onClick={dismissForWeek} className="text-[11px] text-gray-300 hover:text-gray-500 transition-colors">
+              하루간 보지않기
             </button>
           </div>
         </div>

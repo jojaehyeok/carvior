@@ -290,6 +290,73 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 공인진단 vs 개인직거래 ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">WHY INSPECTION</p>
+          <h2 className="text-3xl font-black text-gray-900 mb-3">진단받은 차가 왜 더 잘 팔릴까요?</h2>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            개인이 직접 올린 매물과 공인 평가사가 검증한 매물은 구매자의 신뢰도부터 다릅니다
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {/* 개인 직거래 */}
+          <div className="rounded-2xl border-2 border-gray-200 p-6 bg-gray-50/50">
+            <div className="flex items-center gap-2 mb-5">
+              <span className="text-xs font-black px-2.5 py-1 rounded-full bg-gray-200 text-gray-500">개인직거래</span>
+            </div>
+            <div className="space-y-3">
+              {[
+                ['판매까지 평균', '47일'],
+                ['구매자 신뢰도', '낮음'],
+                ['허위정보 리스크', '있음'],
+                ['해외 바이어 연결', '어려움'],
+              ].map(([label, val]) => (
+                <div key={label} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-400">{label}</span>
+                  <span className="font-bold text-gray-500">{val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 공인진단 */}
+          <div className="rounded-2xl border-2 border-amber-400 p-6 bg-amber-50/30 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="flex items-center gap-2 mb-5">
+              <span className="text-xs font-black px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">✦ 공인진단</span>
+            </div>
+            <div className="space-y-3">
+              {[
+                ['판매까지 평균', '13일'],
+                ['구매자 신뢰도', '높음'],
+                ['허위정보 리스크', '없음'],
+                ['해외 바이어 연결', '자동 노출'],
+              ].map(([label, val]) => (
+                <div key={label} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">{label}</span>
+                  <span className="font-black text-amber-700">{val}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-10">
+          <Link href="/inspection"
+            className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-amber-900 font-black px-8 py-4 rounded-xl text-sm transition-colors">
+            ✦ 공인 검차 신청하기
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </Link>
+          <p className="text-xs text-gray-400 mt-2">
+            <Link href="/marketing/carvior-inspection" className="underline hover:text-gray-600">서비스 자세히 보기</Link>
+          </p>
+        </div>
+      </section>
+
       {/* ── 어떻게 진행되나요? ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <h2 className="text-2xl font-black text-gray-900 mb-2">어떻게 진행되나요?</h2>

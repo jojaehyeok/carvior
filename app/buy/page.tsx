@@ -88,6 +88,9 @@ function BuyCard({ car }: { car: StoreItem }) {
           {stale && (
             <span className="bg-gray-500/70 text-white text-[9px] font-bold px-2 py-1 rounded-full">오래된 매물</span>
           )}
+          {!car.hasReport && !stale && (
+            <span className="bg-white/80 text-gray-500 text-[9px] font-bold px-2 py-1 rounded-full border border-gray-200">개인직거래</span>
+          )}
           {car.hasReport && (
             <a
               href={car.carHash ? `/report/${car.carHash}` : '/marketing/carvior-inspection'}
@@ -207,6 +210,20 @@ export default function BuyPage() {
               <option value="mileage">주행거리순</option>
             </select>
           </div>
+        </div>
+
+        {/* 공인진단 안내 배너 */}
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+          <div className="flex items-center gap-2.5">
+            <span className="text-amber-500 font-black text-sm">✦</span>
+            <div>
+              <p className="text-xs font-black text-amber-800">공인진단 매물은 평균 3배 빠르게 팔립니다</p>
+              <p className="text-[10px] text-amber-600">황금 테두리 = 공인 평가사 직접 검증 완료</p>
+            </div>
+          </div>
+          <a href="/inspection" className="shrink-0 text-[10px] font-black text-amber-900 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition-colors">
+            검차 신청
+          </a>
         </div>
 
         <p className="text-sm text-gray-400 mb-4">총 {filtered.length}대</p>
