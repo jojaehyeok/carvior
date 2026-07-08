@@ -58,9 +58,16 @@ export default function InspectionPromoPopup() {
           <Link
             href="/inspection"
             onClick={() => setVisible(false)}
-            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-4 rounded-xl text-sm text-center transition-colors mb-3"
+            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-4 rounded-xl text-sm text-center transition-colors mb-2"
           >
             지금 검차 신청하기 →
+          </Link>
+          <Link
+            href="/marketing/carvior-inspection"
+            onClick={() => setVisible(false)}
+            className="block w-full text-center text-xs text-violet-500 hover:text-violet-700 py-2 transition-colors mb-2"
+          >
+            서비스 자세히 보기
           </Link>
 
           <div className="flex items-center justify-center gap-4">

@@ -41,7 +41,12 @@ function CarCard({ car, rank }: { car: StoreItem; rank?: number }) {
   const usd   = getUSD(car);
   return (
     <Link href={`/buy/${car.id}`} className="group block">
-      <div className="relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden mb-3 border border-gray-100 group-hover:border-violet-400 group-hover:shadow-md transition-all">
+      <div className={clsx(
+        'relative aspect-[4/3] bg-gray-100 rounded-2xl overflow-hidden mb-3 border transition-all',
+        car.hasReport
+          ? 'border-amber-400 ring-2 ring-amber-300/40 group-hover:ring-amber-400/60 group-hover:shadow-lg group-hover:shadow-amber-100'
+          : 'border-gray-100 group-hover:border-violet-400 group-hover:shadow-md'
+      )}>
         {thumb ? (
           <Image src={thumb} alt={car.titleKo} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="300px" />
         ) : (
@@ -60,8 +65,8 @@ function CarCard({ car, rank }: { car: StoreItem; rank?: number }) {
           </span>
         )}
         {car.hasReport && (
-          <span className="absolute top-2.5 right-2.5 bg-black/70 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-            진단완료
+          <span className="absolute top-2.5 right-2.5 flex items-center gap-0.5 bg-amber-400 text-amber-900 text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
+            ✦ 공인진단
           </span>
         )}
       </div>

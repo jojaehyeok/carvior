@@ -63,8 +63,12 @@ function BuyCard({ car }: { car: StoreItem }) {
     <Link
       href={`/buy/${car.id}`}
       className={clsx(
-        'group block rounded-2xl overflow-hidden border hover:shadow-lg transition-all',
-        stale ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
+        'group block rounded-2xl overflow-hidden border transition-all',
+        stale
+          ? 'border-gray-100 opacity-60 hover:shadow-md'
+          : car.hasReport
+            ? 'border-amber-400 ring-2 ring-amber-300/40 hover:ring-amber-400/70 hover:shadow-lg hover:shadow-amber-100'
+            : 'border-gray-100 hover:border-gray-300 hover:shadow-lg'
       )}
     >
       <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
@@ -84,15 +88,15 @@ function BuyCard({ car }: { car: StoreItem }) {
           {stale && (
             <span className="bg-gray-500/70 text-white text-[9px] font-bold px-2 py-1 rounded-full">오래된 매물</span>
           )}
-          {car.hasReport && car.carHash && (
+          {car.hasReport && (
             <a
-              href={`/report/${car.carHash}`}
+              href={car.carHash ? `/report/${car.carHash}` : '/marketing/carvior-inspection'}
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="bg-black/80 text-white text-[10px] font-bold px-2 py-1 rounded-full hover:bg-black transition-colors"
+              className="flex items-center gap-0.5 bg-amber-400 text-amber-900 text-[9px] font-black px-2 py-1 rounded-full hover:bg-amber-300 transition-colors shadow-sm"
             >
-              진단완료
+              ✦ 공인진단
             </a>
           )}
           {car.accident && (
