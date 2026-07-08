@@ -181,7 +181,7 @@ export default function InspectionCheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-100">
-        <div className="max-w-4xl mx-auto px-6 py-5">
+        <div className="max-w-6xl mx-auto px-6 py-5">
           <nav className="text-xs text-gray-400 mb-1.5 flex items-center gap-1.5">
             <Link href="/" className="hover:text-gray-600 transition-colors">홈</Link>
             <span>›</span>
@@ -193,7 +193,7 @@ export default function InspectionCheckoutPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
 
           {/* ── 왼쪽: 폼 ── */}
