@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import StoreNav from '@/components/StoreNav';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
 const AMOUNT      = 88_000;
@@ -14,28 +13,44 @@ const BANK_INFO = {
   holder: '(주)카비어',
 };
 
+const TIME_SLOTS = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+
+const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
 type PayMethod = 'widget' | 'direct';
 
 interface Form {
-  name: string;
-  email: string;
-  phone: string;
-  carNumber: string;
-  address: string;
+  carNumber:     string;
+  ownerName:     string;
+  phone:         string;
+  email:         string;
+  address:       string;
   addressDetail: string;
-  preferredDate: string;
+}
+
+// 오늘부터 14일치 날짜 생성 (내일부터 시작)
+function getAvailableDays() {
+  return Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i + 1);
+    return d;
+  });
 }
 
 export default function InspectionCheckoutPage() {
   const [form, setForm] = useState<Form>({
-    name: '', email: '', phone: '', carNumber: '',
-    address: '', addressDetail: '', preferredDate: '',
+    carNumber: '', ownerName: '', phone: '', email: '',
+    address: '', addressDetail: '',
   });
-  const [payMethod, setPayMethod]     = useState<PayMethod>('widget');
-  const [loading, setLoading]         = useState(false);
-  const [widgetReady, setWidgetReady] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
+  const [loading, setLoading]           = useState(false);
+  const [widgetReady, setWidgetReady]   = useState(false);
   const [transferDone, setTransferDone] = useState(false);
   const widgetsRef = useRef<any>(null);
+
+  const days = getAvailableDays();
 
   // v2 위젯 초기화
   useEffect(() => {
@@ -43,21 +58,13 @@ export default function InspectionCheckoutPage() {
       const TP      = (window as any).TossPayments;
       const widgets = TP(TOSS_CLIENT_KEY).widgets({ customerKey: TP.ANONYMOUS });
       widgetsRef.current = widgets;
-
       await widgets.setAmount({ currency: 'KRW', value: AMOUNT });
       await Promise.all([
-        widgets.renderPaymentMethods({
-          selector:   '#toss-payment-widget',
-          variantKey: 'DEFAULT',
-        }),
-        widgets.renderAgreement({
-          selector:   '#toss-agreement-widget',
-          variantKey: 'AGREEMENT',
-        }),
+        widgets.renderPaymentMethods({ selector: '#toss-payment-widget', variantKey: 'DEFAULT' }),
+        widgets.renderAgreement({ selector: '#toss-agreement-widget', variantKey: 'AGREEMENT' }),
       ]);
       setWidgetReady(true);
     };
-
     if ((window as any).TossPayments) { init(); return; }
     const s  = document.createElement('script');
     s.src    = 'https://js.tosspayments.com/v2/standard';
@@ -65,15 +72,33 @@ export default function InspectionCheckoutPage() {
     document.head.appendChild(s);
   }, []);
 
+  // 다음 주소 검색 팝업
+  const openAddressSearch = () => {
+    const daum = (window as any).daum;
+    if (!daum) return;
+    new daum.Postcode({
+      oncomplete: (data: any) => {
+        setForm(p => ({ ...p, address: data.roadAddress || data.jibunAddress }));
+      },
+    }).open();
+  };
+
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
 
   const validate = () => {
-    if (!form.name || !form.phone || !form.carNumber || !form.address || !form.preferredDate) {
-      alert('필수 항목을 모두 입력해주세요.'); return false;
-    }
+    if (!form.carNumber)  { alert('차량번호를 입력해주세요.'); return false; }
+    if (!form.ownerName)  { alert('소유주 이름을 입력해주세요.'); return false; }
+    if (!form.phone)      { alert('연락처를 입력해주세요.'); return false; }
+    if (!selectedDate)    { alert('방문 날짜를 선택해주세요.'); return false; }
+    if (!selectedTime)    { alert('방문 시간을 선택해주세요.'); return false; }
+    if (!form.address)    { alert('방문 장소를 입력해주세요.'); return false; }
     return true;
   };
+
+  const preferredDateTime = selectedDate && selectedTime
+    ? `${selectedDate}T${selectedTime}:00`
+    : '';
 
   const payWithWidget = async () => {
     if (!validate()) return;
@@ -85,10 +110,10 @@ export default function InspectionCheckoutPage() {
       const orderId = `CARVIOR-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
       sessionStorage.setItem(`order_${orderId}`, JSON.stringify({
         carNumber:         form.carNumber,
-        carOwner:          form.name,
+        carOwner:          form.ownerName,
         contact:           form.phone.replace(/-/g, ''),
         address:           `${form.address} ${form.addressDetail}`.trim(),
-        preferredDateTime: form.preferredDate,
+        preferredDateTime,
         email:             form.email || '',
       }));
       await widgetsRef.current.requestPayment({
@@ -96,7 +121,7 @@ export default function InspectionCheckoutPage() {
         orderName:           '카비어 공인 검차 서비스 (VAT 포함)',
         successUrl:          `${window.location.origin}/inspection/success`,
         failUrl:             `${window.location.origin}/inspection/fail`,
-        customerName:        form.name,
+        customerName:        form.ownerName,
         customerEmail:       form.email || undefined,
         customerMobilePhone: form.phone.replace(/-/g, ''),
       });
@@ -116,10 +141,10 @@ export default function InspectionCheckoutPage() {
         body: JSON.stringify({
           source:            'CARVIOR_INSPECTION',
           carNumber:         form.carNumber,
-          carOwner:          form.name,
+          carOwner:          form.ownerName,
           contact:           form.phone.replace(/-/g, ''),
           address:           `${form.address} ${form.addressDetail}`.trim(),
-          preferredDateTime: form.preferredDate,
+          preferredDateTime,
           paymentMethod:     'BANK_TRANSFER',
           amount:            AMOUNT,
         }),
@@ -167,8 +192,6 @@ export default function InspectionCheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <StoreNav />
-
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 py-5">
           <nav className="text-xs text-gray-400 mb-1.5 flex items-center gap-1.5">
@@ -185,7 +208,7 @@ export default function InspectionCheckoutPage() {
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
 
-          {/* ── 왼쪽: 주문 정보 + 결제 위젯 ── */}
+          {/* ── 왼쪽 ── */}
           <div className="lg:col-span-3 space-y-4">
 
             {/* 주문 상품 */}
@@ -193,7 +216,7 @@ export default function InspectionCheckoutPage() {
               <h2 className="font-black text-gray-900 text-sm mb-4">주문 상품 정보</h2>
               <div className="flex gap-4 items-center">
                 <div className="w-16 h-16 bg-violet-50 rounded-xl flex items-center justify-center shrink-0 text-2xl">🔍</div>
-                <div className="flex-1 min-w-0">
+                <div>
                   <p className="font-bold text-gray-900 text-sm">카비어 공인 검차 서비스</p>
                   <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">공인 평가사 방문 · 100+ 항목 점검 · 디지털 리포트</p>
                   <p className="font-black text-gray-900 text-base mt-2">
@@ -203,12 +226,15 @@ export default function InspectionCheckoutPage() {
               </div>
             </div>
 
-            {/* 주문자 정보 */}
+            {/* 신청자 정보 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-black text-gray-900 text-sm mb-4">주문자 정보</h2>
+              <h2 className="font-black text-gray-900 text-sm mb-4">신청자 정보</h2>
               <div className="space-y-3">
-                <Field label="이름" required>
-                  <input value={form.name} onChange={set('name')} placeholder="홍길동" className={inputCls} />
+                <Field label="차량번호" required>
+                  <input value={form.carNumber} onChange={set('carNumber')} placeholder="12가 3456" className={inputCls} />
+                </Field>
+                <Field label="소유주 이름" required>
+                  <input value={form.ownerName} onChange={set('ownerName')} placeholder="홍길동" className={inputCls} />
                 </Field>
                 <Field label="연락처" required>
                   <input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" className={inputCls} />
@@ -219,25 +245,88 @@ export default function InspectionCheckoutPage() {
               </div>
             </div>
 
-            {/* 검차 정보 */}
+            {/* 방문 일정 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-black text-gray-900 text-sm mb-4">검차 정보</h2>
-              <div className="space-y-3">
-                <Field label="차량번호" required>
-                  <input value={form.carNumber} onChange={set('carNumber')} placeholder="12가 3456" className={inputCls} />
-                </Field>
-                <Field label="검차 주소" required>
-                  <input value={form.address} onChange={set('address')} placeholder="서울시 강남구 테헤란로 123" className={`${inputCls} mb-2`} />
-                  <input value={form.addressDetail} onChange={set('addressDetail')} placeholder="상세 주소 (동호수, 건물명 등)" className={inputCls} />
-                </Field>
-                <Field label="희망 일시" required>
-                  <input value={form.preferredDate} onChange={set('preferredDate')} type="datetime-local" className={inputCls} />
-                </Field>
+              <h2 className="font-black text-gray-900 text-sm mb-5">방문 일정</h2>
+
+              {/* 날짜 */}
+              <p className="text-xs font-bold text-gray-500 mb-2.5">방문 날짜 <span className="text-red-500">*</span></p>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                {days.map(d => {
+                  const iso     = d.toISOString().slice(0, 10);
+                  const isSat   = d.getDay() === 6;
+                  const isSun   = d.getDay() === 0;
+                  const active  = selectedDate === iso;
+                  return (
+                    <button
+                      key={iso}
+                      onClick={() => setSelectedDate(iso)}
+                      className={`shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border-2 transition-all min-w-[52px] ${
+                        active
+                          ? 'border-blue-500 bg-blue-500 text-white'
+                          : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                      }`}
+                    >
+                      <span className={`text-[10px] font-bold mb-0.5 ${
+                        active ? 'text-blue-100' : isSun ? 'text-red-400' : isSat ? 'text-blue-400' : 'text-gray-400'
+                      }`}>
+                        {DAY_LABELS[d.getDay()]}
+                      </span>
+                      <span className="text-sm font-black leading-none">{d.getDate()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* 시간 */}
+              <p className="text-xs font-bold text-gray-500 mt-5 mb-2.5">방문 시간 <span className="text-red-500">*</span></p>
+              <div className="grid grid-cols-4 gap-2">
+                {TIME_SLOTS.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setSelectedTime(t)}
+                    className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${
+                      selectedTime === t
+                        ? 'border-blue-500 bg-blue-500 text-white'
+                        : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* ── 토스 결제 위젯 ── */}
-            {/* display:none으로 숨겨도 DOM에 존재해야 위젯이 정상 동작함 */}
+            {/* 방문 장소 */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <h2 className="font-black text-gray-900 text-sm mb-4">방문 장소</h2>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    value={form.address}
+                    onChange={set('address')}
+                    placeholder="주소 검색"
+                    readOnly
+                    className={`${inputCls} flex-1 bg-gray-50 cursor-pointer`}
+                    onClick={openAddressSearch}
+                  />
+                  <button
+                    onClick={openAddressSearch}
+                    className="px-4 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl shrink-0 hover:bg-gray-700 transition-colors"
+                  >
+                    검색
+                  </button>
+                </div>
+                <input
+                  value={form.addressDetail}
+                  onChange={set('addressDetail')}
+                  placeholder="상세주소 (동/호수, 층 등)"
+                  className={inputCls}
+                />
+              </div>
+            </div>
+
+            {/* 토스 결제 위젯 (widget mode일 때, DOM에 항상 존재) */}
             <div
               className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
               style={{ display: payMethod === 'widget' ? 'block' : 'none' }}
@@ -253,15 +342,14 @@ export default function InspectionCheckoutPage() {
             </div>
           </div>
 
-          {/* ── 오른쪽: 결제 방법 + 금액 + 버튼 ── */}
+          {/* ── 오른쪽 ── */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl border border-gray-100 p-6 sticky top-24 space-y-5">
 
-              {/* 결제 방법 선택 */}
+              {/* 결제 방법 */}
               <div>
                 <p className="text-sm font-black text-gray-900 mb-3">결제 방법</p>
 
-                {/* 위젯 결제 */}
                 <button
                   onClick={() => setPayMethod('widget')}
                   className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all mb-2 ${
@@ -286,7 +374,6 @@ export default function InspectionCheckoutPage() {
                   )}
                 </button>
 
-                {/* 직접 계좌이체 */}
                 <button
                   onClick={() => setPayMethod('direct')}
                   className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-xl border-2 transition-all ${
@@ -307,7 +394,6 @@ export default function InspectionCheckoutPage() {
                   </div>
                 </button>
 
-                {/* 직접 이체 계좌 안내 */}
                 {payMethod === 'direct' && (
                   <div className="mt-3 bg-gray-50 rounded-xl p-3 space-y-1.5">
                     <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wider">입금 계좌</p>
@@ -361,6 +447,27 @@ export default function InspectionCheckoutPage() {
                   </span>
                   <span className="font-black text-blue-600 text-lg">{AMOUNT.toLocaleString()}원</span>
                 </div>
+
+                {/* 선택된 일정 요약 */}
+                {(selectedDate || selectedTime) && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 space-y-1">
+                    {selectedDate && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">방문 날짜</span>
+                        <span className="font-bold text-gray-700">
+                          {new Date(selectedDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+                        </span>
+                      </div>
+                    )}
+                    {selectedTime && (
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">방문 시간</span>
+                        <span className="font-bold text-gray-700">{selectedTime}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-[10px] text-gray-400 text-right mt-1">검차 전날 18시까지 100% 환불 가능해요</p>
               </div>
 
