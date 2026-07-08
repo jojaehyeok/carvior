@@ -155,7 +155,7 @@ export default function HomePage() {
           {/* 플로팅 카드 */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: '🔍', title: '허위매물 0', sub: '진단 완료 차량만' },
+              { icon: '🚗', title: '무료 등록', sub: '지금 바로 올려보세요' },
               { icon: '💰', title: '등록비 무료', sub: 'MVP 기간 한정' },
               { icon: '🌏', title: '글로벌 바이어', sub: '해외 직거래 연결' },
               { icon: '📋', title: '투명한 이력', sub: '사고·침수 전수 공개' },
