@@ -375,7 +375,7 @@ export default function InspectionCheckoutPage() {
                   </svg>
                   <div className="text-left">
                     <p className={`text-sm font-black ${payMethod === 'widget' ? 'text-blue-700' : 'text-gray-700'}`}>
-                      카드 / 계좌이체 / 간편결제
+                      카드·계좌이체·간편결제
                     </p>
                     <p className="text-[10px] text-gray-400">토스페이먼츠 결제 위젯</p>
                   </div>
