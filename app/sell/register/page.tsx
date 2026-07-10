@@ -276,6 +276,7 @@ export default function SelfRegisterPage() {
   // 자동차등록증 OCR
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrDone, setOcrDone] = useState(false);
+  const [ocrRaw, setOcrRaw] = useState<Record<string, unknown> | null>(null);
   const ocrFileRef = useRef<HTMLInputElement>(null);
 
   // 가격·설명
@@ -341,6 +342,7 @@ export default function SelfRegisterPage() {
       const data = await res.json();
       if (data.error) { alert('등록증 인식에 실패했습니다. 직접 입력해주세요.'); return; }
 
+      setOcrRaw(data);
       if (data.plateNumber) setCarNumber(String(data.plateNumber));
       if (data.ownerName) setOwnerName(String(data.ownerName));
 
@@ -569,15 +571,28 @@ export default function SelfRegisterPage() {
 
           {/* 자동차등록증 스캔 */}
           {ocrDone ? (
-            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
-              <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" fill="none" stroke="#16a34a" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+                <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <svg width="18" height="18" fill="none" stroke="#16a34a" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-green-800">등록증 스캔 완료</p>
+                  <p className="text-[11px] text-green-600">아래 정보를 확인·수정해주세요</p>
+                </div>
+                <button onClick={() => setOcrDone(false)} className="text-zinc-400 text-lg leading-none px-1">×</button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-green-800">등록증 스캔 완료</p>
-                <p className="text-[11px] text-green-600">아래 정보를 확인·수정해주세요</p>
-              </div>
-              <button onClick={() => setOcrDone(false)} className="text-zinc-400 text-lg leading-none px-1">×</button>
+              {ocrRaw && (
+                <div className="bg-zinc-900 rounded-2xl p-4 text-[11px] font-mono overflow-x-auto">
+                  <p className="text-zinc-400 mb-2 font-sans font-bold text-xs">OCR 원시 결과</p>
+                  {Object.entries(ocrRaw).map(([k, v]) => (
+                    <div key={k} className="flex gap-2 py-0.5 border-b border-zinc-800 last:border-0">
+                      <span className="text-violet-400 shrink-0 w-36">{k}</span>
+                      <span className="text-green-300 break-all">{v == null ? <span className="text-zinc-600">null</span> : String(v)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : ocrLoading ? (
             <div className="bg-violet-600 rounded-2xl px-4 py-4 flex items-center gap-3">
@@ -688,14 +703,58 @@ export default function SelfRegisterPage() {
                   </select>
                 </Field>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="배기량">
-                  <input value={car.displacement} onChange={e => setCar(p=>({...p,displacement:e.target.value}))} placeholder="예: 1998cc" className={inp} />
-                </Field>
-                <Field label="색상">
-                  <input value={car.color} onChange={e => setCar(p=>({...p,color:e.target.value}))} placeholder="예: 흰색" className={inp} />
-                </Field>
-              </div>
+              <Field label="배기량">
+                <input value={car.displacement} onChange={e => setCar(p=>({...p,displacement:e.target.value}))} placeholder="예: 1998cc" className={inp} />
+              </Field>
+              <Field label="색상">
+                {(() => {
+                  const COLORS = [
+                    { ko: '흰색',    hex: '#F5F5F5' },
+                    { ko: '검정',    hex: '#1A1A1A' },
+                    { ko: '은색',    hex: '#C8C8C8' },
+                    { ko: '회색',    hex: '#787878' },
+                    { ko: '빨간색',  hex: '#CC2222' },
+                    { ko: '파란색',  hex: '#1A52CC' },
+                    { ko: '남색',    hex: '#0A1F6A' },
+                    { ko: '하늘색',  hex: '#5BA3D9' },
+                    { ko: '초록색',  hex: '#2A7A35' },
+                    { ko: '베이지',  hex: '#D4B896' },
+                    { ko: '갈색',    hex: '#6B4226' },
+                    { ko: '노란색',  hex: '#F5C518' },
+                    { ko: '주황색',  hex: '#E67E22' },
+                    { ko: '보라색',  hex: '#7D3C98' },
+                  ];
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        {COLORS.map(c => (
+                          <button
+                            key={c.ko}
+                            type="button"
+                            onClick={() => setCar(p => ({ ...p, color: p.color === c.ko ? '' : c.ko }))}
+                            className={`w-8 h-8 rounded-full border-2 transition-all ${car.color === c.ko ? 'border-violet-500 scale-110 shadow-md' : 'border-transparent hover:border-zinc-300'}`}
+                            style={{ backgroundColor: c.hex }}
+                            title={c.ko}
+                          />
+                        ))}
+                      </div>
+                      {car.color && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-zinc-500">선택:</span>
+                          <span className="text-xs font-bold text-zinc-700">{car.color}</span>
+                          <button type="button" onClick={() => setCar(p=>({...p,color:''}))} className="text-[10px] text-zinc-400 hover:text-zinc-600">✕</button>
+                        </div>
+                      )}
+                      <input
+                        value={car.color}
+                        onChange={e => setCar(p=>({...p,color:e.target.value}))}
+                        placeholder="직접 입력"
+                        className={`${inp} text-xs py-2`}
+                      />
+                    </div>
+                  );
+                })()}
+              </Field>
             </div>
           </div>
         </div>
