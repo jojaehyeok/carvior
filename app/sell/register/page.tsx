@@ -330,7 +330,7 @@ export default function SelfRegisterPage() {
     if (!file) return;
     setOcrLoading(true);
     try {
-      const resized = await resizeImage(file, 800, 0.75);
+      const resized = await resizeImage(file, 600, 0.65);
       const reader = new FileReader();
       const base64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve((reader.result as string).split(',')[1]);
@@ -342,6 +342,7 @@ export default function SelfRegisterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: base64, mediaType: 'image/jpeg' }),
       });
+      if (!res.ok) { alert('등록증 인식에 실패했습니다. 직접 입력해주세요.'); return; }
       const data = await res.json();
       if (data.error) { alert('등록증 인식에 실패했습니다. 직접 입력해주세요.'); return; }
 
