@@ -571,43 +571,53 @@ export default function SelfRegisterPage() {
       {step === 0 && (
         <div className="flex-1 px-4 py-5 space-y-4 max-w-lg mx-auto w-full">
 
-          {/* 자동차등록증 OCR */}
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest">자동차등록증 OCR</p>
-              <span className="text-[10px] text-zinc-400 bg-zinc-100 rounded-full px-2 py-0.5">선택</span>
+          {/* 자동차등록증 스캔 */}
+          {ocrDone ? (
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+              <div className="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="18" height="18" fill="none" stroke="#16a34a" strokeWidth={2.5} viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-green-800">등록증 스캔 완료</p>
+                <p className="text-[11px] text-green-600">아래 정보를 확인·수정해주세요</p>
+              </div>
+              <button onClick={() => setOcrDone(false)} className="text-zinc-400 text-lg leading-none px-1">×</button>
             </div>
-            <p className="text-[11px] text-zinc-400 mb-3">등록증 사진을 올리면 차량 정보를 자동으로 채워드려요</p>
-            {ocrLoading ? (
-              <div className="flex items-center justify-center gap-2 py-4">
-                <span className="animate-spin text-violet-500 text-lg">⟳</span>
-                <span className="text-sm text-violet-600 font-semibold">등록증 분석 중…</span>
+          ) : ocrLoading ? (
+            <div className="bg-violet-600 rounded-2xl px-4 py-4 flex items-center gap-3">
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="animate-spin text-white text-xl">⟳</span>
               </div>
-            ) : ocrDone ? (
-              <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-3 py-2.5 text-xs text-green-800">
-                <span>✅</span>
-                <span>차량 정보가 입력되었습니다. 아래 내용을 확인·수정해주세요.</span>
-                <button
-                  onClick={() => setOcrDone(false)}
-                  className="ml-auto text-zinc-400 hover:text-zinc-600 text-base leading-none"
-                >×</button>
+              <div>
+                <p className="text-sm font-bold text-white">등록증 분석 중…</p>
+                <p className="text-[11px] text-violet-200">차량 정보를 읽고 있어요</p>
               </div>
-            ) : (
-              <button
-                onClick={() => ocrFileRef.current?.click()}
-                className="w-full py-3 border-2 border-dashed border-violet-300 hover:border-violet-500 hover:bg-violet-50 rounded-xl text-sm font-semibold text-violet-500 transition-colors"
-              >
-                📄 등록증 사진 선택하기
-              </button>
-            )}
-            <input
-              ref={ocrFileRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleOcrUpload}
-            />
-          </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => ocrFileRef.current?.click()}
+              className="w-full bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white rounded-2xl px-4 py-4 flex items-center gap-3 transition-all"
+            >
+              <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="20" height="20" fill="none" stroke="white" strokeWidth={2} viewBox="0 0 24 24">
+                  <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+                  <rect x="7" y="7" width="10" height="10" rx="1"/>
+                </svg>
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-sm font-extrabold">자동차등록증 스캔</p>
+                <p className="text-[11px] text-violet-200 mt-0.5">사진 1장으로 차량 정보 자동 입력</p>
+              </div>
+              <svg width="18" height="18" fill="none" stroke="white" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          )}
+          <input
+            ref={ocrFileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleOcrUpload}
+          />
 
           {/* 차량번호 조회 */}
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100">
