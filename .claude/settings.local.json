@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl -s \"https://carvior.store/api/v1/external/inspection/report/10\")"
+      "Bash(curl -s \"https://carvior.store/api/v1/external/inspection/report/10\")",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)"
     ]
   }
 }
