@@ -330,16 +330,17 @@ export default function SelfRegisterPage() {
     if (!file) return;
     setOcrLoading(true);
     try {
+      const resized = await resizeImage(file, 1200, 0.88);
       const reader = new FileReader();
       const base64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve((reader.result as string).split(',')[1]);
         reader.onerror = reject;
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(resized);
       });
       const res = await fetch('/api/car/ocr-registration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64, mediaType: file.type || 'image/jpeg' }),
+        body: JSON.stringify({ imageBase64: base64, mediaType: 'image/jpeg' }),
       });
       const data = await res.json();
       if (data.error) { alert('등록증 인식에 실패했습니다. 직접 입력해주세요.'); return; }
