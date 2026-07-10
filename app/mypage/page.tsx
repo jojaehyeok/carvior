@@ -39,9 +39,10 @@ export default function MypagePage() {
   const router = useRouter();
   const [items, setItems] = useState<StoreItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState<{ item: StoreItem; type: 'transport' | 'inspection' } | null>(null);
+  const [modal, setModal] = useState<{ item: StoreItem; type: 'inspection' } | null>(null);
   const [form, setForm] = useState<BookingForm>({ address: '', detailAddress: '', contact: '', preferredDateTime: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [soldRating, setSoldRating] = useState<Record<number, number>>({});
 
   const user = session?.user as any;
 
@@ -66,6 +67,15 @@ export default function MypagePage() {
     if (res.ok) setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'sold' } : i));
   };
 
+  const submitRating = (item: StoreItem, stars: number) => {
+    setSoldRating(prev => ({ ...prev, [item.id]: stars }));
+    fetch('https://carvior.store/api/v1/admin/notify/seller-rating', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carNumber: item.carNumber, title: item.titleKo, stars }),
+    }).catch(() => {});
+  };
+
   const submitBooking = async () => {
     if (!modal) return;
     setSubmitting(true);
@@ -80,7 +90,7 @@ export default function MypagePage() {
           address: form.address,
           detailAddress: form.detailAddress,
           preferredDateTime: form.preferredDateTime,
-          source: modal.type === 'transport' ? 'TRANSPORT' : 'INSPECTION',
+          source: 'INSPECTION',
         }),
       });
       setModal(null);
@@ -214,12 +224,33 @@ export default function MypagePage() {
                             </button>
                           )}
                           {item.status === 'sold' && (
-                            <button
-                              onClick={() => { setModal({ item, type: 'transport' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
-                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-zinc-700 text-white hover:bg-zinc-800 transition-colors"
-                            >
-                              탁송 신청
-                            </button>
+                            <div className="w-full space-y-2 mt-1">
+                              <div className="bg-green-50 border border-green-100 rounded-xl px-3 py-2">
+                                <p className="text-xs font-black text-green-800">🎉 판매 완료!</p>
+                                <p className="text-[10px] text-green-600 mt-0.5">카비어를 이용해주셔서 감사합니다</p>
+                              </div>
+                              {!soldRating[item.id] ? (
+                                <div>
+                                  <p className="text-[10px] text-gray-400 mb-1">이용 경험을 평가해주세요</p>
+                                  <div className="flex gap-0.5">
+                                    {[1,2,3,4,5].map(s => (
+                                      <button key={s} onClick={() => submitRating(item, s)}
+                                        className="text-xl text-gray-200 hover:text-amber-400 transition-colors leading-none">★</button>
+                                    ))}
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-[11px] text-amber-500 font-bold">
+                                  {'★'.repeat(soldRating[item.id])}{'☆'.repeat(5 - soldRating[item.id])} 감사합니다!
+                                </p>
+                              )}
+                              <button
+                                onClick={() => router.push('/sell/register')}
+                                className="w-full py-2 text-[11px] font-bold rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                              >
+                                + 다음 차량도 카비어에 등록하기
+                              </button>
+                            </div>
                           )}
                         </div>
 
@@ -248,14 +279,12 @@ export default function MypagePage() {
         )}
       </div>
 
-      {/* 탁송/검차 신청 모달 */}
+      {/* 검차 신청 모달 */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
             <div>
-              <h3 className="font-black text-gray-900 text-lg">
-                {modal.type === 'inspection' ? '검차 신청' : '탁송 신청'}
-              </h3>
+              <h3 className="font-black text-gray-900 text-lg">검차 신청</h3>
               <p className="text-xs text-gray-400 mt-1">{modal.item.titleKo} ({modal.item.carNumber})</p>
             </div>
 

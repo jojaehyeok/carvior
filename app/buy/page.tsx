@@ -126,8 +126,79 @@ function BuyCard({ car }: { car: StoreItem }) {
   );
 }
 
+function SoldCard({ car }: { car: StoreItem }) {
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [contact, setContact] = useState('');
+  const [sent, setSent] = useState(false);
+
+  const sendAlert = () => {
+    if (!contact.trim()) return;
+    fetch('https://carvior.store/api/v1/admin/notify/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contact, carTitle: car.titleKo, category: car.category }),
+    }).catch(() => {});
+    setSent(true);
+  };
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white opacity-70">
+      <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+        {car.photos?.exterior?.[0] ? (
+          <img src={car.photos.exterior[0]} alt={car.titleKo} className="w-full h-full object-cover grayscale" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <svg viewBox="0 0 500 280" fill="none" className="w-4/5 opacity-10">
+              <rect x="40" y="140" width="420" height="100" rx="20" fill="#000"/>
+              <path d="M110 140 L155 75 H345 L390 140Z" fill="#000"/>
+              <circle cx="130" cy="220" r="40" fill="#333"/>
+              <circle cx="370" cy="220" r="40" fill="#333"/>
+            </svg>
+          </div>
+        )}
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <span className="text-white font-black text-xl tracking-widest border-2 border-white px-4 py-1.5 rounded">SOLD</span>
+        </div>
+      </div>
+      <div className="p-4">
+        <p className="text-xs text-gray-300 mb-0.5">{car.year}년 · {car.region}</p>
+        <h3 className="font-bold text-gray-400 leading-snug mb-3 line-clamp-1">{car.titleKo}</h3>
+        {!alertOpen ? (
+          <button
+            onClick={() => setAlertOpen(true)}
+            className="w-full py-2.5 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-xs font-bold hover:bg-violet-100 transition-colors"
+          >
+            🔔 비슷한 차량 입고 알림 신청
+          </button>
+        ) : sent ? (
+          <div className="text-center py-2">
+            <p className="text-xs font-bold text-green-600">✓ 신청 완료! 입고 시 바로 알려드릴게요</p>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="tel"
+              placeholder="연락처 입력"
+              value={contact}
+              onChange={e => setContact(e.target.value)}
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-violet-400"
+            />
+            <button
+              onClick={sendAlert}
+              className="px-3 py-2 bg-violet-600 text-white text-xs font-bold rounded-lg hover:bg-violet-500"
+            >
+              신청
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function BuyPage() {
   const [items, setItems] = useState<StoreItem[]>([]);
+  const [soldItems, setSoldItems] = useState<StoreItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState('전체');
   const [search, setSearch] = useState('');
@@ -138,7 +209,9 @@ export default function BuyPage() {
       .then(r => r.json())
       .then((data: StoreItem[]) => {
         const active = data.filter(i => i.status === 'active');
+        const sold   = data.filter(i => i.status === 'sold');
         setItems(active.length > 0 ? active : DEMO_CARS);
+        setSoldItems(sold);
       })
       .catch(() => setItems(DEMO_CARS))
       .finally(() => setLoading(false));
@@ -166,6 +239,10 @@ export default function BuyPage() {
       if (pa !== pb) return pa - pb;
       return new Date(b.inspectedAt).getTime() - new Date(a.inspectedAt).getTime();
     });
+
+  const filteredSold = soldItems
+    .filter(i => selectedType === '전체' || i.category === selectedType)
+    .filter(i => !search || i.titleKo.includes(search) || i.region?.includes(search));
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -249,6 +326,23 @@ export default function BuyPage() {
             {filtered.map(car => (
               <BuyCard key={car.id} car={car} />
             ))}
+          </div>
+        )}
+
+        {/* ── 판매완료 매물 ── */}
+        {filteredSold.length > 0 && (
+          <div className="mt-12">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px bg-gray-100" />
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">판매 완료된 매물</p>
+              <div className="flex-1 h-px bg-gray-100" />
+            </div>
+            <p className="text-xs text-gray-400 mb-4">비슷한 차량 입고 시 알림을 신청해보세요</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {filteredSold.map(car => (
+                <SoldCard key={car.id} car={car} />
+              ))}
+            </div>
           </div>
         )}
       </div>
