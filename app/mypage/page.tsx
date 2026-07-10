@@ -169,72 +169,76 @@ export default function MypagePage() {
               return (
                 <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                   <div className="flex">
-                    {/* 썸네일 */}
-                    <div className="w-28 h-28 shrink-0 bg-gray-100">
+                    {/* 썸네일 — 카드 전체 높이 채움 */}
+                    <div className="w-36 shrink-0 self-stretch bg-gray-100 min-h-[9rem]">
                       {img ? (
                         <img src={img} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-300 text-3xl">🚗</div>
+                        <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">🚗</div>
                       )}
                     </div>
 
                     {/* 정보 */}
-                    <div className="flex-1 p-4 min-w-0">
+                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-between gap-2">
+                      {/* 상단: 제목 + 뱃지 */}
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-bold text-sm text-gray-900 truncate">{item.titleKo}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km</p>
-                          <p className="text-sm font-black text-violet-600 mt-1">
+                          <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{item.titleKo}</p>
+                          <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
+                            {item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km
+                          </p>
+                          <p className="text-base font-black text-violet-600 mt-1 leading-none">
                             {item.priceKRW ? `${Math.round(Number(item.priceKRW) / 10000).toLocaleString()}만원` : '가격 미정'}
                           </p>
                         </div>
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full shrink-0 ${s.color}`}>{s.label}</span>
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${s.color}`}>{s.label}</span>
                       </div>
 
-                      {/* 액션 버튼 */}
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {/* 검차 신청: 검토중·판매중 모두 가능 */}
-                        {(item.status === 'pending' || item.status === 'active') && (
-                          <a
-                            href="/inspection"
-                            className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
-                          >
-                            ✦ 검차 신청
-                          </a>
-                        )}
-                        {item.status === 'active' && (
-                          <button
-                            onClick={() => markSold(item)}
-                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                          >
-                            판매완료
-                          </button>
-                        )}
-                        {item.status === 'sold' && (
-                          <button
-                            onClick={() => { setModal({ item, type: 'transport' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
-                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-zinc-700 text-white hover:bg-zinc-800 transition-colors"
-                          >
-                            탁송 신청
-                          </button>
-                        )}
+                      {/* 하단: 버튼 + 상태 메시지 */}
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-1.5">
+                          {(item.status === 'pending' || item.status === 'active') && (
+                            <a
+                              href="/inspection"
+                              className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
+                            >
+                              ✦ 검차 신청
+                            </a>
+                          )}
+                          {item.status === 'active' && (
+                            <button
+                              onClick={() => markSold(item)}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+                            >
+                              판매완료
+                            </button>
+                          )}
+                          {item.status === 'sold' && (
+                            <button
+                              onClick={() => { setModal({ item, type: 'transport' }); setForm({ address: '', detailAddress: '', contact: '', preferredDateTime: '' }); }}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-zinc-700 text-white hover:bg-zinc-800 transition-colors"
+                            >
+                              탁송 신청
+                            </button>
+                          )}
+                        </div>
+
                         {item.status === 'pending' && (
-                          <div>
-                            <p className="text-[11px] text-yellow-600 font-semibold">관리자 검토 후 활성화됩니다</p>
-                            <p className="text-[10px] text-zinc-400 mt-0.5">검차 완료 시 즉시 게시됩니다</p>
+                          <p className="text-[10px] text-yellow-600 leading-relaxed">
+                            관리자 검토 후 활성화됩니다<br />
+                            <span className="text-zinc-400">검차 완료 시 즉시 게시됩니다</span>
+                          </p>
+                        )}
+
+                        {(item.status === 'active' || item.status === 'pending') && (
+                          <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
+                            <span className="text-amber-500 text-[10px]">💡</span>
+                            <p className="text-[10px] text-amber-700 font-semibold">
+                              검차받은 매물은 평균 <strong>3배 빠르게</strong> 판매됩니다
+                            </p>
                           </div>
                         )}
                       </div>
-
-                      {/* 검차 유도 메시지 */}
-                      {(item.status === 'active' || item.status === 'pending') && (
-                        <div className="mt-2 flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
-                          <span className="text-amber-500 text-xs">💡</span>
-                          <p className="text-[10px] text-amber-700 font-semibold leading-snug">
-                            검차받은 매물은 평균 <strong>3배 빠르게</strong> 판매됩니다
-                          </p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
