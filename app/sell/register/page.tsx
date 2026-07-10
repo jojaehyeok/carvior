@@ -273,6 +273,11 @@ export default function SelfRegisterPage() {
   });
   const [uploading, setUploading] = useState<CatKey | null>(null);
 
+  // 자동차등록증 OCR
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrDone, setOcrDone] = useState(false);
+  const ocrFileRef = useRef<HTMLInputElement>(null);
+
   // 가격·설명
   const [sellType, setSellType] = useState<string>('일반차량');
   const [priceKRW, setPriceKRW] = useState('');
@@ -316,6 +321,53 @@ export default function SelfRegisterPage() {
       setLookupDone(true);
     } finally {
       setLooking(false);
+    }
+  };
+
+  // ── 자동차등록증 OCR ──────────────────────────────────
+  const handleOcrUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOcrLoading(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch('/api/car/ocr-registration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mediaType: file.type || 'image/jpeg' }),
+      });
+      const data = await res.json();
+      if (data.error) { alert('등록증 인식에 실패했습니다. 직접 입력해주세요.'); return; }
+
+      if (data.plateNumber) setCarNumber(String(data.plateNumber));
+      if (data.ownerName) setOwnerName(String(data.ownerName));
+
+      const fuelMatch = ['가솔린', '디젤', '하이브리드', 'LPG', '전기', '기타'].find(
+        f => data.fuelType?.includes(f)
+      );
+      const transMatch = ['자동', '수동'].find(t => data.transmission?.includes(t));
+
+      setCar(prev => ({
+        ...prev,
+        ...(data.carBrand     && { maker: String(data.carBrand) }),
+        ...(data.carName      && { model: String(data.carName) }),
+        ...(data.modelYear    && { year: String(data.modelYear) }),
+        ...(data.displacement && { displacement: String(data.displacement) }),
+        ...(fuelMatch         && { fuel: fuelMatch }),
+        ...(transMatch        && { transmission: transMatch }),
+        ...(data.color        && { color: String(data.color) }),
+      }));
+      setOcrDone(true);
+    } catch {
+      alert('등록증 처리 중 오류가 발생했습니다.');
+    } finally {
+      setOcrLoading(false);
+      e.target.value = '';
     }
   };
 
@@ -370,6 +422,14 @@ export default function SelfRegisterPage() {
       }
     }
     setPhotos(prev => ({ ...prev, [catKey]: [...prev[catKey], ...newUrls] }));
+    // 번호판·얼굴·주민번호 블러 (백그라운드 처리, 동일 S3 키에 덮어씀)
+    if (newUrls.length > 0) {
+      fetch('https://carvior.store/api/v1/admin/blur/photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: newUrls }),
+      }).catch(() => {});
+    }
     setUploading(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carNumber, photos]);
@@ -509,6 +569,45 @@ export default function SelfRegisterPage() {
       {/* ══ STEP 0: 차량정보 ══════════════════════════ */}
       {step === 0 && (
         <div className="flex-1 px-4 py-5 space-y-4 max-w-lg mx-auto w-full">
+
+          {/* 자동차등록증 OCR */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-violet-600 uppercase tracking-widest">자동차등록증 OCR</p>
+              <span className="text-[10px] text-zinc-400 bg-zinc-100 rounded-full px-2 py-0.5">선택</span>
+            </div>
+            <p className="text-[11px] text-zinc-400 mb-3">등록증 사진을 올리면 차량 정보를 자동으로 채워드려요</p>
+            {ocrLoading ? (
+              <div className="flex items-center justify-center gap-2 py-4">
+                <span className="animate-spin text-violet-500 text-lg">⟳</span>
+                <span className="text-sm text-violet-600 font-semibold">등록증 분석 중…</span>
+              </div>
+            ) : ocrDone ? (
+              <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-3 py-2.5 text-xs text-green-800">
+                <span>✅</span>
+                <span>차량 정보가 입력되었습니다. 아래 내용을 확인·수정해주세요.</span>
+                <button
+                  onClick={() => setOcrDone(false)}
+                  className="ml-auto text-zinc-400 hover:text-zinc-600 text-base leading-none"
+                >×</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => ocrFileRef.current?.click()}
+                className="w-full py-3 border-2 border-dashed border-violet-300 hover:border-violet-500 hover:bg-violet-50 rounded-xl text-sm font-semibold text-violet-500 transition-colors"
+              >
+                📄 등록증 사진 선택하기
+              </button>
+            )}
+            <input
+              ref={ocrFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleOcrUpload}
+            />
+          </div>
+
           {/* 차량번호 조회 */}
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100">
             <p className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-3">차량번호로 자동 조회</p>
@@ -602,7 +701,10 @@ export default function SelfRegisterPage() {
             <p className="text-sm font-bold text-zinc-700">사진 등록</p>
             <span className="text-xs text-zinc-400">총 {totalPhotos}장</span>
           </div>
-          <p className="text-xs text-zinc-400 mb-3">사진이 많을수록 딜러 관심도 3배 증가해요. 외관은 필수입니다.</p>
+          <p className="text-xs text-zinc-400 mb-2">사진이 많을수록 딜러 관심도 3배 증가해요. 외관은 필수입니다.</p>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 text-[11px] text-blue-700 mb-1">
+            🔒 업로드된 사진의 번호판·얼굴·주민번호는 자동으로 블러 처리됩니다.
+          </div>
           {PHOTO_CATS.map(cat => (
             <PhotoCard
               key={cat.key}
