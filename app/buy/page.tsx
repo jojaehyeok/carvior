@@ -148,9 +148,14 @@ export default function BuyPage() {
     .filter(i => selectedType === '전체' || i.category === selectedType)
     .filter(i => !search || i.titleKo.includes(search) || i.region?.includes(search))
     .sort((a, b) => {
+      // ── 최우선: 검차 완료(hasReport) 1순위, 직거래 2순위 ──
+      if (a.hasReport !== b.hasReport) return a.hasReport ? -1 : 1;
+
+      // ── 각 그룹 내 선택 정렬 ──
       if (sortBy === 'price_asc')  return a.priceKRW - b.priceKRW;
       if (sortBy === 'price_desc') return b.priceKRW - a.priceKRW;
       if (sortBy === 'mileage')    return a.mileage - b.mileage;
+
       // 최신순: 30일+ → 뒤로, 14일+ → 중간, 신규 → 앞
       const now = Date.now();
       const penalty = (d: string) => {

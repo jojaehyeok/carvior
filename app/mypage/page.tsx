@@ -16,6 +16,8 @@ interface StoreItem {
   status: Status;
   photos: Record<string, string[]>;
   registeredAt: string;
+  carHash?: string;
+  hasReport?: boolean;
 }
 
 const STATUS_MAP: Record<Status, { label: string; color: string }> = {
@@ -217,7 +219,10 @@ export default function MypagePage() {
                           </button>
                         )}
                         {item.status === 'pending' && (
-                          <p className="text-[11px] text-yellow-600 font-semibold">관리자 검토 후 활성화됩니다</p>
+                          <div>
+                            <p className="text-[11px] text-yellow-600 font-semibold">관리자 검토 후 활성화됩니다</p>
+                            <p className="text-[10px] text-zinc-400 mt-0.5">검차 완료 시 즉시 게시됩니다</p>
+                          </div>
                         )}
                       </div>
 
