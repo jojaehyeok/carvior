@@ -86,12 +86,15 @@ export async function POST(req: NextRequest) {
         const data = await res.json();
         return NextResponse.json(data, { status: 201 });
       }
-    } catch { /* 폴백 */ }
+      // NestJS가 에러 반환 (409 중복 등) → 그대로 전달
+      const errData = await res.json();
+      return NextResponse.json(errData, { status: res.status });
+    } catch { /* NestJS 연결 실패 시에만 JSON 폴백 */ }
 
-    // JSON 파일 폴백
+    // JSON 파일 폴백 (NestJS 미배포 시)
     const items = readItems();
-    if (items.find(i => i.bookingId === body.bookingId)) {
-      return NextResponse.json({ error: '이미 등록된 예약입니다.' }, { status: 409 });
+    if (items.find(i => i.bookingId === body.bookingId || i.carNumber === body.carNumber)) {
+      return NextResponse.json({ message: '이미 등록된 차량번호입니다.' }, { status: 409 });
     }
     const newItem: StoreItem = {
       ...body,

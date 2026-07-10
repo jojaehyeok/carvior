@@ -91,8 +91,9 @@ export default function MypagePage() {
   };
 
   const thumb = (item: StoreItem) => {
-    const all = Object.values(item.photos ?? {}).flat();
-    return all[0] ?? null;
+    return (item.photos as any)?.exterior?.[0]
+      ?? Object.values(item.photos ?? {}).flat()[0]
+      ?? null;
   };
 
   if (status === 'loading' || loading) {
@@ -190,21 +191,22 @@ export default function MypagePage() {
 
                       {/* 액션 버튼 */}
                       <div className="mt-3 flex flex-wrap gap-2">
+                        {/* 검차 신청: 검토중·판매중 모두 가능 */}
+                        {(item.status === 'pending' || item.status === 'active') && (
+                          <a
+                            href="/inspection"
+                            className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
+                          >
+                            ✦ 검차 신청
+                          </a>
+                        )}
                         {item.status === 'active' && (
-                          <>
-                            <a
-                              href="/inspection"
-                              className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
-                            >
-                              ✦ 검차 신청
-                            </a>
-                            <button
-                              onClick={() => markSold(item)}
-                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                            >
-                              판매완료
-                            </button>
-                          </>
+                          <button
+                            onClick={() => markSold(item)}
+                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+                          >
+                            판매완료
+                          </button>
                         )}
                         {item.status === 'sold' && (
                           <button
@@ -219,8 +221,8 @@ export default function MypagePage() {
                         )}
                       </div>
 
-                      {/* 검차 유도 메시지 (active & 미진단) */}
-                      {item.status === 'active' && (
+                      {/* 검차 유도 메시지 */}
+                      {(item.status === 'active' || item.status === 'pending') && (
                         <div className="mt-2 flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">
                           <span className="text-amber-500 text-xs">💡</span>
                           <p className="text-[10px] text-amber-700 font-semibold leading-snug">

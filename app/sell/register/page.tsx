@@ -513,7 +513,7 @@ export default function SelfRegisterPage() {
       });
       if (!res.ok) {
         const err = await res.json();
-        alert(err.error ?? '등록 실패. 다시 시도해주세요.');
+        alert(err.message ?? err.error ?? '등록 실패. 다시 시도해주세요.');
         return;
       }
       setDone(true);
