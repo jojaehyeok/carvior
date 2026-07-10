@@ -360,6 +360,7 @@ export default function SelfRegisterPage() {
         ...(fuelMatch         && { fuel: fuelMatch }),
         ...(transMatch        && { transmission: transMatch }),
         ...(data.color        && { color: String(data.color) }),
+        ...(data.mileage      && { mileage: String(data.mileage) }),
       }));
       setOcrDone(true);
     } catch {
