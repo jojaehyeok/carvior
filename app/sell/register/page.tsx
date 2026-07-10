@@ -330,7 +330,7 @@ export default function SelfRegisterPage() {
     if (!file) return;
     setOcrLoading(true);
     try {
-      const resized = await resizeImage(file, 1200, 0.88);
+      const resized = await resizeImage(file, 800, 0.75);
       const reader = new FileReader();
       const base64 = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve((reader.result as string).split(',')[1]);
