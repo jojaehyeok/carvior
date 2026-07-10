@@ -42,7 +42,9 @@ export default function MypagePage() {
   const [modal, setModal] = useState<{ item: StoreItem; type: 'inspection' } | null>(null);
   const [form, setForm] = useState<BookingForm>({ address: '', detailAddress: '', contact: '', preferredDateTime: '' });
   const [submitting, setSubmitting] = useState(false);
-  const [soldRating, setSoldRating] = useState<Record<number, number>>({});
+  const [soldRating, setSoldRating] = useState<Record<number, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('soldRating') ?? '{}'); } catch { return {}; }
+  });
 
   const user = session?.user as any;
 
@@ -68,7 +70,11 @@ export default function MypagePage() {
   };
 
   const submitRating = (item: StoreItem, stars: number) => {
-    setSoldRating(prev => ({ ...prev, [item.id]: stars }));
+    setSoldRating(prev => {
+      const next = { ...prev, [item.id]: stars };
+      try { localStorage.setItem('soldRating', JSON.stringify(next)); } catch {}
+      return next;
+    });
     fetch('https://carvior.store/api/v1/admin/notify/seller-rating', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -207,7 +213,7 @@ export default function MypagePage() {
                       {/* 하단: 버튼 + 상태 메시지 */}
                       <div className="space-y-2">
                         <div className="flex flex-wrap gap-1.5">
-                          {(item.status === 'pending' || item.status === 'active') && (
+                          {(item.status === 'pending' || item.status === 'active') && !item.hasReport && (
                             <a
                               href="/inspection"
                               className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"
