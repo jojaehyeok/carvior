@@ -237,7 +237,7 @@ export default function CarDetailPage() {
     const storedLiked = localStorage.getItem(`liked_${id}`) === '1';
     setLiked(storedLiked);
     // 스탯 fetch
-    fetch(`/api/item-stats/${id}`)
+    fetch(`https://carvior.store/api/v1/admin/store-items/${id}/stats`)
       .then(r => r.json())
       .then(d => { setViewCount(d.views ?? 0); setLikeCount(d.likes ?? 0); })
       .catch(() => {});
@@ -245,7 +245,7 @@ export default function CarDetailPage() {
     const key = `viewed_${id}`;
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
-      fetch(`/api/item-stats/${id}`, {
+      fetch(`https://carvior.store/api/v1/admin/store-items/${id}/stats`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'view' }),
@@ -451,7 +451,7 @@ export default function CarDetailPage() {
                   const next = !liked;
                   setLiked(next);
                   localStorage.setItem(`liked_${id}`, next ? '1' : '0');
-                  fetch(`/api/item-stats/${id}`, {
+                  fetch(`https://carvior.store/api/v1/admin/store-items/${id}/stats`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: next ? 'like' : 'unlike' }),
