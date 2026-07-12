@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import StoreNav from "@/components/StoreNav";
+import ChannelTalk from "@/components/ChannelTalk";
 import clsx from "clsx";
 import Script from "next/script"; // 카카오 지도 위해 추가
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
           strategy="afterInteractive"
         />
+        <ChannelTalk />
       </body>
     </html>
   );

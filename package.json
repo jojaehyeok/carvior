@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.110.0",
+		"@channel.io/channel-web-sdk-loader": "^2.0.2",
 		"@nextui-org/button": "2.0.37",
 		"@nextui-org/code": "2.0.32",
 		"@nextui-org/input": "2.2.4",
