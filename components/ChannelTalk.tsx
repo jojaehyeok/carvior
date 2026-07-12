@@ -1,15 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import ChannelService from "@channel.io/channel-web-sdk-loader";
 
 const PLUGIN_KEY = "05a1c010-2e20-40f7-82d4-eeac8d09c879";
 
 export default function ChannelTalk() {
   useEffect(() => {
-    ChannelService.loadScript();
-    ChannelService.boot({ pluginKey: PLUGIN_KEY });
-    return () => { ChannelService.shutdown(); };
+    const w = window as any;
+    if (!w.ChannelIO) {
+      const ch: any = (...args: any[]) => ch.q.push(args);
+      ch.q = [];
+      w.ChannelIO = ch;
+      const s = document.createElement("script");
+      s.async = true;
+      s.src = "https://cdn.channel.io/plugin/ch-plugin-web.js";
+      document.head.appendChild(s);
+    }
+    w.ChannelIO("boot", { pluginKey: PLUGIN_KEY });
+    return () => { w.ChannelIO?.("shutdown"); };
   }, []);
 
   return null;
