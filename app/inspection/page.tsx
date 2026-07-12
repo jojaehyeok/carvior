@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
@@ -114,7 +114,7 @@ export default function InspectionCheckoutPage() {
         preferredDateTime, email: form.email || '',
       }));
       await widgetsRef.current.requestPayment({
-        orderId, orderName: '카비어 공인 검차 서비스 (VAT 포함)',
+        orderId, orderName: '카비어 검차 서비스 (VAT 포함)',
         successUrl: `${window.location.origin}/inspection/success`,
         failUrl:    `${window.location.origin}/inspection/fail`,
         customerName: form.ownerName,
@@ -203,8 +203,8 @@ export default function InspectionCheckoutPage() {
               <div className="flex gap-4 items-center">
                 <div className="w-16 h-16 bg-violet-50 rounded-xl flex items-center justify-center shrink-0 text-2xl">🔍</div>
                 <div>
-                  <p className="font-bold text-gray-900 text-sm">카비어 공인 검차 서비스</p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">공인 평가사 방문 · 100+ 항목 점검 · 디지털 리포트</p>
+                  <p className="font-bold text-gray-900 text-sm">카비어 검차 서비스</p>
+                  <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">평가사 방문 · 100+ 항목 점검 · 디지털 리포트</p>
                   <p className="font-black text-gray-900 text-base mt-2">80,000원 <span className="text-xs text-gray-400 font-normal">(VAT 별도)</span></p>
                 </div>
               </div>

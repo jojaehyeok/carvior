@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -40,7 +40,7 @@ const STEPS = [
         <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
       </svg>
     ),
-    desc: '공인 평가사가 차량 상태를 정밀 점검하고 등급을 부여합니다.',
+    desc: '평가사가 차량 상태를 정밀 점검하고 등급을 부여합니다.',
     detail: [
       { tag: '외관 점검', text: '차체, 도장, 유리 등 외관 전반 검사' },
       { tag: '기계 점검', text: '엔진, 미션, 하체 등 기계 상태 정밀 점검' },

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ export default function LandingPage() {
             CARVIOR
           </h1>
           <p className="text-2xl md:text-3xl text-gray-600 mb-12 font-light leading-relaxed max-w-3xl mx-auto">
-            국가공인 진단사가 제안하는 <br className="md:hidden" /> 
+            전문 진단사가 제안하는 <br className="md:hidden" /> 
             가장 완벽한 중고차 검수 솔루션
           </p>
           <div className="flex flex-col sm:flex-row gap-5 justify-center">
@@ -103,7 +103,7 @@ export default function LandingPage() {
             </div>
             <div className="space-y-3 px-2">
               <span className="inline-block text-blue-600 font-bold text-sm tracking-widest uppercase border-b-2 border-blue-100 pb-1">Step 03</span>
-              <h3 className="text-3xl font-bold text-gray-950 tracking-tight">국가공인 전문가의 안목</h3>
+              <h3 className="text-3xl font-bold text-gray-950 tracking-tight">전문가의 안목</h3>
               <p className="text-gray-700 leading-relaxed text-base">수천 대의 데이터를 경험한 베테랑 진단사만이 잡아낼 수 있는 미세한 이상 징후까지 놓치지 않습니다.</p>
             </div>
           </div>

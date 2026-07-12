@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -121,7 +121,7 @@ export default function StorePage() {
               <span className="text-white/40">한 곳에서.</span>
             </h1>
             <p className="text-white/50 text-base md:text-lg mb-10 leading-relaxed">
-              공인 평가사가 직접 확인한 매물만 올립니다.<br />
+              평가사가 직접 확인한 매물만 올립니다.<br />
               허위매물 없이, 가격도 투명하게.
             </p>
             <div className="flex flex-wrap gap-3 justify-center lg:justify-start">

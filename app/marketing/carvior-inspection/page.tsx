@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -22,7 +22,7 @@ const CHECK_ITEMS = [
 
 const STEPS = [
     { num: '01', title: '평가 예약 & 결제', desc: '차량 정보와 방문 일정을 입력하고 간편 결제 (80,000원)', icon: '💳' },
-    { num: '02', title: '전문 평가사 방문', desc: '카비어 공인 평가사가 직접 찾아가 100+ 항목을 꼼꼼히 평가합니다', icon: '🔍' },
+    { num: '02', title: '진단 평가사 방문', desc: '카비어 진단 평가사가 직접 찾아가 100+ 항목을 꼼꼼히 평가합니다', icon: '🔍' },
     { num: '03', title: '공식 평가 리포트 발행', desc: '객관적 데이터 기반의 차량 가치 리포트를 즉시 발행합니다', icon: '📄' },
     { num: '04', title: '딜러 매칭 & 최고가 제시', desc: '검증된 딜러 네트워크에서 리포트를 보고 경쟁적으로 최고가를 제시합니다', icon: '🤝' },
     { num: '05', title: '당일 계약 & 대금 지급', desc: '선택한 딜러와 당일 계약 후 즉시 대금을 수령하세요', icon: '✅' },
@@ -613,7 +613,7 @@ export default function CarviorInspectionPage() {
                     </div>
 
                     <h1 className="text-[2.4rem] font-black leading-[1.15] mb-5 tracking-tight">
-                        공인 평가사가 직접 가고<br />
+                        평가사가 직접 가고<br />
                         딜러가 경쟁합니다
                     </h1>
                     <p className="mb-3 text-sm leading-relaxed text-zinc-400">
@@ -653,7 +653,7 @@ export default function CarviorInspectionPage() {
             {/* ── 신뢰 뱃지 바 ── */}
             <section className="px-5 py-4 bg-zinc-100">
                 <div className="flex flex-wrap items-center justify-center max-w-xl gap-5 mx-auto">
-                    {['수도권 전문 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
+                    {['수도권 진단 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
                         <div key={t} className="flex items-center gap-1.5 text-xs font-bold text-zinc-500">
                             <span className="w-4 h-4 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[9px]">✓</span>
                             {t}
@@ -714,7 +714,7 @@ export default function CarviorInspectionPage() {
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">EVALUATION</p>
                     <h2 className="mb-2 text-2xl font-black leading-tight text-center text-zinc-900">100+ 항목 정밀 평가</h2>
-                    <p className="mb-8 text-sm text-center text-zinc-400">전문 평가사가 직접 방문해 꼼꼼하게 확인합니다</p>
+                    <p className="mb-8 text-sm text-center text-zinc-400">진단 평가사가 직접 방문해 꼼꼼하게 확인합니다</p>
 
                     {/* 진단장비 이미지 갤러리 (경로: /images/diagnostic-1~3.jpg) */}
                     <div className="grid grid-cols-2 gap-3 mb-6">

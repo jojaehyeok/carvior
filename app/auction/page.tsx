@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 
@@ -197,7 +197,7 @@ function AuctionContent() {
                 <span className="text-[10px] font-black tracking-wide bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase">딜러 전용</span>
               </div>
               <h1 className="text-3xl font-black text-white">진단 완료 차량 경매</h1>
-              <p className="text-zinc-400 text-sm mt-1.5">카비어 공인 진단이 완료된 차량을 경매로 직접 낙찰받으세요.</p>
+              <p className="text-zinc-400 text-sm mt-1.5">카비어 진단이 완료된 차량을 경매로 직접 낙찰받으세요.</p>
             </div>
             <div className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-2.5">
               <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />

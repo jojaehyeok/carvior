@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -223,7 +223,7 @@ export default function EvaluatorsPage() {
             <span className="text-black">평가사</span>를 만나보세요!
           </h1>
           <p className="text-sm text-gray-600">
-            카비어 평가사는 중고차 매매업(딜러) 활동을 하지 않으며,
+            카비어 진단 평가사는 중고차 매매업(딜러) 활동을 하지 않으며,
             <br className="hidden sm:block" />
             기본 교육과 시스템 기준을 통과한 누구나 활동할 수 있습니다.
           </p>

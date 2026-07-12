@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -127,7 +127,7 @@ function SuccessContent() {
         <ul className="space-y-1">
           {[
             '담당자가 연락드려 검차 일정을 확정합니다.',
-            '공인 평가사가 지정 장소로 방문합니다.',
+            '평가사가 지정 장소로 방문합니다.',
             '100+ 항목 점검 후 디지털 리포트를 발송합니다.',
             '검차 전날 18시까지 100% 환불 가능합니다.',
           ].map(t => (

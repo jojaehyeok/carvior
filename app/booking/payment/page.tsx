@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ const DEMO_DATA = {
   evaluator: {
     id: 999,
     name: "김진단 평가사",
-    title: "국가공인 자동차진단평가사 1급",
+    title: "자동차 진단평가사 1급",
     avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
     rating: 4.9,
     originalFee: 100000,

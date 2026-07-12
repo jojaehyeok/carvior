@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
@@ -241,7 +241,7 @@ export default function SimpleRequestByCompanyPage() {
                         진단 신청서
                     </h1>
                     <p className="text-zinc-500 text-sm leading-relaxed">
-                        차량 정보를 입력하면 카비어 전문 평가사가 직접 방문합니다.<br />
+                        차량 정보를 입력하면 카비어 진단 평가사가 직접 방문합니다.<br />
                         <span className="text-zinc-700 font-semibold">수도권(서울·경기·인천) 지역</span> 운영 중
                     </p>
                 </div>

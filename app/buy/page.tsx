@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -99,7 +99,7 @@ function BuyCard({ car }: { car: StoreItem }) {
               onClick={e => e.stopPropagation()}
               className="flex items-center gap-0.5 bg-amber-400 text-amber-900 text-[9px] font-black px-2 py-1 rounded-full hover:bg-amber-300 transition-colors shadow-sm"
             >
-              ✦ 공인진단
+              ✦ 진단
             </a>
           )}
           {car.accident && (
@@ -249,7 +249,7 @@ export default function BuyPage() {
       <div className="bg-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-10">
           <p className="text-zinc-400 text-xs font-bold tracking-[0.2em] uppercase mb-2">카비어 매물</p>
-          <h1 className="text-3xl font-black text-white">공인 진단 완료 차량</h1>
+          <h1 className="text-3xl font-black text-white">진단 완료 차량</h1>
           <p className="text-zinc-400 text-sm mt-1.5">허위매물 없이, 진단 완료된 차량만 올립니다.</p>
         </div>
       </div>
@@ -294,13 +294,13 @@ export default function BuyPage() {
           </div>
         </div>
 
-        {/* 공인진단 안내 배너 */}
+        {/* 진단 안내 배너 */}
         <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
           <div className="flex items-center gap-2.5">
             <span className="text-amber-500 font-black text-sm">✦</span>
             <div>
-              <p className="text-xs font-black text-amber-800">공인진단 매물은 평균 3배 빠르게 팔립니다</p>
-              <p className="text-[10px] text-amber-600">황금 테두리 = 공인 평가사 직접 검증 완료</p>
+              <p className="text-xs font-black text-amber-800">진단 매물은 평균 3배 빠르게 팔립니다</p>
+              <p className="text-[10px] text-amber-600">황금 테두리 = 평가사 직접 검증 완료</p>
             </div>
           </div>
           <a href="/inspection" className="shrink-0 text-[10px] font-black text-amber-900 bg-amber-400 hover:bg-amber-300 px-3 py-1.5 rounded-lg transition-colors">

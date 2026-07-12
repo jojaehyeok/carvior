@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -66,7 +66,7 @@ function CarCard({ car, rank }: { car: StoreItem; rank?: number }) {
         )}
         {car.hasReport && (
           <span className="absolute top-2.5 right-2.5 flex items-center gap-0.5 bg-amber-400 text-amber-900 text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
-            ✦ 공인진단
+            ✦ 진단
           </span>
         )}
       </div>
@@ -290,13 +290,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 공인진단 vs 개인직거래 ── */}
+      {/* ── 진단 vs 개인직거래 ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-12">
           <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">WHY INSPECTION</p>
           <h2 className="text-3xl font-black text-gray-900 mb-3">진단받은 차가 왜 더 잘 팔릴까요?</h2>
           <p className="text-gray-400 text-sm max-w-md mx-auto">
-            개인이 직접 올린 매물과 공인 평가사가 검증한 매물은 구매자의 신뢰도부터 다릅니다
+            개인이 직접 올린 매물과 평가사가 검증한 매물은 구매자의 신뢰도부터 다릅니다
           </p>
         </div>
 
@@ -321,11 +321,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 공인진단 */}
+          {/* 진단 */}
           <div className="rounded-2xl border-2 border-amber-400 p-6 bg-amber-50/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="flex items-center gap-2 mb-5">
-              <span className="text-xs font-black px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">✦ 공인진단</span>
+              <span className="text-xs font-black px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">✦ 진단</span>
             </div>
             <div className="space-y-3">
               {[
@@ -346,7 +346,7 @@ export default function HomePage() {
         <div className="text-center mt-10">
           <Link href="/inspection"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-amber-900 font-black px-8 py-4 rounded-xl text-sm transition-colors">
-            ✦ 공인 검차 신청하기
+            ✦ 검차 신청하기
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -365,7 +365,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { step: '01', title: '차량 등록 또는 검색', desc: '사진 몇 장 올리면 바로 등록 완료.\n사는 분은 차종·예산으로 필터링.', color: 'text-violet-600' },
-            { step: '02', title: '진단 & 가격 제안', desc: '공인 평가사 방문 진단.\n바이어가 직접 가격 제안도 가능해요.', color: 'text-violet-600' },
+            { step: '02', title: '진단 & 가격 제안', desc: '평가사 방문 진단.\n바이어가 직접 가격 제안도 가능해요.', color: 'text-violet-600' },
             { step: '03', title: '탁송 또는 검차 연결', desc: '계약 완료 후 탁송·검차 예약까지\n카비어에서 한 번에 끝내요.', color: 'text-violet-600' },
           ].map(s => (
             <div key={s.step} className="flex gap-5">

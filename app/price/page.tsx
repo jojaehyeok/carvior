@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 
@@ -60,7 +60,7 @@ export default function PricePage() {
           <p className="text-xs font-black tracking-widest uppercase text-white/40 mb-2">지금 바로</p>
           <h2 className="text-lg font-black mb-1.5">무료 시세 산정 받기</h2>
           <p className="text-white/50 text-sm mb-5">
-            공인 진단사가 직접 방문해 차량을 확인하고<br />
+            진단사가 직접 방문해 차량을 확인하고<br />
             정확한 시세를 알려드립니다.
           </p>
           <Link

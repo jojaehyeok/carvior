@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -601,7 +601,7 @@ export default function CarDetailPage() {
                   <path d="M20 6 9 17l-5-5"/>
                 </svg>
               </div>
-              <p className="font-black text-[#1a2e6b] text-sm tracking-tight">카비어 공인진단 요약</p>
+              <p className="font-black text-[#1a2e6b] text-sm tracking-tight">카비어 진단 요약</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* 사고이력 */}
@@ -988,10 +988,10 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
                 )}
                 <div>
                   <p className={`text-sm font-black ${inspected ? 'text-green-800' : 'text-gray-600'}`}>
-                    {inspected ? '카비어 공인진단 완료' : '미진단 개인 직거래 매물'}
+                    {inspected ? '카비어 진단 완료' : '미진단 개인 직거래 매물'}
                   </p>
                   <p className={`text-[10px] mt-0.5 ${inspected ? 'text-green-600' : 'text-gray-400'}`}>
-                    {inspected ? '공인 평가사가 100+ 항목을 직접 점검한 차량입니다' : '판매자가 직접 등록한 매물 · 공인 검사 미완료'}
+                    {inspected ? '진단 평가사가 100+ 항목을 직접 점검한 차량입니다' : '판매자가 직접 등록한 매물 · 검사 미완료'}
                   </p>
                 </div>
               </div>
@@ -1066,8 +1066,8 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
             <>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-black text-gray-900">카비어 공인진단</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">공인 평가사 직접 방문 · 100+ 항목 점검</p>
+                  <h3 className="text-lg font-black text-gray-900">카비어 진단</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">진단 평가사 직접 방문 · 100+ 항목 점검</p>
                 </div>
                 {!!car.carHash && (
                   <a href={`/report/${car.carHash}`} target="_blank" rel="noopener noreferrer"
@@ -1163,7 +1163,7 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
               </div>
               <p className="font-black text-gray-700 mb-2">진단 리포트 없음</p>
               <p className="text-sm text-gray-400 mb-6 leading-relaxed">
-                공인 검차를 신청하면 100+ 항목 점검 후<br />
+                검차를 신청하면 100+ 항목 점검 후<br />
                 디지털 리포트를 발급해 드립니다.
               </p>
               <a href="/inspection" className="inline-block font-black text-white bg-amber-500 hover:bg-amber-400 px-6 py-3 rounded-xl text-sm transition-colors">

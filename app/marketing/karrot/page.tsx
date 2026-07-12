@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
@@ -319,7 +319,7 @@ export default function CarviorPrivateDealPage() {
                         {/* 후킹 배지 */}
                         <div className="inline-flex items-center gap-2 border border-zinc-700 rounded-full px-3 py-1.5 text-[11px] font-bold text-zinc-300 mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                            공인 진단평가사 · 사업자 등록 완료
+                            진단평가사 · 사업자 등록 완료
                         </div>
 
                         {/* 헤드라인 */}
@@ -334,7 +334,7 @@ export default function CarviorPrivateDealPage() {
                         <p className="mb-8 text-sm leading-relaxed text-zinc-400">
                             숨겨진 결함, 모르는 시세, 막막한 협상...
                             <br />
-                            <span className="font-bold text-white">카비어 공인 평가사가 판매자에게 직접 가서 해결합니다.</span>
+                            <span className="font-bold text-white">카비어 진단 평가사가 판매자에게 직접 가서 해결합니다.</span>
                         </p>
 
                         {/* 이벤트 가격 배너 */}
@@ -388,7 +388,7 @@ export default function CarviorPrivateDealPage() {
                         </div>
                         <div className="pt-4 mt-5 border-t border-zinc-50">
                             <p className="text-sm font-extrabold text-zinc-900">
-                                카비어 평가사가 판매자에게 직접 가서 확인하고,<br />
+                                카비어 진단 평가사가 판매자에게 직접 가서 확인하고,<br />
                                 <span className="font-bold text-zinc-500">결함 근거로 가격을 협상해드립니다.</span>
                             </p>
                         </div>
@@ -434,7 +434,7 @@ export default function CarviorPrivateDealPage() {
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">카비어를 믿을 수 있는 이유</p>
                         <div className="grid grid-cols-1 gap-5">
                             <TrustBadge icon="🏢" title="사업자 등록 완료" desc="사업자등록번호 783-24-02190 · 통신판매업 제 2026-경기안산-0474" />
-                            <TrustBadge icon="🎓" title="공인 진단평가사 직접 방문" desc="국가공인 자격 보유 평가사가 직접 현장에 방문합니다" />
+                            <TrustBadge icon="🎓" title="진단평가사 직접 방문" desc="진단 평가사가 직접 현장에 방문합니다" />
                             <TrustBadge icon="💳" title="진단비 8만원 고정 (이벤트가)" desc="차종·연식 무관 고정가 · 상담은 무료 · ~2026년 8월까지 적용" />
                             <TrustBadge icon="📄" title="공식 진단 리포트 발행" desc="객관적 데이터 기반 리포트 · 구매 후 하자 발생 시 법적 근거로 활용 가능" />
                         </div>
