@@ -23,6 +23,9 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
   const user = session?.user as any;
   const isDealer = user?.role === 'dealer';
 
+  const HIDE_NAV_PATHS = ['/marketing/simple-request'];
+  if (HIDE_NAV_PATHS.some(p => pathname?.startsWith(p))) return null;
+
   return (
     <nav className={clsx(
       'sticky top-0 z-50 border-b transition-colors',
