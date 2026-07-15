@@ -23,19 +23,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
           <div className="relative flex flex-col h-screen">
             <StoreNav />
-            
             <main className="flex-grow">
               {children}
             </main>
           </div>
+          <ChannelTalk />
         </Providers>
-        
+
         {/* 카카오 지도 API (주소 검색용) */}
         <Script
           src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
           strategy="afterInteractive"
         />
-        <ChannelTalk />
       </body>
     </html>
   );
