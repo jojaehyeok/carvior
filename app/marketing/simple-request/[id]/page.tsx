@@ -219,15 +219,16 @@ export default function SimpleRequestByCompanyPage() {
         <div className="min-h-screen bg-zinc-100 font-sans">
             {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
             {/* ── NAV ── */}
-            <nav className="bg-white border-b border-zinc-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-                <span className="text-xl font-black text-zinc-900 tracking-tight">CARVIOR</span>
-                <div className="flex items-center gap-2">
-                    {companyLabel && (
-                        <span className="text-[10px] bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-full font-bold tracking-wide">{companyLabel}</span>
-                    )}
-                    <span className="text-[10px] bg-zinc-900 text-white px-2.5 py-1 rounded-full font-extrabold tracking-wide">B2B</span>
-                </div>
+            <nav className="bg-white border-b border-zinc-200 px-6 py-3 flex justify-center items-center gap-2 sticky top-0 z-50">
+                {companyLabel && (
+                    <span className="text-sm font-bold text-zinc-700">{companyLabel}</span>
+                )}
+                <span className="text-[10px] bg-zinc-900 text-white px-2.5 py-1 rounded-full font-extrabold tracking-wide">B2B</span>
             </nav>
+            {/* ── 지역 안내 ── */}
+            <div className="bg-zinc-50 border-b border-zinc-100 px-6 py-2.5 text-center">
+                <p className="text-[11px] text-zinc-500">📍 현재 <strong className="text-zinc-700">서울 · 경기 · 인천 (수도권)</strong> 지역에서 운영 중입니다. 타 지역은 순차적으로 확대 예정입니다.</p>
+            </div>
 
             {/* ── HERO ── */}
             <div className="bg-white px-6 pt-10 pb-8 border-b border-zinc-100">
