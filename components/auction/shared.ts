@@ -26,6 +26,18 @@ export interface AuctionItem {
   options?: string[];
   inspectedAt?: string;
   adminMemo?: string;
+  inspectionData?: {
+    leakDesc?: string;
+    driveDesc?: string;
+    optionsDesc?: string;
+    warningDesc?: string;
+  };
+  conditionData?: {
+    tireTread?: { front: number; back: number };
+    paintNeeded?: number;
+    wheelScratch?: number;
+    keys?: { smart: number; folding: number; general: number };
+  };
 }
 
 export interface Bid {
