@@ -68,11 +68,17 @@ export default function AppFooter() {
               <button onClick={onTermsOpen} className="transition-colors hover:text-violet-600 hover:underline">이용약관</button>
               <button onClick={onPrivacyOpen} className="font-bold transition-colors hover:text-violet-600 hover:underline">개인정보처리방침</button>
               {/* 🌟 환불정책 링크 추가 (토스 심사용) */}
-              <button 
-                onClick={() => router.push('/policy/refund')} 
+              <button
+                onClick={() => router.push('/policy/refund')}
                 className="font-medium text-red-500 transition-colors hover:underline"
               >
                 취소 및 환불규정
+              </button>
+              <button
+                onClick={() => router.push('/policy/terms')}
+                className="font-medium text-blue-600 transition-colors hover:underline"
+              >
+                온라인 자동차 매매정보제공 이용약관
               </button>
             </div>
           </div>

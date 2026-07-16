@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isApprovedDealer } from '@/lib/dealerAccess';
 import fs from 'fs';
 import path from 'path';
 
 const NEST_BASE = 'http://localhost:4000/api/v1/admin/store-items';
+const INTERNAL_KEY = process.env.STORE_ITEMS_INTERNAL_KEY ?? '';
 const DATA_PATH = path.join(process.cwd(), 'data', 'store-items.json');
 
 // ── JSON 폴백 헬퍼 ──────────────────────────────────────
@@ -48,14 +50,22 @@ export interface StoreItem {
 // ── NestJS 프록시 (실패 시 JSON 폴백) ───────────────────
 async function nestGet(): Promise<Response | null> {
   try {
-    const res = await fetch(NEST_BASE, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(NEST_BASE, {
+      headers: { 'x-internal-key': INTERNAL_KEY },
+      signal: AbortSignal.timeout(3000),
+    });
     if (res.ok) return res;
   } catch { /* NestJS 미배포 중 */ }
   return null;
 }
 
-// GET
+// GET — 자동차관리법 제65조의2: 매매정보는 승인된 딜러에게만 제공
 export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!isApprovedDealer(session)) {
+    return NextResponse.json({ error: '딜러 승인 후 이용 가능한 서비스입니다.' }, { status: 403 });
+  }
+
   const nest = await nestGet();
   if (nest) {
     const data = await nest.json();

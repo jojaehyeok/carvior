@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
           });
           if (!res.ok) return null;
           const user = await res.json();
-          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role };
+          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role, dealerStatus: user.dealerStatus } as any;
         } catch { return null; }
       },
     }),
@@ -58,14 +58,20 @@ export const authOptions: NextAuthOptions = {
 
     async jwt({ token, user, account }) {
       if (user) {
-        token.role   = (user as any).role;
-        token.userId = (user as any).id;
+        token.role         = (user as any).role;
+        token.userId       = (user as any).id;
+        token.dealerStatus = (user as any).dealerStatus;
       }
       // 소셜 로그인 최초 발급 시 DB에서 role 조회
       if (account && account.type !== 'credentials' && token.email) {
         try {
           const res = await fetch(`${NEST}/v1/users/by-email?email=${encodeURIComponent(token.email as string)}`);
-          if (res.ok) { const u = await res.json(); token.role = u.role; token.userId = String(u.id); }
+          if (res.ok) {
+            const u = await res.json();
+            token.role = u.role;
+            token.userId = String(u.id);
+            token.dealerStatus = u.dealerStatus;
+          }
         } catch {}
       }
       if (account) token.provider = account.provider;
@@ -74,9 +80,10 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id       = token.userId ?? token.sub;
-        (session.user as any).role     = token.role;
-        (session.user as any).provider = token.provider;
+        (session.user as any).id           = token.userId ?? token.sub;
+        (session.user as any).role         = token.role;
+        (session.user as any).dealerStatus = token.dealerStatus;
+        (session.user as any).provider     = token.provider;
       }
       return session;
     },

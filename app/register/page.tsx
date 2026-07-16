@@ -216,7 +216,8 @@ export default function RegisterPage() {
             <p className="text-xs font-black text-violet-700 mb-1">딜러 회원 안내</p>
             <p className="text-xs text-violet-500 leading-relaxed">
               자동차 매매종사원증 필수 · 가입 후 서류 검토 후 승인됩니다.<br />
-              사업자가 있으면 세금계산서 발행이 가능합니다.
+              사업자가 있으면 세금계산서 발행이 가능합니다.<br />
+              가입 시 <a href="/policy/terms" target="_blank" rel="noopener noreferrer" className="underline font-bold">온라인 자동차 매매정보제공 이용약관</a>에 동의하게 됩니다.
             </p>
           </div>
         )}
