@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { clsx } from 'clsx';
@@ -12,47 +12,44 @@ export default function HomePage() {
 
       {/* ── 히어로 ── */}
       <section className="relative bg-zinc-900 overflow-hidden">
-        {/* 배경 그라데이션 */}
         <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 via-zinc-900 to-zinc-900 pointer-events-none" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4" />
 
         <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-20">
           <div className="max-w-2xl">
-            {/* 뱃지 */}
             <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-8">
               <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
               MVP 한정 · 등록 완전 무료
             </span>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
-              살 때도, 팔 때도<br />
-              <span className="text-violet-400">카비어 하나면</span><br />
-              충분해요.
+              복잡하고 불투명하던<br />
+              중고차 거래,<br />
+              <span className="text-violet-400">카비어가 정리합니다.</span>
             </h1>
 
             <p className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10">
-              허위매물 없는 진단 차량만 · 딜러 수수료 0원 · 전 세계 바이어 연결<br />
-              복잡한 중고차 거래, 이제 쉽게 해결하세요.
+              전문 평가사의 진단 리포트로 내 차값을 증명하고,<br />
+              검증된 딜러 네트워크에 가장 먼저 전달하세요.
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/buy"
+              <Link href="/sell/register"
                 className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-                지금 매물 보기 →
+                내 차 무료 등록 →
               </Link>
-              <Link href="/sell"
+              <Link href="/price"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
-                내 차 무료 등록
+                번호판으로 시세 조회
               </Link>
             </div>
           </div>
 
-          {/* 플로팅 카드 */}
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               { icon: '🚗', title: '무료 등록', sub: '지금 바로 올려보세요' },
               { icon: '💰', title: '등록비 무료', sub: 'MVP 기간 한정' },
-              { icon: '🌏', title: '글로벌 바이어', sub: '해외 직거래 연결' },
+              { icon: '🌏', title: '딜러 네트워크', sub: '수출업자까지 연결' },
               { icon: '📋', title: '투명한 이력', sub: '사고·침수 전수 공개' },
             ].map(c => (
               <div key={c.title} className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4">
@@ -71,17 +68,17 @@ export default function HomePage() {
         <p className="text-gray-400 text-sm mb-10">원하는 서비스를 선택하면 바로 시작할 수 있어요.</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* 내차사기 */}
-          <Link href="/buy"
+          {/* 검차 신청 */}
+          <Link href="/inspection"
             className="group relative overflow-hidden rounded-2xl bg-zinc-900 p-7 hover:bg-violet-700 transition-colors duration-200">
-            <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">🚗</div>
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">BUY</p>
-            <h3 className="text-xl font-black text-white mb-2">차 사고 싶어요</h3>
+            <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">✦</div>
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">INSPECTION</p>
+            <h3 className="text-xl font-black text-white mb-2">내 차 진단받고 싶어요</h3>
             <p className="text-white/50 text-sm leading-relaxed mb-6">
-              진단 완료된 차량만 모았어요.<br />사진, 이력, 가격 전부 투명하게.
+              평가사가 직접 방문해 정밀 진단.<br />근거 있는 시세로 증명하세요.
             </p>
             <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
-              매물 보러가기
+              검차 신청하기
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -95,7 +92,7 @@ export default function HomePage() {
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60 mb-4">SELL · FREE</p>
             <h3 className="text-xl font-black text-white mb-2">차 팔고 싶어요</h3>
             <p className="text-white/70 text-sm leading-relaxed mb-6">
-              등록비도, 수수료도 0원.<br />사진 올리면 바로 글로벌 노출.
+              등록비도, 수수료도 0원.<br />진단만 받으면 딜러 네트워크에 바로 노출.
             </p>
             <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
               무료로 등록하기
@@ -112,10 +109,10 @@ export default function HomePage() {
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-4">DEALER</p>
             <h3 className="text-xl font-black text-gray-900 mb-2">딜러 · 바이어예요</h3>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              원하는 차에 직접 가격 제안.<br />빠른 매입, 대량 거래도 OK.
+              진단 완료 차량에 직접 가격 제안.<br />빠른 매입, 대량 거래도 OK.
             </p>
             <span className="inline-flex items-center gap-1 text-gray-500 group-hover:text-violet-600 font-bold text-sm transition-colors">
-              입찰 마켓 가기
+              스마트옥션 가기
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -124,11 +121,91 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 카비어 진단 리포트 ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <div className="max-w-3xl mx-auto px-6 text-center">
+          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">CARVIOR REPORT</p>
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
+            근거 없이 깎이던 내 차값,<br />진단 리포트로 시작합니다.
+          </h2>
+          <p className="text-gray-400 text-sm md:text-base mb-10">
+            평가사가 방문해 외관 · 기계 · 사고이력을 정밀 점검하고,<br />
+            감가 사유까지 항목별로 투명하게 공개해드려요.
+          </p>
+
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-sm mx-auto text-left">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-gray-400">진단 리포트 미리보기</span>
+              <span className="text-[10px] font-black bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full">✦ 진단완료</span>
+            </div>
+            <div className="space-y-2.5">
+              {[
+                ['외판 도색 흔적', '-15만원'],
+                ['타이어 교체 필요', '-12만원'],
+                ['휠 복원 필요', '-8만원'],
+              ].map(([label, val]) => (
+                <div key={label} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">{label}</span>
+                  <span className="font-bold text-red-500">{val}</span>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between items-center">
+              <span className="text-xs font-bold text-gray-400">진단 기반 예상가</span>
+              <span className="font-black text-gray-900">협의 가능</span>
+            </div>
+          </div>
+
+          <Link href="/inspection"
+            className="inline-flex items-center gap-2 mt-10 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+            무료 검차 신청하기
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 번호판으로 시세 조회 ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="flex flex-col lg:flex-row items-center gap-14">
+          <div className="flex-1 order-2 lg:order-1">
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-3">시세 조회</p>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">번호판만 입력하면<br />내 차 시세가 바로.</h2>
+            <p className="text-gray-400 text-sm leading-relaxed mb-8">
+              차종 · 연식 · 주행거리 기반의 실거래 데이터로<br />
+              정확한 시세 범위를 바로 확인할 수 있어요.
+            </p>
+            <Link href="/price"
+              className="inline-flex items-center gap-2 border border-gray-300 hover:border-violet-500 hover:text-violet-600 text-gray-700 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
+              내 차 시세 조회하기
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+          </div>
+          <div className="flex-1 order-1 lg:order-2 flex justify-center">
+            <div className="w-full max-w-[280px] bg-white rounded-[2rem] border border-gray-200 shadow-xl p-5">
+              <div className="border border-gray-300 rounded-lg px-3 py-2 text-center font-black text-gray-800 mb-4">
+                12가 3456
+              </div>
+              <div className="space-y-1.5 text-xs text-gray-400 mb-5">
+                <div className="flex justify-between"><span>모델명</span><span className="text-gray-700 font-semibold">쏘나타 뉴라이즈</span></div>
+                <div className="flex justify-between"><span>연식</span><span className="text-gray-700 font-semibold">2018년형</span></div>
+                <div className="flex justify-between"><span>주행거리</span><span className="text-gray-700 font-semibold">78,000km</span></div>
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 mb-1">내 차 예상시세</p>
+              <p className="text-xl font-black text-violet-600">1,150 ~ 1,280만원</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 딜러/수출업자/폐차업자 모집 소개 ── */}
       <section className="bg-zinc-900 relative overflow-hidden py-20">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/4" />
         <div className="relative max-w-7xl mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-10 mb-10">
             <div className="max-w-xl">
               <span className="inline-flex items-center gap-1.5 bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
                 <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
@@ -153,6 +230,19 @@ export default function HomePage() {
               </a>
             </div>
           </div>
+
+          <div className="grid grid-cols-3 gap-4 max-w-2xl">
+            {[
+              { label: '입찰 수수료', value: '0원' },
+              { label: '매매정보 공개', value: '승인 딜러만' },
+              { label: '참여 가능', value: '딜러·수출·폐차' },
+            ].map(s => (
+              <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                <p className="text-white font-black text-sm">{s.value}</p>
+                <p className="text-zinc-500 text-[11px] mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -167,7 +257,6 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-          {/* 개인 직거래 */}
           <div className="rounded-2xl border-2 border-gray-200 p-6 bg-gray-50/50">
             <div className="flex items-center gap-2 mb-5">
               <span className="text-xs font-black px-2.5 py-1 rounded-full bg-gray-200 text-gray-500">개인직거래</span>
@@ -187,7 +276,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 진단 */}
           <div className="rounded-2xl border-2 border-amber-400 p-6 bg-amber-50/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="flex items-center gap-2 mb-5">
@@ -245,6 +333,29 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 안심거래 ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 mb-3">TRUST</p>
+            <h2 className="text-3xl font-black text-gray-900">안심하고 거래할 수 있는 이유</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            {[
+              { icon: '✦', title: '투명한 진단 리포트', desc: '전문 평가사의 정밀 진단으로 감가 사유까지 근거 있게 공개합니다.' },
+              { icon: '🔒', title: '승인제 딜러 네트워크', desc: '서류 심사를 통과한 딜러 · 매매업자만 매매정보에 접근할 수 있어요.' },
+              { icon: '💬', title: '전담 상담 지원', desc: '궁금한 점은 언제든 010-2285-6017로 편하게 문의해주세요.' },
+            ].map(t => (
+              <div key={t.title} className="bg-white rounded-2xl border border-gray-100 p-6">
+                <span className="text-2xl mb-3 block">{t.icon}</span>
+                <h3 className="font-black text-gray-900 mb-1.5">{t.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{t.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── 차 팔기 CTA ── */}
       <section className="bg-violet-600 py-20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
@@ -253,16 +364,16 @@ export default function HomePage() {
             <h2 className="text-3xl font-black text-white leading-tight mb-2">
               내 차, 지금 바로<br />무료로 올려보세요.
             </h2>
-            <p className="text-violet-200 text-sm">등록비 0원 · 수수료 0원 · 해외 바이어 자동 연결</p>
+            <p className="text-violet-200 text-sm">등록비 0원 · 수수료 0원 · 딜러 네트워크 자동 연결</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <Link href="/sell/register"
               className="bg-white text-violet-700 font-black px-8 py-4 rounded-xl text-sm hover:bg-violet-50 transition-colors text-center">
               지금 무료 등록하기
             </Link>
-            <Link href="/buy"
+            <Link href="/price"
               className="border border-white/30 text-white font-bold px-8 py-4 rounded-xl text-sm hover:bg-white/10 transition-colors text-center">
-              매물 구경하기
+              내 차 시세 확인하기
             </Link>
           </div>
         </div>

@@ -48,7 +48,8 @@ export default function AppFooter() {
                 <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
                 <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
                 {/* 🌟 통신판매업 신고번호는 심사 필수 항목입니다. */}
-                <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0474</p> 
+                <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0474</p>
+                <p><span className="text-gray-400">대표번호 :</span> 070-4138-2017</p>
                 <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
               </div>
 
