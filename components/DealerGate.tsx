@@ -52,7 +52,7 @@ export default function DealerGate({ children }: Props) {
 
   if (!dealer) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <div className="bg-black flex items-center justify-center px-4 py-20">
         <div className="w-full max-w-md">
           {/* 카드 */}
           <div className="bg-gray-900 border border-white/10 rounded-2xl p-8 shadow-2xl">

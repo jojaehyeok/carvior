@@ -322,12 +322,68 @@ function AuctionContent() {
   );
 }
 
+function AuctionIntro() {
+  return (
+    <div className="bg-gradient-to-br from-zinc-900 via-purple-950 to-zinc-900 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[-80px] right-[-80px] w-[400px] h-[400px] rounded-full bg-purple-600/10 blur-3xl" />
+        <div className="absolute bottom-[-60px] left-[-60px] w-[300px] h-[300px] rounded-full bg-indigo-600/10 blur-3xl" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-6 py-20">
+        <p className="inline-block text-[10px] font-black tracking-[0.2em] uppercase text-purple-300/60 border border-purple-400/20 px-3 py-1 rounded-full mb-5">
+          카비어 스마트옥션
+        </p>
+        <h1 className="text-4xl md:text-5xl font-black text-white leading-[1.15] mb-4 max-w-2xl">
+          진단 완료 차량을<br />가장 먼저, 가장 합리적으로.
+        </h1>
+        <p className="text-white/50 text-base mb-10 leading-relaxed max-w-xl">
+          딜러 · 수출업자 · 폐차업자를 위한 공개 경쟁 입찰 플랫폼입니다.<br />
+          카비어 평가사가 진단한 차량 정보를 실시간으로 확인하고 직접 입찰하세요.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 max-w-3xl">
+          {[
+            { icon: '✦', title: '진단 데이터 공개', desc: '사고·침수 이력, 주행거리까지 투명하게' },
+            { icon: '⚡', title: '수수료 없는 입찰', desc: '원하는 가격에 자유롭게 제안' },
+            { icon: '🌏', title: '딜러 전용 네트워크', desc: '검증된 딜러 · 수출업자만 참여' },
+          ].map(f => (
+            <div key={f.title} className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4">
+              <p className="text-lg mb-2">{f.icon}</p>
+              <p className="text-white font-black text-sm">{f.title}</p>
+              <p className="text-zinc-500 text-xs mt-0.5">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="#login"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors"
+          >
+            딜러 인증하고 입찰하기
+          </a>
+          <a
+            href="mailto:partner@carvior.store"
+            className="border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm hover:bg-white/5 transition-colors"
+          >
+            딜러 · 파트너 신청 문의
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AuctionPage() {
   return (
-    <DealerGate>
-      <div className="min-h-screen bg-white">
-        <AuctionContent />
+    <div className="min-h-screen bg-white">
+      <AuctionIntro />
+      <div id="login">
+        <DealerGate>
+          <AuctionContent />
+        </DealerGate>
       </div>
-    </DealerGate>
+    </div>
   );
 }

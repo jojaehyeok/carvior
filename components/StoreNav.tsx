@@ -7,9 +7,9 @@ import { useSession, signOut } from 'next-auth/react';
 import { clsx } from 'clsx';
 
 const NAV_LINKS = [
-  { label: '차량 구매',   href: '/buy' },
   { label: '차량 판매',   href: '/sell' },
   { label: '시세 조회',   href: '/price' },
+  { label: '수출·폐차 견적받기', href: '/export-scrap' },
   { label: '스마트옥션', href: '/auction' },
 ];
 
@@ -43,8 +43,6 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
           {NAV_LINKS.map(l => {
             const active = pathname?.startsWith(l.href);
             const isDealerMenu = l.href === '/auction';
-            // 옥션은 딜러만 표시
-            if (isDealerMenu && !isDealer) return null;
             return (
               <li key={l.href} className="relative">
                 <Link
@@ -137,7 +135,6 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
       {open && (
         <div className="lg:hidden bg-white border-t border-gray-100">
           {NAV_LINKS.map(l => {
-            if (l.href === '/auction' && !isDealer) return null;
             return (
               <Link
                 key={l.href}
