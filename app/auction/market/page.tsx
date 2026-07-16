@@ -6,7 +6,9 @@ import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
-import { AuctionItem, Bid, fmtKRW, loadBids, saveBid, timeLeftLabel } from '@/components/auction/shared';
+import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, loadBids, NEW_MS, saveBid, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
+
+type FilterKey = 'all' | 'urgent' | 'new';
 
 function AuctionContent() {
   const { data: session } = useSession();
@@ -14,6 +16,7 @@ function AuctionContent() {
   const [loading, setLoading] = useState(true);
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidTarget, setBidTarget] = useState<AuctionItem | null>(null);
+  const [filter, setFilter] = useState<FilterKey>('all');
   const dealerName = (session?.user as any)?.name ?? '딜러';
 
   useEffect(() => {
@@ -33,6 +36,27 @@ function AuctionContent() {
   };
 
   const getBidCount = (id: string) => bids.filter(b => b.itemId === id).length;
+
+  const activeItems = items.filter(i => i.status === 'active');
+  const urgentItems = activeItems.filter(i => {
+    const ms = getTimeLeftMs(i.auctionEndAt);
+    return ms !== null && ms > 0 && ms <= URGENT_MS;
+  });
+  const newItems = activeItems.filter(i => {
+    if (!i.auctionStartAt) return false;
+    const since = Date.now() - new Date(i.auctionStartAt).getTime();
+    return since >= 0 && since <= NEW_MS;
+  });
+
+  const displayItems = (() => {
+    if (filter === 'urgent') {
+      return [...urgentItems].sort((a, b) => (getTimeLeftMs(a.auctionEndAt) ?? 0) - (getTimeLeftMs(b.auctionEndAt) ?? 0));
+    }
+    if (filter === 'new') {
+      return [...newItems].sort((a, b) => new Date(b.auctionStartAt ?? 0).getTime() - new Date(a.auctionStartAt ?? 0).getTime());
+    }
+    return items;
+  })();
 
   return (
     <div className="min-h-screen bg-white">
@@ -74,6 +98,26 @@ function AuctionContent() {
         </p>
       </div>
 
+      <div className="max-w-7xl mx-auto px-6 pt-6 flex items-center gap-2 flex-wrap">
+        {([
+          { key: 'all',    label: '전체',        count: items.length },
+          { key: 'urgent', label: '🔥 마감임박',  count: urgentItems.length },
+          { key: 'new',    label: '🆕 신규매물',  count: newItems.length },
+        ] as const).map(f => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`text-sm font-bold px-4 py-2 rounded-full border transition-colors ${
+              filter === f.key
+                ? 'bg-black text-white border-black'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+            }`}
+          >
+            {f.label}{f.count > 0 ? ` (${f.count})` : ''}
+          </button>
+        ))}
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 py-8">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -81,22 +125,26 @@ function AuctionContent() {
               <div key={i} className="rounded-2xl border border-gray-100 animate-pulse h-64" />
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : displayItems.length === 0 ? (
           <div className="text-center py-24 text-gray-400">
             <p className="text-4xl mb-4">🔨</p>
-            <p className="font-semibold">진행 중인 경매가 없습니다.</p>
+            <p className="font-semibold">
+              {filter === 'urgent' ? '마감 임박 매물이 없습니다.' : filter === 'new' ? '신규 매물이 없습니다.' : '진행 중인 경매가 없습니다.'}
+            </p>
             <p className="text-sm mt-1">진단 완료 차량이 등록되면 자동으로 나타납니다.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {items.map(item => {
+            {displayItems.map(item => {
               const bidCount = getBidCount(item.id);
               const closed   = item.status !== 'active';
               const thumb    = item.photos?.exterior?.[0];
+              const msLeft   = getTimeLeftMs(item.auctionEndAt);
+              const urgent   = !closed && msLeft !== null && msLeft > 0 && msLeft <= URGENT_MS;
               return (
                 <div
                   key={item.id}
-                  className={`rounded-2xl border overflow-hidden ${closed ? 'opacity-60' : 'hover:border-gray-300 hover:shadow-lg'} transition-all`}
+                  className={`rounded-2xl border overflow-hidden ${closed ? 'opacity-60' : urgent ? 'border-red-200 hover:shadow-lg' : 'hover:border-gray-300 hover:shadow-lg'} transition-all`}
                 >
                   <Link href={`/auction/market/${item.id}`} className="aspect-[4/3] bg-gray-50 flex items-center justify-center relative block">
                     {thumb ? (
@@ -113,7 +161,9 @@ function AuctionContent() {
                       <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded-full">진단완료</span>
                       {closed
                         ? <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
-                        : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">진행중</span>
+                        : urgent
+                          ? <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">🔥 마감임박</span>
+                          : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">진행중</span>
                       }
                     </div>
                   </Link>
@@ -136,7 +186,7 @@ function AuctionContent() {
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] text-gray-400">입찰 {bidCount}건</p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className={`text-[10px] font-bold ${urgent ? 'text-red-500' : 'text-gray-400 font-normal'}`}>
                           {!closed && timeLeftLabel(item.auctionEndAt) ? timeLeftLabel(item.auctionEndAt) : '마감'}
                         </p>
                       </div>
@@ -145,9 +195,9 @@ function AuctionContent() {
                     <button
                       disabled={closed}
                       onClick={() => setBidTarget(item)}
-                      className="w-full py-3 rounded-xl text-sm font-bold transition-colors bg-black hover:bg-gray-800 text-white disabled:bg-gray-100 disabled:text-gray-400"
+                      className={`w-full py-3 rounded-xl text-sm font-bold transition-colors text-white disabled:bg-gray-100 disabled:text-gray-400 ${urgent ? 'bg-red-500 hover:bg-red-600' : 'bg-black hover:bg-gray-800'}`}
                     >
-                      {closed ? (item.status === 'sold' ? '낙찰완료' : '경매 마감') : bidCount > 0 ? '입찰 수정' : '입찰하기'}
+                      {closed ? (item.status === 'sold' ? '낙찰완료' : '경매 마감') : bidCount > 0 ? '입찰 수정' : urgent ? '🔥 지금 입찰하기' : '입찰하기'}
                     </button>
                   </div>
                 </div>

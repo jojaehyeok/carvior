@@ -75,11 +75,21 @@ export function saveBid(bids: Bid[], itemId: string, amount: number, dealerName:
   return updated;
 }
 
-export function timeLeftLabel(endAt?: string): string | null {
+export function getTimeLeftMs(endAt?: string): number | null {
   if (!endAt) return null;
-  const diff = new Date(endAt).getTime() - Date.now();
+  return new Date(endAt).getTime() - Date.now();
+}
+
+export function timeLeftLabel(endAt?: string): string | null {
+  const diff = getTimeLeftMs(endAt);
+  if (diff === null) return null;
   if (diff <= 0) return '마감';
   const h = Math.floor(diff / 3_600_000);
   const m = Math.floor((diff % 3_600_000) / 60_000);
   return h > 0 ? `${h}시간 ${m}분 남음` : `${m}분 남음`;
 }
+
+// 마감 임박 기준: 6시간 이내
+export const URGENT_MS = 6 * 60 * 60 * 1000;
+// 신규매물 기준: 게시 12시간 이내
+export const NEW_MS = 12 * 60 * 60 * 1000;
