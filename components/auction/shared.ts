@@ -19,6 +19,8 @@ export interface AuctionItem {
   status: 'active' | 'sold' | 'hidden' | 'pending' | 'closed';
   auctionStartAt?: string;
   auctionEndAt?: string;
+  carHash?: string;
+  hasReport?: boolean;
   photos?: Record<string, string[]>;
   specs?: { label: string; value: string }[];
   options?: string[];

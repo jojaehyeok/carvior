@@ -33,7 +33,6 @@ function AuctionContent() {
   };
 
   const getBidCount = (id: string) => bids.filter(b => b.itemId === id).length;
-  const getTopBid = (id: string) => bids.filter(b => b.itemId === id).reduce((max, b) => Math.max(max, b.amount), 0);
 
   return (
     <div className="min-h-screen bg-white">
@@ -92,7 +91,6 @@ function AuctionContent() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {items.map(item => {
               const bidCount = getBidCount(item.id);
-              const topBid   = getTopBid(item.id);
               const closed   = item.status !== 'active';
               const thumb    = item.photos?.exterior?.[0];
               return (
@@ -130,17 +128,16 @@ function AuctionContent() {
                       {item.carNumber} · {item.region?.split(' ')[0] ?? '지역 미상'} · {item.mileage ? `${item.mileage.toLocaleString()}km` : '주행거리 미상'}
                     </p>
 
+                    {/* 다른 딜러 입찰 현황은 금액을 공개하지 않음(경쟁입찰 원칙) — 건수/예상가만 표시 */}
                     <div className="bg-gray-50 rounded-xl p-3 mb-3 flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-gray-400">최고 입찰가</p>
-                        <p className="text-lg font-black text-gray-900">
-                          {topBid > 0 ? fmtKRW(topBid) : '—'}
-                        </p>
+                        <p className="text-[10px] text-gray-400">예상 낙찰가</p>
+                        <p className="text-lg font-black text-gray-900">{fmtKRW(item.priceKRW)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] text-gray-400">입찰 {bidCount}건</p>
                         <p className="text-[10px] text-gray-400">
-                          {!closed && timeLeftLabel(item.auctionEndAt) ? timeLeftLabel(item.auctionEndAt) : `예상 ${fmtKRW(item.priceKRW)}`}
+                          {!closed && timeLeftLabel(item.auctionEndAt) ? timeLeftLabel(item.auctionEndAt) : '마감'}
                         </p>
                       </div>
                     </div>
