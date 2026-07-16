@@ -16,7 +16,9 @@ export interface AuctionItem {
   priceKRW: number;
   priceUSD?: number;
   region?: string;
-  status: 'active' | 'sold' | 'hidden' | 'pending';
+  status: 'active' | 'sold' | 'hidden' | 'pending' | 'closed';
+  auctionStartAt?: string;
+  auctionEndAt?: string;
   photos?: Record<string, string[]>;
   specs?: { label: string; value: string }[];
   options?: string[];
@@ -57,4 +59,13 @@ export function saveBid(bids: Bid[], itemId: string, amount: number, dealerName:
   const updated = [...bids, { itemId, amount, dealerName, timestamp: new Date().toISOString() }];
   localStorage.setItem('carvior_bids', JSON.stringify(updated));
   return updated;
+}
+
+export function timeLeftLabel(endAt?: string): string | null {
+  if (!endAt) return null;
+  const diff = new Date(endAt).getTime() - Date.now();
+  if (diff <= 0) return '마감';
+  const h = Math.floor(diff / 3_600_000);
+  const m = Math.floor((diff % 3_600_000) / 60_000);
+  return h > 0 ? `${h}시간 ${m}분 남음` : `${m}분 남음`;
 }

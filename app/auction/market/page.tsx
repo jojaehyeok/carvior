@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
-import { AuctionItem, Bid, fmtKRW, loadBids, saveBid } from '@/components/auction/shared';
+import { AuctionItem, Bid, fmtKRW, loadBids, saveBid, timeLeftLabel } from '@/components/auction/shared';
 
 function AuctionContent() {
   const { data: session } = useSession();
@@ -21,7 +21,7 @@ function AuctionContent() {
 
     fetch('/api/admin/store-items')
       .then(r => r.json())
-      .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data.filter(i => i.status === 'active' || i.status === 'sold') : []))
+      .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data.filter(i => ['active', 'sold', 'closed'].includes(i.status)) : []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);
@@ -139,7 +139,9 @@ function AuctionContent() {
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] text-gray-400">입찰 {bidCount}건</p>
-                        <p className="text-[10px] text-gray-400">예상 {fmtKRW(item.priceKRW)}</p>
+                        <p className="text-[10px] text-gray-400">
+                          {!closed && timeLeftLabel(item.auctionEndAt) ? timeLeftLabel(item.auctionEndAt) : `예상 ${fmtKRW(item.priceKRW)}`}
+                        </p>
                       </div>
                     </div>
 
