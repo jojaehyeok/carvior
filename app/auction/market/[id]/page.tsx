@@ -118,7 +118,7 @@ function AuctionDetailContent() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4 pb-2">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4 pb-2">
         <nav className="flex items-center gap-1.5 text-xs text-gray-400">
           <Link href="/auction" className="hover:text-black transition-colors">스마트옥션</Link>
           <span>/</span>
@@ -128,8 +128,8 @@ function AuctionDetailContent() {
         </nav>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
 
           {/* 왼쪽: 사진 갤러리 */}
           <div>
