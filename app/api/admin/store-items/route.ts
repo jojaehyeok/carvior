@@ -60,10 +60,16 @@ async function nestGet(): Promise<Response | null> {
 }
 
 // GET — 자동차관리법 제65조의2: 매매정보는 승인된 딜러에게만 제공
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!isApprovedDealer(session)) {
-    return NextResponse.json({ error: '딜러 승인 후 이용 가능한 서비스입니다.' }, { status: 403 });
+// 단, 관리자 대시보드처럼 내부 키를 아는 신뢰된 호출은 딜러 세션 없이도 허용
+export async function GET(req: NextRequest) {
+  const internalKey = req.headers.get('x-internal-key');
+  const isInternalCaller = !!internalKey && internalKey === INTERNAL_KEY;
+
+  if (!isInternalCaller) {
+    const session = await getServerSession(authOptions);
+    if (!isApprovedDealer(session)) {
+      return NextResponse.json({ error: '딜러 승인 후 이용 가능한 서비스입니다.' }, { status: 403 });
+    }
   }
 
   const nest = await nestGet();

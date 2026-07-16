@@ -1,8 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = 'https://carvior.store/api/v1';
+const INTERNAL_KEY = process.env.STORE_ITEMS_INTERNAL_KEY ?? '';
 
-export async function GET() {
+// 예약 원본 데이터(차량번호·주소 등)는 관리자 대시보드 전용 — 일반 공개 API 아님
+export async function GET(req: NextRequest) {
+  const internalKey = req.headers.get('x-internal-key');
+  if (!internalKey || internalKey !== INTERNAL_KEY) {
+    return NextResponse.json({ error: '접근 권한이 없습니다.' }, { status: 403 });
+  }
   try {
     const res = await fetch(`${BACKEND_URL}/external/request/list`, {
       cache: 'no-store',
