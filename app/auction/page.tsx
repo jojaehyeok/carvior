@@ -1,8 +1,10 @@
 ﻿'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
-import DealerGate from '@/components/DealerGate';
+import { isApprovedDealer } from '@/lib/dealerAccess';
 
 interface AuctionItem {
   id: number;
@@ -149,18 +151,14 @@ function BidModal({
 }
 
 function AuctionContent() {
+  const { data: session } = useSession();
   const [items, setItems] = useState<AuctionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [bids, setBids] = useState<Bid[]>([]);
   const [bidTarget, setBidTarget] = useState<AuctionItem | null>(null);
-  const [dealerName, setDealerName] = useState('딜러');
+  const dealerName = (session?.user as any)?.name ?? '딜러';
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('carvior_dealer');
-      if (raw) setDealerName(JSON.parse(raw).name);
-    } catch {}
-
     // 입찰 내역 복원
     try {
       const savedBids = localStorage.getItem('carvior_bids');
@@ -375,14 +373,63 @@ function AuctionIntro() {
   );
 }
 
+function AuctionGate({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+
+  if (status === 'loading') return null;
+
+  if (!isApprovedDealer(session)) {
+    return (
+      <div className="bg-black flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-md">
+          <div className="bg-gray-900 border border-white/10 rounded-2xl p-8 shadow-2xl text-center">
+            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4 mx-auto">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24" className="text-purple-400">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <h2 className="text-white text-xl font-bold mb-1.5">딜러 승인 후 이용 가능합니다</h2>
+            <p className="text-white/40 text-sm mb-6">
+              {session
+                ? '딜러 승인이 완료되지 않은 계정입니다. 승인 완료 후 다시 로그인해주세요.'
+                : '실시간 매물과 입찰은 승인된 딜러 계정으로 로그인해야 볼 수 있어요.'}
+            </p>
+            <div className="flex flex-col gap-2.5">
+              {session ? (
+                <a href="mailto:partner@carvior.store"
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-sm transition-colors">
+                  딜러 승인 문의하기
+                </a>
+              ) : (
+                <Link href="/login"
+                  className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-sm transition-colors">
+                  로그인
+                </Link>
+              )}
+              <Link href="/register"
+                className="w-full border border-white/10 text-white/70 hover:text-white font-bold py-3.5 rounded-xl text-sm transition-colors">
+                딜러 회원가입
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function AuctionPage() {
   return (
     <div className="min-h-screen bg-white">
       <AuctionIntro />
       <div id="login">
-        <DealerGate>
+        <AuctionGate>
           <AuctionContent />
-        </DealerGate>
+        </AuctionGate>
       </div>
     </div>
   );
