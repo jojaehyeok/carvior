@@ -507,6 +507,9 @@ export default function SelfRegisterPage() {
         adminMemo: `[셀프등록] 판매구분:${sellType} / 연락처:${contact} / 설명:${description}\n${memo}`,
         selfRegistered: true,
         sellerContact: contact,
+        // 자동차관리법 시행규칙 제144조의3 — 등록증 스캔 시 이미 파싱해둔 원본을 그대로 전달해
+        // 백엔드가 3년 보관용 컴플라이언스 기록을 남길 수 있게 함
+        registrationOcr: ocrRaw ?? undefined,
       };
       const res = await fetch('/api/admin/store-items', {
         method: 'POST',
