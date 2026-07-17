@@ -505,6 +505,8 @@ export default function SelfRegisterPage() {
         ].filter(s => s.value),
         options: [],
         adminMemo: `[셀프등록] 판매구분:${sellType} / 연락처:${contact} / 설명:${description}\n${memo}`,
+        selfRegistered: true,
+        sellerContact: contact,
       };
       const res = await fetch('/api/admin/store-items', {
         method: 'POST',

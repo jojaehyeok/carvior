@@ -29,7 +29,19 @@ function AuctionContent() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleBid = (itemId: string, amount: number) => {
+  const handleBid = async (itemId: string, amount: number) => {
+    try {
+      const res = await fetch(`/api/store-items/${itemId}/bid`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error ?? '입찰에 실패했습니다.'); return; }
+    } catch {
+      alert('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
     const updated = saveBid(bids, itemId, amount, dealerName);
     setBids(updated);
     alert(`✓ ${fmtKRW(amount)} 입찰 완료!\n최종 낙찰은 어드민에서 확인됩니다.`);
