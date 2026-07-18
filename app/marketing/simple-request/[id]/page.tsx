@@ -311,7 +311,7 @@ export default function SimpleRequestByCompanyPage() {
                                 </select>
                             </div>
                             <div className="relative">
-                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">희망 판매가</label>
+                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">희망 매입가</label>
                                 <input
                                     type="number"
                                     name="desiredPrice"

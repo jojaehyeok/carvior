@@ -262,9 +262,9 @@ export default function SimpleRequestPage() {
                                     ))}
                                 </select>
                             </div>
-                            {/* 희망 판매가 */}
+                            {/* 희망 매입가 — 이 페이지는 딜러가 차량을 카비어에 넘기는 B2B 매입 신청이라 매입가 기준 */}
                             <div className="relative">
-                                <label className="text-xs text-slate-400 font-bold mb-1 block">희망 판매가</label>
+                                <label className="text-xs text-slate-400 font-bold mb-1 block">희망 매입가</label>
                                 <input
                                     type="number"
                                     name="desiredPrice"
