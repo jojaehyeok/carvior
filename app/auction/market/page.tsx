@@ -174,8 +174,8 @@ function AuctionContent() {
                       {closed
                         ? <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
                         : urgent
-                          ? <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">🔥 마감임박</span>
-                          : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">진행중</span>
+                          ? <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">🔥 {timeLeftLabel(item.auctionEndAt) ?? '마감임박'}</span>
+                          : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{timeLeftLabel(item.auctionEndAt) ?? '진행중'}</span>
                       }
                     </div>
                   </Link>
