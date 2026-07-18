@@ -6,7 +6,8 @@ import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
-import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, loadBids, NEW_MS, saveBid, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
+import CountdownTimer from '@/components/auction/CountdownTimer';
+import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, loadBids, NEW_MS, saveBid, URGENT_MS } from '@/components/auction/shared';
 
 type FilterKey = 'all' | 'urgent' | 'new';
 
@@ -174,8 +175,8 @@ function AuctionContent() {
                       {closed
                         ? <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
                         : urgent
-                          ? <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">🔥 {timeLeftLabel(item.auctionEndAt) ?? '마감임박'}</span>
-                          : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{timeLeftLabel(item.auctionEndAt) ?? '진행중'}</span>
+                          ? <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full animate-pulse">🔥 마감임박</span>
+                          : <span className="bg-green-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">진행중</span>
                       }
                     </div>
                   </Link>
@@ -190,6 +191,14 @@ function AuctionContent() {
                       {item.carNumber} · {item.region?.split(' ')[0] ?? '지역 미상'} · {item.mileage ? `${item.mileage.toLocaleString()}km` : '주행거리 미상'}
                     </p>
 
+                    {/* 경매 종료까지 — 초 단위로 흘러가는 실시간 카운트다운 */}
+                    {!closed && (
+                      <div className="mb-3">
+                        <p className="text-[10px] text-gray-400 mb-0.5">경매 종료까지</p>
+                        <CountdownTimer endAt={item.auctionEndAt} size={32} />
+                      </div>
+                    )}
+
                     {/* 다른 딜러 입찰 현황은 금액을 공개하지 않음(경쟁입찰 원칙) — 건수/예상가만 표시 */}
                     <div className="bg-gray-50 rounded-xl p-3 mb-3 flex items-center justify-between">
                       <div>
@@ -198,9 +207,6 @@ function AuctionContent() {
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] text-gray-400">입찰 {bidCount}건</p>
-                        <p className={`text-[10px] font-bold ${urgent ? 'text-red-500' : 'text-gray-400 font-normal'}`}>
-                          {!closed && timeLeftLabel(item.auctionEndAt) ? timeLeftLabel(item.auctionEndAt) : '마감'}
-                        </p>
                       </div>
                     </div>
 
