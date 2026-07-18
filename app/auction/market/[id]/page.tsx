@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
-import { AuctionItem, Bid, fmtKRW, getUSD, loadBids, saveBid } from '@/components/auction/shared';
+import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, getUSD, loadBids, saveBid, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
 
 // ── 사진 수집 (buy/[id]와 동일 패턴, registration은 개인정보 보호로 제외) ──────────
 interface PhotoItem { url?: string; label: string }
@@ -196,6 +196,8 @@ function AuctionDetailContent() {
   const myTopBid = myBids.reduce((max, b) => Math.max(max, b.amount), 0);
   const closed = item.status !== 'active';
   const usd = getUSD(item);
+  const msLeft = getTimeLeftMs(item.auctionEndAt);
+  const urgent = !closed && msLeft !== null && msLeft > 0 && msLeft <= URGENT_MS;
 
   const priceLabel = closed
     ? (item.status === 'sold' ? '낙찰완료' : '경매마감')
@@ -246,12 +248,15 @@ function AuctionDetailContent() {
                 </div>
               )}
 
-              {/* 경매 상태 배지 */}
+              {/* 경매 상태 배지 — 진행중이면 남은시간을 항상 같이 표시 */}
               <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                {closed
-                  ? <span className="bg-red-500/80 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
-                  : <span className="bg-green-500/80 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full">진행중</span>
-                }
+                {closed ? (
+                  <span className="bg-red-500/80 text-white text-[10px] font-black px-2.5 py-1.5 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
+                ) : (
+                  <span className={`text-white text-[10px] font-black px-2.5 py-1.5 rounded-full ${urgent ? 'bg-red-500 animate-pulse' : 'bg-green-500/80'}`}>
+                    {urgent ? '🔥 ' : ''}{timeLeftLabel(item.auctionEndAt) ?? '진행중'}
+                  </span>
+                )}
               </div>
 
               {/* 사진 카운터 */}

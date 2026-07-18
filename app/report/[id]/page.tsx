@@ -573,11 +573,11 @@ export default function PublicReportPage() {
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
       </div>
 
-      {/* PDF 다운로드 플로팅 버튼 */}
+      {/* PDF 다운로드 플로팅 버튼 — 채널톡 위젯이 항상 우하단을 쓰므로 겹치지 않게 좌하단에 배치 */}
       <button
         onClick={downloadPDF}
         disabled={pdfLoading}
-        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-blue-700 rounded-full shadow-lg bottom-6 right-5 hover:bg-blue-800 disabled:bg-blue-400"
+        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-blue-700 rounded-full shadow-lg bottom-6 left-5 hover:bg-blue-800 disabled:bg-blue-400"
       >
         {pdfLoading ? (
           <>
