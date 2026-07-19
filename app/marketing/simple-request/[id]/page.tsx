@@ -211,7 +211,11 @@ export default function SimpleRequestByCompanyPage() {
                     }),
                 });
 
-                alert(`✅ 신청 완료!\n정상적으로 접수되었습니다.`);
+                alert(
+                    dbResult.restricted
+                        ? `✅ 접수 완료!\n${dbResult.message}`
+                        : `✅ 신청 완료!\n정상적으로 접수되었습니다.`
+                );
                 window.location.reload();
             } else {
                 throw new Error(dbResult.message || '서버 저장 실패');
