@@ -173,10 +173,17 @@ export default function SimpleRequestPage() {
         setIsSubmitting(true);
 
         try {
+            // 딜러가 신청 시점엔 차량번호/소유자를 모르는 경우가 대부분이라
+            // 비워두면 "미정"으로 접수하고, 진단 방문 시 평가사가 실제 정보로 채운다.
+            const submitData = {
+                ...formData,
+                carNumber: formData.carNumber || '미정',
+                carOwner: formData.carOwner || '미정',
+            };
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, source: 'SIMPLE_FORM' }),
+                body: JSON.stringify({ ...submitData, source: 'SIMPLE_FORM' }),
             });
 
             const dbResult = await dbResponse.json();
@@ -189,7 +196,7 @@ export default function SimpleRequestPage() {
                     body: JSON.stringify({
                         dealerName: formData.dealerName,
                         contact: formData.contact,
-                        carNumber: formData.carNumber,
+                        carNumber: submitData.carNumber,
                         preferredDateTime: formData.preferredDateTime,
                     }),
                 });
@@ -228,9 +235,8 @@ export default function SimpleRequestPage() {
                         <div className="space-y-4">
                             <div>
                                 <input
-                                    required
                                     name="carNumber"
-                                    placeholder="차량번호 (예: 123가 4567)"
+                                    placeholder="차량번호 (예: 123가 4567) · 모르면 비워두세요"
                                     className={clsx(
                                         "w-full text-lg font-bold border-b-2 p-3 outline-none transition-all",
                                         carError ? "border-red-500" : "border-slate-100 focus:border-blue-600"
@@ -240,7 +246,7 @@ export default function SimpleRequestPage() {
                                 />
                                 {carError && <p className="text-red-500 text-xs mt-2 ml-1">{carError}</p>}
                             </div>
-                            <input required name="carOwner" placeholder="차량 소유자 성함" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
+                            <input name="carOwner" placeholder="차량 소유자 성함 · 모르면 비워두세요" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
                         </div>
                     </div>
 
