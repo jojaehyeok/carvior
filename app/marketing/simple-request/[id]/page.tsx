@@ -7,6 +7,7 @@ import PrivacyModal from '@/components/PrivacyModal';
 
 const COMPANY_LABELS: Record<string, string> = {
     'anyone-motors': '애니원 모터스',
+    'gwangmyeong-motors': '광명모터스',
     'carvatar': '차바타',
 };
 
