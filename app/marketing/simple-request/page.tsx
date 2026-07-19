@@ -231,10 +231,8 @@ export default function SimpleRequestPage() {
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                     {/* 01. 차량 확인 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <div className="flex items-center gap-2 mb-4">
-                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">01. 차량 확인</h3>
-                            <span className="text-[11px] font-bold text-slate-400">차량번호·소유자 정보는 선택사항입니다</span>
-                        </div>
+                        <h3 className="text-sm font-bold text-slate-400 mb-1.5 uppercase tracking-widest">01. 차량 확인</h3>
+                        <p className="text-sm font-bold text-red-500 mb-4">차량번호·소유자 정보는 선택사항입니다</p>
                         <div className="space-y-4">
                             <div>
                                 <input

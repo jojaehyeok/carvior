@@ -261,10 +261,8 @@ export default function SimpleRequestByCompanyPage() {
 
                     {/* 01. 차량 확인 */}
                     <div className="bg-white rounded-2xl p-6">
-                        <div className="flex items-center gap-2 mb-5">
-                            <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">01 · 차량 확인</p>
-                            <span className="text-[10px] font-bold text-zinc-400">차량번호·소유자 정보는 선택사항입니다</span>
-                        </div>
+                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1.5">01 · 차량 확인</p>
+                        <p className="text-sm font-bold text-red-500 mb-5">차량번호·소유자 정보는 선택사항입니다</p>
                         <div className="space-y-4">
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 구분</label>
