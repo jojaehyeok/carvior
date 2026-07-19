@@ -231,12 +231,15 @@ export default function SimpleRequestPage() {
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                     {/* 01. 차량 확인 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">01. 차량 확인</h3>
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">01. 차량 확인</h3>
+                            <span className="text-[11px] font-bold text-slate-400">차량번호·소유자 정보는 선택사항입니다</span>
+                        </div>
                         <div className="space-y-4">
                             <div>
                                 <input
                                     name="carNumber"
-                                    placeholder="차량번호 (예: 123가 4567) · 모르면 비워두세요"
+                                    placeholder="차량번호 (예: 123가 4567)"
                                     className={clsx(
                                         "w-full text-lg font-bold border-b-2 p-3 outline-none transition-all",
                                         carError ? "border-red-500" : "border-slate-100 focus:border-blue-600"
@@ -246,7 +249,7 @@ export default function SimpleRequestPage() {
                                 />
                                 {carError && <p className="text-red-500 text-xs mt-2 ml-1">{carError}</p>}
                             </div>
-                            <input name="carOwner" placeholder="차량 소유자 성함 · 모르면 비워두세요" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
+                            <input name="carOwner" placeholder="차량 소유자 성함" className="w-full border-b-2 border-slate-100 p-3 focus:border-blue-600 outline-none transition-all" onChange={handleChange} />
                         </div>
                     </div>
 

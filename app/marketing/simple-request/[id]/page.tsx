@@ -261,7 +261,10 @@ export default function SimpleRequestByCompanyPage() {
 
                     {/* 01. 차량 확인 */}
                     <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">01 · 차량 확인</p>
+                        <div className="flex items-center gap-2 mb-5">
+                            <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">01 · 차량 확인</p>
+                            <span className="text-[10px] font-bold text-zinc-400">차량번호·소유자 정보는 선택사항입니다</span>
+                        </div>
                         <div className="space-y-4">
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 구분</label>
@@ -279,7 +282,7 @@ export default function SimpleRequestByCompanyPage() {
                             <div>
                                 <input
                                     name="carNumber"
-                                    placeholder="차량번호 (예: 123가4567) · 모르면 비워두세요"
+                                    placeholder="차량번호 (예: 123가4567)"
                                     className={clsx(
                                         'w-full text-lg font-black border-b-2 pb-2 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900',
                                         carError ? 'border-red-400' : 'border-zinc-100 focus:border-zinc-900'
@@ -291,7 +294,7 @@ export default function SimpleRequestByCompanyPage() {
                             </div>
                             <input
                                 name="carOwner"
-                                placeholder="차량 소유자 성함 · 모르면 비워두세요"
+                                placeholder="차량 소유자 성함"
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
