@@ -301,7 +301,8 @@ export default function SimpleRequestByCompanyPage() {
 
                     {/* 02. 차량 상태 */}
                     <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">02 · 차량 상태</p>
+                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1.5">02 · 차량 상태</p>
+                        <p className="text-sm font-bold text-red-500 mb-5">차량 연식·희망 매입가는 선택사항입니다</p>
                         <div className="space-y-4">
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 연식</label>

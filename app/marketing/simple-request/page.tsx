@@ -253,7 +253,8 @@ export default function SimpleRequestPage() {
 
                     {/* 02. 차량 상태 */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest">02. 차량 상태</h3>
+                        <h3 className="text-sm font-bold text-slate-400 mb-1.5 uppercase tracking-widest">02. 차량 상태</h3>
+                        <p className="text-sm font-bold text-red-500 mb-4">차량 연식·희망 매입가는 선택사항입니다</p>
                         <div className="space-y-4">
                             {/* 연식 */}
                             <div>
