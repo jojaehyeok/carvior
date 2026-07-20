@@ -169,10 +169,6 @@ export default function SimpleRequestByCompanyPage() {
             alert('개인정보 수집·이용에 동의해주세요.');
             return;
         }
-        if (!vehicleCategory) {
-            alert('차량 구분을 선택해주세요.');
-            return;
-        }
         if (!formData.preferredDateTime) {
             alert('방문 날짜와 시간을 선택해주세요.');
             return;
@@ -194,7 +190,7 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...submitData, source: companyId, additionalMemo: `[${vehicleCategory}] ${formData.additionalMemo}`.trim(), privacyAgreed }),
+                body: JSON.stringify({ ...submitData, source: companyId, additionalMemo: `${vehicleCategory ? `[${vehicleCategory}] ` : ''}${formData.additionalMemo}`.trim(), privacyAgreed }),
             });
 
             const dbResult = await dbResponse.json();
@@ -272,7 +268,6 @@ export default function SimpleRequestByCompanyPage() {
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 구분</label>
                                 <select
-                                    required
                                     value={vehicleCategory}
                                     onChange={e => setVehicleCategory(e.target.value)}
                                     className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
