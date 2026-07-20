@@ -283,11 +283,24 @@ export default function PublicReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const downloadPDF = () => {
     if (!data || pdfLoading) return;
     setPdfLoading(true);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+    } catch {
+      // 클립보드 권한이 없는 브라우저 대비 폴백
+      window.prompt("아래 링크를 복사하세요", window.location.href);
+      return;
+    }
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 1500);
   };
 
   // pdfLoading=true → PdfTemplate 마운트 → useEffect 실행 순서 보장
@@ -572,6 +585,14 @@ export default function PublicReportPage() {
         <p>본 리포트는 진단 시점 기준으로 작성되었습니다.</p>
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
       </div>
+
+      {/* 링크 복사 플로팅 버튼 — PDF 다운로드 버튼 바로 위에 배치 */}
+      <button
+        onClick={handleCopyLink}
+        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-zinc-700 rounded-full shadow-lg bottom-20 left-5 hover:bg-zinc-800"
+      >
+        {linkCopied ? <>✅ 복사됨</> : <>🔗 링크 복사</>}
+      </button>
 
       {/* PDF 다운로드 플로팅 버튼 — 채널톡 위젯이 항상 우하단을 쓰므로 겹치지 않게 좌하단에 배치 */}
       <button
