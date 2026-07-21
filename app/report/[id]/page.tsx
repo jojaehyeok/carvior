@@ -12,6 +12,7 @@ import PdfTemplate from "./PdfTemplate";
 
 // ─── 타입 ──────────────────────────────────────────────────────────────────────
 interface ReportData {
+  dealerName?: string | null;
   car_info: {
     number: string;
     type: string;
@@ -386,7 +387,7 @@ export default function PublicReportPage() {
     );
   }
 
-  const { car_info, evaluation, car_status, damages, images } = data;
+  const { dealerName, car_info, evaluation, car_status, damages, images } = data;
   const totalKeys =
     car_status.keys.smart + car_status.keys.folding +
     car_status.keys.general + car_status.keys.special;
@@ -404,6 +405,7 @@ export default function PublicReportPage() {
         </div>
         <h1 className="text-3xl font-bold text-gray-900">{car_info.number}</h1>
         <p className="mt-1 text-gray-500">{car_info.type}</p>
+        {dealerName && <p className="mt-1 text-sm text-gray-400">딜러: {dealerName}</p>}
       </div>
 
       {/* 차량 기본 정보 */}

@@ -41,6 +41,7 @@ const SYMBOL_COLOR: Record<string,string> = {
 };
 
 export interface ReportData {
+  dealerName?: string | null;
   car_info: { number:string; type:string; mileage:number; color:string; repairCost:number };
   evaluation: { leakDesc:string; driveDesc:string; optionsDesc:string; warningDesc:string; memo:string };
   car_status: {
@@ -104,7 +105,7 @@ function Header({ carNumber, grade }:{ carNumber:string; grade:GradeInfo }) {
 
 // ─── Page 1: 차량정보 + 진단결과 + 손상 ─────────────────────────────────────
 function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
-  const { car_info, evaluation, car_status, damages } = data;
+  const { dealerName, car_info, evaluation, car_status, damages } = data;
   const totalKeys = car_status.keys.smart+car_status.keys.folding+car_status.keys.general+car_status.keys.special;
   const damagedParts = damages.map((syms,i)=>({ name:PART_NAMES[i],symbols:syms })).filter(p=>p.symbols.length>0);
   const isOk = (v:string) => !v||v==="이상 없음";
@@ -130,6 +131,7 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
               <div style={{ fontSize:9,color:"#9ca3af" }}>차량번호 / 차종</div>
               <div style={{ fontSize:16,fontWeight:900 }}>{car_info.number}</div>
               <div style={{ fontSize:10,color:"#6b7280" }}>{car_info.type||"-"}</div>
+              {dealerName && <div style={{ fontSize:9,color:"#9ca3af" }}>딜러: {dealerName}</div>}
             </div>
             <div style={{ display:"flex",gap:14 }}>
               <Donut value={car_status.tireTread.front} label="앞 타이어"
