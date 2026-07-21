@@ -588,6 +588,15 @@ export default function PublicReportPage() {
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
       </div>
 
+      {/* 사진 전체 다운로드(zip) 플로팅 버튼 — 링크 복사 버튼 바로 위에 배치, 등록증/차대번호 등
+          개인정보 사진은 리포트 화면과 동일하게 제외되고 1,2,3...번 순서로 이름 붙여 압축됨 */}
+      <a
+        href={`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}/zip`}
+        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-emerald-700 rounded-full shadow-lg bottom-[136px] left-5 hover:bg-emerald-800"
+      >
+        📦 사진 전체 다운로드
+      </a>
+
       {/* 링크 복사 플로팅 버튼 — PDF 다운로드 버튼 바로 위에 배치 */}
       <button
         onClick={handleCopyLink}
