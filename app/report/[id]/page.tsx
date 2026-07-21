@@ -285,6 +285,7 @@ export default function PublicReportPage() {
   const [error, setError] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
   const pdfRef = useRef<HTMLDivElement>(null);
 
   const downloadPDF = () => {
@@ -588,38 +589,57 @@ export default function PublicReportPage() {
         <p className="mt-1">© Carvior · 차량 진단 서비스</p>
       </div>
 
-      {/* 사진 전체 다운로드(zip) 플로팅 버튼 — 링크 복사 버튼 바로 위에 배치, 등록증/차대번호 등
-          개인정보 사진은 리포트 화면과 동일하게 제외되고 1,2,3...번 순서로 이름 붙여 압축됨 */}
-      <a
-        href={`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}/zip`}
-        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-emerald-700 rounded-full shadow-lg bottom-[136px] left-5 hover:bg-emerald-800"
-      >
-        📦 사진 전체 다운로드
-      </a>
+      {/* 플로팅 버튼 그룹 — 화면을 너무 가려서 접었다 폈다 할 수 있는 FAB 메뉴로 전환.
+          채널톡 위젯이 항상 우하단을 쓰므로 겹치지 않게 좌하단에 배치 */}
+      <div className="fixed z-50 flex flex-col-reverse items-start gap-3 bottom-6 left-5">
+        {/* 메인 토글 버튼 — 항상 보임 */}
+        <button
+          onClick={() => setFabOpen(v => !v)}
+          aria-label={fabOpen ? "메뉴 닫기" : "메뉴 열기"}
+          className="flex items-center justify-center w-14 h-14 text-xl text-white transition-transform bg-gray-900 rounded-full shadow-lg hover:bg-black active:scale-95"
+        >
+          {fabOpen ? "✕" : "☰"}
+        </button>
 
-      {/* 링크 복사 플로팅 버튼 — PDF 다운로드 버튼 바로 위에 배치 */}
-      <button
-        onClick={handleCopyLink}
-        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-zinc-700 rounded-full shadow-lg bottom-20 left-5 hover:bg-zinc-800"
-      >
-        {linkCopied ? <>✅ 복사됨</> : <>🔗 링크 복사</>}
-      </button>
+        {/* PDF 다운로드 */}
+        <button
+          onClick={downloadPDF}
+          disabled={pdfLoading}
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 bg-blue-700 rounded-full shadow-lg hover:bg-blue-800 disabled:bg-blue-400 ${
+            fabOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+        >
+          {pdfLoading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
+              생성 중...
+            </>
+          ) : (
+            <>⬇️ PDF 다운로드</>
+          )}
+        </button>
 
-      {/* PDF 다운로드 플로팅 버튼 — 채널톡 위젯이 항상 우하단을 쓰므로 겹치지 않게 좌하단에 배치 */}
-      <button
-        onClick={downloadPDF}
-        disabled={pdfLoading}
-        className="fixed z-50 flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-colors bg-blue-700 rounded-full shadow-lg bottom-6 left-5 hover:bg-blue-800 disabled:bg-blue-400"
-      >
-        {pdfLoading ? (
-          <>
-            <div className="w-4 h-4 border-2 border-white rounded-full border-t-transparent animate-spin" />
-            생성 중...
-          </>
-        ) : (
-          <>⬇️ PDF 다운로드</>
-        )}
-      </button>
+        {/* 링크 복사 */}
+        <button
+          onClick={handleCopyLink}
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 bg-zinc-700 rounded-full shadow-lg hover:bg-zinc-800 ${
+            fabOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+        >
+          {linkCopied ? <>✅ 복사됨</> : <>🔗 링크 복사</>}
+        </button>
+
+        {/* 사진 전체 다운로드(zip) — 등록증/차대번호 등 개인정보 사진은 리포트 화면과 동일하게
+            제외되고 1,2,3...번 순서로 이름 붙여 압축됨 */}
+        <a
+          href={`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}/zip`}
+          className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 bg-emerald-700 rounded-full shadow-lg hover:bg-emerald-800 ${
+            fabOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"
+          }`}
+        >
+          📦 사진 전체 다운로드
+        </a>
+      </div>
 
       {/* PDF 클릭 시에만 마운트 → 평소엔 이미지 이중 요청 없음 */}
       {pdfLoading && (
