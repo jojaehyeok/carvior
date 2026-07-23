@@ -15,7 +15,7 @@ function DateTimeSelector({ onDateTimeSelect }: { onDateTimeSelect: (date: strin
     const [selectedDate, setSelectedDate] = useState<string>('');
     const [selectedTime, setSelectedTime] = useState<string>('');
 
-    const dates = Array.from({ length: 14 }, (_, i) => {
+    const dates = Array.from({ length: 60 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() + i);
         return {
@@ -38,7 +38,7 @@ function DateTimeSelector({ onDateTimeSelect }: { onDateTimeSelect: (date: strin
         <div className="space-y-5">
             <div>
                 <label className="text-[10px] font-extrabold text-zinc-500 mb-3 block uppercase tracking-widest">방문 날짜</label>
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-2 overflow-x-auto pb-2">
                     {dates.map((item) => (
                         <button
                             key={item.full}
