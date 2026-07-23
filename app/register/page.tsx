@@ -105,6 +105,7 @@ export default function RegisterPage() {
   const [pw2, setPw2]           = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   // 딜러 전용
   const [licenseDoc,    setLicenseDoc]    = useState<DocFile>(emptyDoc());
@@ -128,7 +129,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const body: Record<string, string> = { email, password, name, phone, role };
+      const body: Record<string, string | boolean> = { email, password, name, phone, role, marketingConsent };
       if (role === 'dealer') {
         body.dealerLicenseUrl = licenseDoc.url;
         if (hasBusiness) {
@@ -289,6 +290,22 @@ export default function RegisterPage() {
           )}
 
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
+          <div className="pt-1 space-y-2">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none">
+              <div
+                onClick={() => setMarketingConsent(v => !v)}
+                className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${marketingConsent ? 'bg-violet-600' : 'bg-gray-200'}`}
+              >
+                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${marketingConsent ? 'translate-x-5' : 'translate-x-1'}`} />
+              </div>
+              <span className="text-xs text-gray-500">(선택) 이벤트·혜택 등 광고성 정보 수신에 동의합니다</span>
+            </label>
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              가입 시 <a href="/policy/terms" target="_blank" rel="noopener noreferrer" className="underline">이용약관</a> 및{' '}
+              <a href="/policy/privacy" target="_blank" rel="noopener noreferrer" className="underline">개인정보처리방침</a>에 동의하게 됩니다.
+            </p>
+          </div>
 
           <button
             type="submit" disabled={loading}

@@ -45,6 +45,8 @@ export default function MypagePage() {
   const [soldRating, setSoldRating] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem('soldRating') ?? '{}'); } catch { return {}; }
   });
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [consentSaving, setConsentSaving] = useState(false);
 
   const user = session?.user as any;
 
@@ -59,6 +61,31 @@ export default function MypagePage() {
       .then(data => { setItems(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [status]);
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    fetch('/api/mypage/marketing-consent')
+      .then(r => r.json())
+      .then(data => setMarketingConsent(!!data.marketingConsent))
+      .catch(() => {});
+  }, [status]);
+
+  const toggleMarketingConsent = async () => {
+    const next = !marketingConsent;
+    setMarketingConsent(next);
+    setConsentSaving(true);
+    try {
+      await fetch('/api/mypage/marketing-consent', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ marketingConsent: next }),
+      });
+    } catch {
+      setMarketingConsent(!next);
+    } finally {
+      setConsentSaving(false);
+    }
+  };
 
   const markSold = async (item: StoreItem) => {
     const res = await fetch(`/api/mypage/store-items?id=${item.id}`, {
@@ -150,6 +177,28 @@ export default function MypagePage() {
             >
               로그아웃
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 계정 설정 */}
+      <div className="max-w-2xl mx-auto px-4 pt-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
+          <p className="text-xs font-black text-gray-700 mb-3">계정 설정</p>
+
+          <label className="flex items-center justify-between gap-2.5 cursor-pointer select-none">
+            <span className="text-sm text-gray-700">광고성 정보 수신 동의</span>
+            <div
+              onClick={toggleMarketingConsent}
+              className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${consentSaving ? 'opacity-50' : ''} ${marketingConsent ? 'bg-violet-600' : 'bg-gray-200'}`}
+            >
+              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${marketingConsent ? 'translate-x-5' : 'translate-x-1'}`} />
+            </div>
+          </label>
+
+          <div className="flex gap-4 mt-4 pt-3 border-t border-gray-100">
+            <a href="/policy/privacy" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-400 underline">개인정보처리방침</a>
+            <a href="/policy/terms" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-400 underline">이용약관</a>
           </div>
         </div>
       </div>

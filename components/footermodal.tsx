@@ -14,16 +14,10 @@ import { useRouter } from "next/navigation";
 
 export default function AppFooter() {
   const router = useRouter();
-  const { 
-    isOpen: isTermsOpen, 
-    onOpen: onTermsOpen, 
-    onOpenChange: onTermsOpenChange 
-  } = useDisclosure();
-
-  const { 
-    isOpen: isPrivacyOpen, 
-    onOpen: onPrivacyOpen, 
-    onOpenChange: onPrivacyOpenChange 
+  const {
+    isOpen: isTermsOpen,
+    onOpen: onTermsOpen,
+    onOpenChange: onTermsOpenChange
   } = useDisclosure();
 
   return (
@@ -67,7 +61,12 @@ export default function AppFooter() {
             <p className="text-xs text-gray-400">© 2026 카비어. All Rights Reserved.</p>
             <div className="flex gap-6 text-xs text-gray-500">
               <button onClick={onTermsOpen} className="transition-colors hover:text-violet-600 hover:underline">이용약관</button>
-              <button onClick={onPrivacyOpen} className="font-bold transition-colors hover:text-violet-600 hover:underline">개인정보처리방침</button>
+              <button
+                onClick={() => router.push('/policy/privacy')}
+                className="font-bold transition-colors hover:text-violet-600 hover:underline"
+              >
+                개인정보처리방침
+              </button>
               {/* 🌟 환불정책 링크 추가 (토스 심사용) */}
               <button
                 onClick={() => router.push('/policy/refund')}
@@ -178,48 +177,6 @@ export default function AppFooter() {
                     <p>이메일: cs@carvior.com</p>
                     <p>회사: 카비어 / 사업자등록번호: 783-24-02190</p>
                     <p>대표: 조재혁</p>
-                  </div>
-                </div>
-              </ModalBody>
-              <ModalFooter className="border-t">
-                <Button color="primary" onPress={onClose}>닫기</Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* 🛡️ 개인정보처리방침 모달 */}
-      <Modal isOpen={isPrivacyOpen} onOpenChange={onPrivacyOpenChange} scrollBehavior="inside" size="3xl">
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="border-b">개인정보처리방침</ModalHeader>
-              <ModalBody className="p-8">
-                <div className="space-y-6 text-sm leading-relaxed text-gray-800 whitespace-pre-wrap">
-                  <p><strong>카비어(Carvior)</strong>는 이용자의 개인정보를 소중하게 처리하며, 관련 법령을 준수합니다.</p>
-                  
-                  <div>
-                    <p className="font-bold">1. 개인정보의 수집 및 이용 목적</p>
-                    <p>- 차량 점검 서비스 예약 및 수행</p>
-                    <p>- 서비스 이용에 따른 본인 확인 및 상담 처리</p>
-                  </div>
-
-                  <div>
-                    <p className="font-bold">2. 수집하는 개인정보 항목</p>
-                    <p>- 필수항목: 성명, 연락처, 차량정보, 점검 희망 주소</p>
-                    <p>- 자동수집: IP주소, 서비스 이용 기록</p>
-                  </div>
-
-                  <div>
-                    <p className="font-bold">3. 개인정보의 보유 및 이용기간</p>
-                    <p>- 이용 목적 달성 시 혹은 회원 탈퇴 시 지체 없이 파기합니다.</p>
-                    <p>- 관계 법령에 의하여 보존할 필요가 있는 경우 해당 기간 동안 보관합니다.</p>
-                  </div>
-
-                  <div>
-                    <p className="font-bold">4. 개인정보 보호책임자</p>
-                    <p>- 성명: 조재혁 / 연락처: 010-2285-6017</p>
                   </div>
                 </div>
               </ModalBody>
