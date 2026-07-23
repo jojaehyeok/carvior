@@ -404,10 +404,10 @@ export default function PublicReportPage() {
         <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <span>🔍</span> 차량 진단 리포트
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">{car_info.number}</h1>
-        {car_info.type && car_info.type !== "알수없음" && (
-          <p className="mt-1 text-gray-500">{car_info.type}</p>
+        {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" && (
+          <p className="text-sm font-semibold text-blue-600">{car_info.type}</p>
         )}
+        <h1 className="mt-1 text-3xl font-bold text-gray-900">{car_info.number}</h1>
         {dealerName && <p className="mt-1 text-sm text-gray-400">딜러: {dealerName}</p>}
       </div>
 
