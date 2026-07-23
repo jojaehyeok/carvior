@@ -95,6 +95,7 @@ export default function SimpleRequestByCompanyPage() {
     const companyLabel = COMPANY_LABELS[companyId] || companyId;
 
     const [vehicleCategory, setVehicleCategory] = useState('');
+    const [isSelfOwned, setIsSelfOwned] = useState(false);
 
     const [formData, setFormData] = useState({
         carNumber: '',
@@ -190,7 +191,7 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...submitData, source: companyId, additionalMemo: `${vehicleCategory ? `[${vehicleCategory}] ` : ''}${formData.additionalMemo}`.trim(), privacyAgreed }),
+                body: JSON.stringify({ ...submitData, source: isSelfOwned ? `self-${companyId}` : companyId, additionalMemo: `${vehicleCategory ? `[${vehicleCategory}] ` : ''}${formData.additionalMemo}`.trim(), privacyAgreed }),
             });
 
             const dbResult = await dbResponse.json();
@@ -277,6 +278,15 @@ export default function SimpleRequestByCompanyPage() {
                                     <option value="포터·봉고">포터·봉고 (화물)</option>
                                 </select>
                             </div>
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={isSelfOwned}
+                                    onChange={e => setIsSelfOwned(e.target.checked)}
+                                    className="w-4 h-4 accent-zinc-900"
+                                />
+                                <span className="text-sm font-medium text-zinc-600">자체 보유 차량입니다 (외부 딜러 신청 아님)</span>
+                            </label>
                             <div>
                                 <input
                                     name="carNumber"
