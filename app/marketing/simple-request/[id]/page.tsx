@@ -254,6 +254,15 @@ export default function SimpleRequestByCompanyPage() {
                         차량 정보를 입력하면 카비어 진단 평가사가 직접 방문합니다.<br />
                         <span className="text-zinc-700 font-semibold">수도권(서울·경기·인천) 지역</span> 운영 중
                     </p>
+                    <label className="flex items-center gap-2 cursor-pointer select-none mt-3">
+                        <input
+                            type="checkbox"
+                            checked={isSelfOwned}
+                            onChange={e => setIsSelfOwned(e.target.checked)}
+                            className="w-4 h-4 accent-zinc-900"
+                        />
+                        <span className="text-sm font-medium text-zinc-600">자체 신청 접수</span>
+                    </label>
                 </div>
             </div>
 
@@ -278,15 +287,6 @@ export default function SimpleRequestByCompanyPage() {
                                     <option value="포터·봉고">포터·봉고 (화물)</option>
                                 </select>
                             </div>
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                                <input
-                                    type="checkbox"
-                                    checked={isSelfOwned}
-                                    onChange={e => setIsSelfOwned(e.target.checked)}
-                                    className="w-4 h-4 accent-zinc-900"
-                                />
-                                <span className="text-sm font-medium text-zinc-600">자체 보유 차량입니다 (외부 딜러 신청 아님)</span>
-                            </label>
                             <div>
                                 <input
                                     name="carNumber"
