@@ -405,7 +405,9 @@ export default function PublicReportPage() {
           <span>🔍</span> 차량 진단 리포트
         </div>
         <h1 className="text-3xl font-bold text-gray-900">{car_info.number}</h1>
-        <p className="mt-1 text-gray-500">{car_info.type}</p>
+        {car_info.type && car_info.type !== "알수없음" && (
+          <p className="mt-1 text-gray-500">{car_info.type}</p>
+        )}
         {dealerName && <p className="mt-1 text-sm text-gray-400">딜러: {dealerName}</p>}
       </div>
 
@@ -420,10 +422,6 @@ export default function PublicReportPage() {
             <p className="text-lg font-bold text-gray-800">
               {car_info.mileage.toLocaleString()} km
             </p>
-          </div>
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <p className="mb-1 text-xs text-gray-400">색상</p>
-            <p className="text-lg font-bold text-gray-800">{car_info.color || "-"}</p>
           </div>
           <div className="p-4 bg-gray-50 rounded-xl">
             <p className="mb-1 text-xs text-gray-400">열쇠</p>

@@ -130,7 +130,9 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
             <div style={{ flex:1 }}>
               <div style={{ fontSize:9,color:"#9ca3af" }}>차량번호 / 차종</div>
               <div style={{ fontSize:16,fontWeight:900 }}>{car_info.number}</div>
-              <div style={{ fontSize:10,color:"#6b7280" }}>{car_info.type||"-"}</div>
+              {car_info.type && car_info.type !== "알수없음" && (
+                <div style={{ fontSize:10,color:"#6b7280" }}>{car_info.type}</div>
+              )}
               {dealerName && <div style={{ fontSize:9,color:"#9ca3af" }}>딜러: {dealerName}</div>}
             </div>
             <div style={{ display:"flex",gap:14 }}>
@@ -140,15 +142,14 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
                 color={car_status.tireTread.back>=60?"#16a34a":car_status.tireTread.back>=30?"#d97706":"#dc2626"} />
             </div>
           </div>
-          {/* 스펙 4칸 */}
-          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr" }}>
+          {/* 스펙 3칸 */}
+          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr" }}>
             {[
               { label:"주행거리",value:`${car_info.mileage.toLocaleString()} km` },
-              { label:"색상",    value:car_info.color||"-" },
               { label:"열쇠",    value:`${totalKeys}개 (스마트 ${car_status.keys.smart})` },
               { label:"도색필요",value:`${car_status.paintNeeded}개소` },
             ].map((item,i)=>(
-              <div key={i} style={{ padding:"7px 12px",borderRight:i<3?"1px solid #e5e7eb":"none" }}>
+              <div key={i} style={{ padding:"7px 12px",borderRight:i<2?"1px solid #e5e7eb":"none" }}>
                 <div style={{ fontSize:8,color:"#9ca3af",marginBottom:1 }}>{item.label}</div>
                 <div style={{ fontSize:10,fontWeight:700 }}>{item.value}</div>
               </div>
