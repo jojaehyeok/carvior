@@ -104,6 +104,7 @@ export default function SimpleRequestByCompanyPage() {
         desiredPrice: '',
         dealerName: '',
         contact: '',
+        customerContact: '',
         address: '',
         detailAddress: '',
         preferredDateTime: '',
@@ -361,6 +362,18 @@ export default function SimpleRequestByCompanyPage() {
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
+                            <div>
+                                <input
+                                    type="tel"
+                                    name="customerContact"
+                                    placeholder="고객 연락처 (선택 · - 제외)"
+                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    onChange={handleChange}
+                                />
+                                <p className="text-[11px] text-zinc-400 mt-1.5">
+                                    평가사가 전시장이 아닌 고객에게 직접 방문해야 하면 입력해주세요. 전시장 방문이면 비워두세요.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
