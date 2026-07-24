@@ -175,6 +175,10 @@ export default function SimpleRequestByCompanyPage() {
             alert('방문 날짜와 시간을 선택해주세요.');
             return;
         }
+        if (!formData.contact.trim() && !formData.customerContact.trim()) {
+            alert('딜러 연락처 또는 고객 연락처 중 최소 하나는 입력해주세요.');
+            return;
+        }
         if (!companyId) {
             alert('잘못된 접근입니다. 올바른 신청 링크를 사용해주세요.');
             return;
