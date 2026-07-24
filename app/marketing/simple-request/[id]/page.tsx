@@ -355,10 +355,9 @@ export default function SimpleRequestByCompanyPage() {
                                 onChange={handleChange}
                             />
                             <input
-                                required
                                 type="tel"
                                 name="contact"
-                                placeholder="연락처 (- 제외)"
+                                placeholder="딜러 연락처 (선택 · - 제외)"
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
