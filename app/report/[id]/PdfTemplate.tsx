@@ -256,12 +256,12 @@ function Page2({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
 
   const photoCats: { label:string; imgs:string[] }[] = [
     { label:"외관",       imgs:images.exterior??[] },
+    { label:"휠&트레드",   imgs:images.wheel??[] },
     { label:"실내",       imgs:images.interior??[] },
     { label:"옵션",       imgs:images.extra??[] },
-    { label:"휠",         imgs:images.wheel??[] },
-    { label:"엔진",       imgs:images.engine??[] },
-    { label:"하부",       imgs:images.undercarriage??[] },
-    { label:"외판 데미지", imgs:images.damage??[] },
+    { label:"엔진룸",     imgs:images.engine??[] },
+    { label:"하부 & 누유", imgs:images.undercarriage??[] },
+    { label:"내외판 데미지", imgs:images.damage??[] },
     { label:"기타사진",   imgs:images.extraMemo??[] },
   ].filter(c=>c.imgs.length>0);
 

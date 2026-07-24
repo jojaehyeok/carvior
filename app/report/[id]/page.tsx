@@ -122,12 +122,12 @@ const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; bo
 
 const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: string }[] = [
   { key: "exterior",     label: "외관",      icon: "🚗" },
+  { key: "wheel",        label: "휠&트레드",   icon: "🛞" },
   { key: "interior",     label: "실내",      icon: "💺" },
   { key: "extra",        label: "옵션",      icon: "🔧" },
-  { key: "wheel",        label: "휠",        icon: "🛞" },
-  { key: "engine",       label: "엔진",      icon: "⚙️" },
-  { key: "undercarriage",label: "하부",      icon: "🔩" },
-  { key: "damage",       label: "외판 데미지", icon: "🔨" },
+  { key: "engine",       label: "엔진룸",     icon: "⚙️" },
+  { key: "undercarriage",label: "하부 & 누유", icon: "🔩" },
+  { key: "damage",       label: "내외판 데미지", icon: "🔨" },
   { key: "extraMemo",    label: "기타사진",   icon: "📷" },
 ];
 
