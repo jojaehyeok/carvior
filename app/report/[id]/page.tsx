@@ -110,14 +110,16 @@ const ORIGINAL_H = 4001;
 
 const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; border: string }> = {
   X: { label: "교환",      bg: "#ef4444", text: "#ffffff", border: "#ef4444" },
-  W: { label: "용접",      bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
+  W: { label: "판금/용접", bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
   M: { label: "탈부착",    bg: "#eab308", text: "#ffffff", border: "#eab308" },
   A: { label: "흠집",      bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
   U: { label: "요철",      bg: "#a855f7", text: "#ffffff", border: "#a855f7" },
   T: { label: "깨짐",      bg: "#6b7280", text: "#ffffff", border: "#6b7280" },
   C: { label: "부식",      bg: "#22c55e", text: "#ffffff", border: "#22c55e" },
   P: { label: "도장필요",  bg: "#ec4899", text: "#ffffff", border: "#ec4899" },
-  B: { label: "판금",      bg: "#8b5cf6", text: "#ffffff", border: "#8b5cf6" },
+  // B(판금)는 위 damages 정규화 단계에서 이미 W로 합쳐져서 여기까진 안 들어오지만,
+  // 방어적으로 남겨둠(다른 값이 섞여 들어와도 라벨은 항상 동일하게)
+  B: { label: "판금/용접", bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
 };
 
 const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: string }[] = [
@@ -388,7 +390,10 @@ export default function PublicReportPage() {
     );
   }
 
-  const { dealerName, car_info, evaluation, car_status, damages, images } = data;
+  const { dealerName, car_info, evaluation, car_status, damages: rawDamages, images } = data;
+  // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, 평가사 앱 입력은 그대로 두고
+  // 리포트 표시에서만 B를 W로 합쳐서 보여준다(라벨도 "판금/용접"으로 통합)
+  const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
   const totalKeys =
     car_status.keys.smart + car_status.keys.folding +
     car_status.keys.general + car_status.keys.special;

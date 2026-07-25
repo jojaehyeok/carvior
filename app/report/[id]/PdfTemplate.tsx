@@ -34,7 +34,7 @@ const ORIGINAL_W = 2109;
 const ORIGINAL_H = 4001;
 
 const SYMBOL_LABEL: Record<string,string> = {
-  X:"교환",W:"용접",M:"탈부착",A:"흠집",U:"요철",T:"깨짐",C:"부식",P:"도장필요",B:"판금",
+  X:"교환",W:"판금/용접",M:"탈부착",A:"흠집",U:"요철",T:"깨짐",C:"부식",P:"도장필요",B:"판금/용접",
 };
 const SYMBOL_COLOR: Record<string,string> = {
   X:"#ef4444",W:"#3b82f6",M:"#eab308",A:"#3b82f6",U:"#a855f7",T:"#6b7280",C:"#22c55e",P:"#ec4899",B:"#8b5cf6",
@@ -105,7 +105,9 @@ function Header({ carNumber, grade }:{ carNumber:string; grade:GradeInfo }) {
 
 // ─── Page 1: 차량정보 + 진단결과 + 손상 ─────────────────────────────────────
 function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
-  const { dealerName, car_info, evaluation, car_status, damages } = data;
+  const { dealerName, car_info, evaluation, car_status, damages: rawDamages } = data;
+  // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, PDF에도 B를 W로 바꿔서 보여준다
+  const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
   const totalKeys = car_status.keys.smart+car_status.keys.folding+car_status.keys.general+car_status.keys.special;
   const damagedParts = damages.map((syms,i)=>({ name:PART_NAMES[i],symbols:syms })).filter(p=>p.symbols.length>0);
   const isOk = (v:string) => !v||v==="이상 없음";
