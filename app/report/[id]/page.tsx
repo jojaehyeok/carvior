@@ -110,7 +110,7 @@ const ORIGINAL_H = 4001;
 
 const SYMBOL_STYLE: Record<string, { label: string; bg: string; text: string; border: string }> = {
   X: { label: "교환",      bg: "#ef4444", text: "#ffffff", border: "#ef4444" },
-  W: { label: "판금/도장", bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
+  W: { label: "용접",      bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
   M: { label: "탈부착",    bg: "#eab308", text: "#ffffff", border: "#eab308" },
   A: { label: "흠집",      bg: "#3b82f6", text: "#ffffff", border: "#3b82f6" },
   U: { label: "요철",      bg: "#a855f7", text: "#ffffff", border: "#a855f7" },

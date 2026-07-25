@@ -34,7 +34,7 @@ const ORIGINAL_W = 2109;
 const ORIGINAL_H = 4001;
 
 const SYMBOL_LABEL: Record<string,string> = {
-  X:"교환",W:"판금/도장",M:"탈부착",A:"흠집",U:"요철",T:"깨짐",C:"부식",P:"도장필요",B:"판금",
+  X:"교환",W:"용접",M:"탈부착",A:"흠집",U:"요철",T:"깨짐",C:"부식",P:"도장필요",B:"판금",
 };
 const SYMBOL_COLOR: Record<string,string> = {
   X:"#ef4444",W:"#3b82f6",M:"#eab308",A:"#3b82f6",U:"#a855f7",T:"#6b7280",C:"#22c55e",P:"#ec4899",B:"#8b5cf6",
