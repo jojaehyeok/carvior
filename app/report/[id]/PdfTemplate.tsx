@@ -42,6 +42,7 @@ const SYMBOL_COLOR: Record<string,string> = {
 
 export interface ReportData {
   dealerName?: string | null;
+  driverName?: string | null;
   car_info: { number:string; type:string; mileage:number; color:string; repairCost:number };
   evaluation: { leakDesc:string; driveDesc:string; optionsDesc:string; warningDesc:string; memo:string };
   car_status: {
@@ -105,7 +106,7 @@ function Header({ carNumber, grade }:{ carNumber:string; grade:GradeInfo }) {
 
 // ─── Page 1: 차량정보 + 진단결과 + 손상 ─────────────────────────────────────
 function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
-  const { dealerName, car_info, evaluation, car_status, damages: rawDamages } = data;
+  const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages } = data;
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, PDF에도 B를 W로 바꿔서 보여준다
   const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
   const totalKeys = car_status.keys.smart+car_status.keys.folding+car_status.keys.general+car_status.keys.special;
@@ -136,6 +137,7 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
               )}
               <div style={{ fontSize:16,fontWeight:900 }}>{car_info.number}</div>
               {dealerName && <div style={{ fontSize:9,color:"#9ca3af" }}>딜러: {dealerName}</div>}
+              {driverName && <div style={{ fontSize:9,color:"#9ca3af" }}>담당 진단평가사: {driverName}</div>}
             </div>
             <div style={{ display:"flex",gap:14 }}>
               <Donut value={car_status.tireTread.front} label="앞 타이어"
@@ -253,7 +255,7 @@ function Page2({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
   const docImgs: { label:string; url:string }[] = [
     ...(images.dashboard??[]).map(url=>({ label:"계기판",url })),
     // registration(자동차등록증)은 개인정보 보호를 위해 PDF에도 포함하지 않음
-    ...(images.vin??[]).map(url=>({ label:"차대번호",url })),
+    ...(images.vin??[]).map(url=>({ label:"보험이력",url })),
   ];
 
   const photoCats: { label:string; imgs:string[] }[] = [

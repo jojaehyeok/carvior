@@ -13,6 +13,7 @@ import PdfTemplate from "./PdfTemplate";
 // ─── 타입 ──────────────────────────────────────────────────────────────────────
 interface ReportData {
   dealerName?: string | null;
+  driverName?: string | null;
   car_info: {
     number: string;
     type: string;
@@ -26,6 +27,12 @@ interface ReportData {
     optionsDesc: string;
     warningDesc: string;
     memo: string;
+  };
+  checklistPhotos?: {
+    warning?: string[];
+    options?: string[];
+    leak?: string[];
+    drive?: string[];
   };
   car_status: {
     keys: { smart: number; folding: number; general: number; special: number };
@@ -135,7 +142,7 @@ const IMAGE_CATEGORIES: { key: keyof ReportData["images"]; label: string; icon: 
 
 const DOC_IMAGES: { key: keyof ReportData["images"]; label: string }[] = [
   { key: "dashboard", label: "계기판" },
-  { key: "vin",       label: "차대번호" },
+  { key: "vin",       label: "보험이력" },
   // registration(자동차등록증)은 개인정보 보호를 위해 사이트에 절대 표시하지 않음
 ];
 
@@ -390,7 +397,7 @@ export default function PublicReportPage() {
     );
   }
 
-  const { dealerName, car_info, evaluation, car_status, damages: rawDamages, images } = data;
+  const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos } = data;
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, 평가사 앱 입력은 그대로 두고
   // 리포트 표시에서만 B를 W로 합쳐서 보여준다(라벨도 "판금/용접"으로 통합)
   const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
@@ -414,6 +421,7 @@ export default function PublicReportPage() {
         )}
         <h1 className="mt-1 text-3xl font-bold text-gray-900">{car_info.number}</h1>
         {dealerName && <p className="mt-1 text-sm text-gray-400">딜러: {dealerName}</p>}
+        {driverName && <p className="mt-1 text-sm text-gray-400">담당 진단평가사: {driverName}</p>}
       </div>
 
       {/* 차량 기본 정보 */}
@@ -441,6 +449,10 @@ export default function PublicReportPage() {
             <p className="mb-1 text-xs text-gray-400">외판 도색 필요</p>
             <p className="text-lg font-bold text-gray-800">{car_status.paintNeeded}개소</p>
           </div>
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <p className="mb-1 text-xs text-gray-400">휠 스크래치</p>
+            <p className="text-lg font-bold text-gray-800">{car_status.wheelScratch}짝</p>
+          </div>
         </div>
 
         <div className="p-4 mt-4 bg-gray-50 rounded-xl">
@@ -451,14 +463,7 @@ export default function PublicReportPage() {
           </div>
         </div>
 
-        {car_status.wheelScratch > 0 && (
-          <div className="flex items-center gap-2 p-3 mt-3 border border-yellow-200 bg-yellow-50 rounded-xl">
-            <span className="text-yellow-500">⚠️</span>
-            <p className="text-sm text-yellow-800">휠 스크래치 {car_status.wheelScratch}개</p>
-          </div>
-        )}
-
-        {/* 계기판 / 등록증 / 차대번호 */}
+        {/* 계기판 / 등록증 / 보험이력 */}
         {DOC_IMAGES.some((d) => images[d.key]?.length) && (
           <div className="mt-4">
             <p className="mb-2 text-xs text-gray-400">서류 및 계기판</p>
@@ -491,27 +496,45 @@ export default function PublicReportPage() {
         </h2>
         <div className="space-y-3">
           {[
-            { label: "누유 상태", value: evaluation.leakDesc,    icon: "💧" },
-            { label: "주행 상태", value: evaluation.driveDesc,   icon: "🏁" },
-            { label: "옵션 상태", value: evaluation.optionsDesc, icon: "🔧" },
-            { label: "경고등",    value: evaluation.warningDesc, icon: "⚡" },
+            { label: "누유 상태", value: evaluation.leakDesc,    icon: "💧", photoKey: "leak" as const },
+            { label: "주행 상태", value: evaluation.driveDesc,   icon: "🏁", photoKey: "drive" as const },
+            { label: "옵션 상태", value: evaluation.optionsDesc, icon: "🔧", photoKey: "options" as const },
+            { label: "경고등",    value: evaluation.warningDesc, icon: "⚡", photoKey: "warning" as const },
           ].map((item) => {
             const isOk = item.value === "이상 없음" || !item.value;
+            const photos = checklistPhotos?.[item.photoKey] ?? [];
             return (
               <div
                 key={item.label}
-                className={`flex items-start gap-3 p-3 rounded-xl border ${
+                className={`p-3 rounded-xl border ${
                   isOk ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                  <p className={`text-sm font-medium ${isOk ? "text-green-700" : "text-red-700"}`}>
-                    {item.value || "이상 없음"}
-                  </p>
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">{item.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-gray-500">{item.label}</p>
+                    <p className={`text-sm font-medium ${isOk ? "text-green-700" : "text-red-700"}`}>
+                      {item.value || "이상 없음"}
+                    </p>
+                  </div>
+                  <span className="text-lg">{isOk ? "✅" : "❌"}</span>
                 </div>
-                <span className="text-lg">{isOk ? "✅" : "❌"}</span>
+                {photos.length > 0 && (
+                  <div className="flex gap-2 mt-3 ml-8">
+                    {photos.map((url, i) => (
+                      <a key={i} href={encodeURI(url)} target="_blank" rel="noopener noreferrer" className="block">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={encodeURI(url)}
+                          alt={`${item.label} 사진 ${i + 1}`}
+                          loading="lazy"
+                          className="object-cover w-16 h-16 border border-gray-200 rounded-lg hover:opacity-90 transition-opacity"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

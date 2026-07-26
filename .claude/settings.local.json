@@ -3,7 +3,10 @@
     "allow": [
       "Bash(curl -s \"https://carvior.store/api/v1/external/inspection/report/10\")",
       "Skill(claude-api)",
-      "Skill(claude-api:*)"
+      "Skill(claude-api:*)",
+      "Bash(tasklist //FI \"IMAGENAME eq electron.exe\" //FI \"IMAGENAME eq 카비어*\")",
+      "Bash(tasklist)",
+      "PowerShell(Get-Process | Where-Object { $_.ProcessName -match \"카비어\" } | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 1; \"closed\")"
     ]
   }
 }
