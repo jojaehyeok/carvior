@@ -4,7 +4,10 @@ const SECRET_KEY = process.env.TOSS_SECRET_KEY ?? 'live_gsk_EP59LybZ8BlWyb9jXnmk
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { paymentKey, orderId, amount, carNumber, carOwner, contact, address, preferredDateTime, email } = body;
+  const {
+    paymentKey, orderId, amount, carNumber, carOwner, contact, address, preferredDateTime, email,
+    dealerName, dealerContact, listingUrl,
+  } = body;
 
   // 1. 토스 결제 확인
   const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
   // 2. 결제 성공 시 백엔드 저장 + 관리자 알림 (fire-and-forget)
   if (data.status === 'DONE') {
     const orderPayload = {
-      source:            'CARVIOR_INSPECTION_TOSS',
+      source:            'CARVIOR_INSPECTION',
       carNumber:         carNumber  ?? '',
       carOwner:          carOwner   ?? '',
       contact:           contact    ?? '',
@@ -32,6 +35,9 @@ export async function POST(req: NextRequest) {
       paymentKey,
       orderId,
       email:             email ?? '',
+      dealerName:        dealerName ?? '',
+      dealerContact:     dealerContact ?? '',
+      listingUrl:        listingUrl ?? '',
     };
 
     // 백엔드 저장

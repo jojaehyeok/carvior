@@ -20,6 +20,9 @@ interface Form {
   email:         string;
   address:       string;
   addressDetail: string;
+  dealerName:    string;
+  dealerContact: string;
+  listingUrl:    string;
 }
 
 function getAvailableDays() {
@@ -34,6 +37,7 @@ export default function InspectionCheckoutPage() {
   const [form, setForm] = useState<Form>({
     carNumber: '', ownerName: '', phone: '', email: '',
     address: '', addressDetail: '',
+    dealerName: '', dealerContact: '', listingUrl: '',
   });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -118,9 +122,15 @@ export default function InspectionCheckoutPage() {
     ? `${selectedDate}T${selectedTime}:00` : '';
 
   const validate = () => {
-    if (!form.carNumber) { alert('차량번호를 입력해주세요.'); return false; }
-    if (!form.ownerName) { alert('소유주 이름을 입력해주세요.'); return false; }
+    if (!form.ownerName) { alert('신청자 이름을 입력해주세요.'); return false; }
     if (!form.phone)     { alert('연락처를 입력해주세요.'); return false; }
+    // 구매를 고려중인 차량 정보 — 차주 본인이 아니라 "구매하려는" 사람이 신청하는 경우가
+    // 많아서 차량번호를 모를 수 있다. 차량번호/딜러 연락처/매물 링크 중 최소 하나만 있으면
+    // 담당 평가사가 어떤 차량인지 확인할 수 있으므로 이 중 하나만 있어도 접수 가능하게 한다.
+    if (!form.carNumber && !form.dealerContact && !form.listingUrl) {
+      alert('차량번호, 딜러 연락처, 매물 링크 중 최소 하나는 입력해주세요.');
+      return false;
+    }
     if (!selectedDate)   { alert('방문 날짜를 선택해주세요.'); return false; }
     if (!selectedTime)   { alert('방문 시간을 선택해주세요.'); return false; }
     if (!form.address)   { alert('방문 장소를 입력해주세요.'); return false; }
@@ -140,6 +150,8 @@ export default function InspectionCheckoutPage() {
         contact: form.phone.replace(/-/g, ''),
         address: `${form.address} ${form.addressDetail}`.trim(),
         preferredDateTime, email: form.email || '',
+        dealerName: form.dealerName || '', dealerContact: form.dealerContact || '',
+        listingUrl: form.listingUrl || '',
       }));
       await widgetsRef.current.requestPayment({
         orderId, orderName: '카비어 검차 서비스 (VAT 포함)',
@@ -166,6 +178,8 @@ export default function InspectionCheckoutPage() {
           contact: form.phone.replace(/-/g, ''),
           address: `${form.address} ${form.addressDetail}`.trim(),
           preferredDateTime, paymentMethod: 'BANK_TRANSFER', amount: AMOUNT,
+          dealerName: form.dealerName || '', dealerContact: form.dealerContact || '',
+          listingUrl: form.listingUrl || '',
         }),
       });
       setTransferDone(true);
@@ -241,10 +255,20 @@ export default function InspectionCheckoutPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">신청자 정보</h2>
               <div className="space-y-3">
-                <Field label="차량번호" required><input value={form.carNumber} onChange={set('carNumber')} placeholder="12가 3456" className={inputCls} /></Field>
-                <Field label="소유주 이름" required><input value={form.ownerName} onChange={set('ownerName')} placeholder="홍길동" className={inputCls} /></Field>
+                <Field label="신청자 이름" required><input value={form.ownerName} onChange={set('ownerName')} placeholder="홍길동" className={inputCls} /></Field>
                 <Field label="연락처" required><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" className={inputCls} /></Field>
                 <Field label="이메일" optional><input value={form.email} onChange={set('email')} placeholder="example@email.com" type="email" className={inputCls} /></Field>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <h2 className="font-black text-gray-900 text-sm mb-1">구매하려는 차량 정보</h2>
+              <p className="text-xs text-gray-400 mb-4">차량번호를 모르셔도 괜찮아요 — 아래 중 최소 하나만 입력해주세요.</p>
+              <div className="space-y-3">
+                <Field label="차량번호" optional><input value={form.carNumber} onChange={set('carNumber')} placeholder="모르면 비워두세요" className={inputCls} /></Field>
+                <Field label="딜러 이름" optional><input value={form.dealerName} onChange={set('dealerName')} placeholder="예: OO모터스 김OO 팀장" className={inputCls} /></Field>
+                <Field label="딜러 연락처" optional><input value={form.dealerContact} onChange={set('dealerContact')} placeholder="010-0000-0000" className={inputCls} /></Field>
+                <Field label="매물 링크" optional><input value={form.listingUrl} onChange={set('listingUrl')} placeholder="당근마켓 등 매물 페이지 링크" className={inputCls} /></Field>
               </div>
             </div>
 

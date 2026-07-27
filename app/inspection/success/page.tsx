@@ -11,6 +11,9 @@ interface OrderMeta {
   address?: string;
   preferredDateTime?: string;
   email?: string;
+  dealerName?: string;
+  dealerContact?: string;
+  listingUrl?: string;
 }
 
 function SuccessContent() {
@@ -109,8 +112,11 @@ function SuccessContent() {
         <div className="bg-blue-50 rounded-xl p-4 text-left space-y-2 mb-6 border border-blue-100">
           <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-3">신청 정보</p>
           {meta.carOwner    && <Row label="신청자"   value={meta.carOwner} />}
-          {meta.carNumber   && <Row label="차량번호" value={meta.carNumber} />}
           {meta.contact     && <Row label="연락처"   value={meta.contact} />}
+          {meta.carNumber   && <Row label="차량번호" value={meta.carNumber} />}
+          {meta.dealerName  && <Row label="딜러 이름" value={meta.dealerName} />}
+          {meta.dealerContact && <Row label="딜러 연락처" value={meta.dealerContact} />}
+          {meta.listingUrl  && <Row label="매물 링크" value={<span className="text-right break-all">{meta.listingUrl}</span>} />}
           {meta.address     && <Row label="검차 주소" value={<span className="text-right">{meta.address}</span>} />}
           {meta.preferredDateTime && (
             <Row label="희망 일시" value={new Date(meta.preferredDateTime).toLocaleString('ko-KR', {

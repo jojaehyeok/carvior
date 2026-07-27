@@ -725,16 +725,16 @@ export default function PublicReportPage() {
                   <span className="text-lg">{item.icon}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500">{item.label}</p>
-                    <p className={`text-sm font-medium ${isOk ? "text-green-700" : "text-red-700"}`}>
+                    <p className={`text-sm font-medium whitespace-pre-line ${isOk ? "text-green-700" : "text-red-700"}`}>
                       {item.value || t("noIssue", lang)}
                     </p>
                   </div>
                   <span className="text-lg">{isOk ? "✅" : "❌"}</span>
                 </div>
                 {photos.length > 0 && (
-                  <div className="flex gap-2 mt-3 ml-8">
+                  <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-2 mt-3 ml-8 flex-wrap">
                     {photos.map((url, i) => (
-                      <a key={i} href={encodeURI(url)} target="_blank" rel="noopener noreferrer" className="block">
+                      <a key={i} href={encodeURI(url)} data-src={encodeURI(url)} className="block">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={encodeURI(url)}
@@ -744,7 +744,7 @@ export default function PublicReportPage() {
                         />
                       </a>
                     ))}
-                  </div>
+                  </LightGallery>
                 )}
               </div>
             );

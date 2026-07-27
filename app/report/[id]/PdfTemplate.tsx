@@ -181,7 +181,7 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
                     <span style={{ fontSize:12 }}>{item.icon}</span>
                     <div style={{ flex:1 }}>
                       <div style={{ fontSize:8,color:"#9ca3af" }}>{item.label}</div>
-                      <div style={{ fontSize:10,fontWeight:600,color:ok?"#15803d":"#b91c1c" }}>{item.value||"이상 없음"}</div>
+                      <div style={{ fontSize:10,fontWeight:600,color:ok?"#15803d":"#b91c1c",whiteSpace:"pre-line" }}>{item.value||"이상 없음"}</div>
                     </div>
                     <span style={{ fontSize:10 }}>{ok?"✅":"❌"}</span>
                   </div>
