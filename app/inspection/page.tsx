@@ -53,10 +53,13 @@ export default function InspectionCheckoutPage() {
   const [availableSlots, setAvailableSlots] = useState<Record<string, boolean> | null>(null);
   const [regionCovered, setRegionCovered]   = useState<boolean | null>(null);
   const [loadingSlots, setLoadingSlots]     = useState(false);
+  const [consultSubmitting, setConsultSubmitting] = useState(false);
+  const [consultDone, setConsultDone]       = useState(false);
 
   const days = getAvailableDays();
 
   useEffect(() => {
+    setConsultDone(false);
     if (!form.address || !selectedDate) { setAvailableSlots(null); setRegionCovered(null); return; }
     let cancelled = false;
     setLoadingSlots(true);
@@ -136,6 +139,44 @@ export default function InspectionCheckoutPage() {
     if (!form.address)   { alert('방문 장소를 입력해주세요.'); return false; }
     return true;
   };
+
+  // 지역이 서비스 준비중이거나, 지역은 되는데 그 날짜엔 다 마감이라 예약 가능한 시간이
+  // 하나도 없을 때 — 고객을 그냥 막지 않고 이름/연락처만 받아 결제 없이 접수해둔다.
+  // 담당자가 기존 알림톡으로 안내받아 직접 연락해서 일정을 조율하는 방식(결제 전이라
+  // 자동배정은 시도되지만 지역/시간이 안 맞으니 실패하고 관리자에게만 알림이 감).
+  const submitConsultRequest = async () => {
+    if (!form.ownerName) { alert('이름을 입력해주세요.'); return; }
+    if (!form.phone)     { alert('연락처를 입력해주세요.'); return; }
+    setConsultSubmitting(true);
+    try {
+      await fetch('https://carvior.store/api/v1/external/request', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'CARVIOR_INSPECTION',
+          carNumber: '미정',
+          carOwner: form.ownerName,
+          contact: form.phone.replace(/-/g, ''),
+          address: `${form.address} ${form.addressDetail}`.trim(),
+          preferredDateTime: `${selectedDate} 00:00`,
+          paymentMethod: 'CONSULTATION_REQUEST',
+          additionalMemo: '희망 일정에 예약 가능한 평가사가 없어 상담 요청함',
+        }),
+      });
+      setConsultDone(true);
+    } catch {
+      alert('상담 신청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setConsultSubmitting(false);
+    }
+  };
+
+  const consultationNeeded = !loadingSlots && !!selectedDate && (
+    regionCovered === false ||
+    (regionCovered === true && !!availableSlots && Object.values(availableSlots).every(v => !v))
+  );
+  // 방문 가능한 시간을 실제로 골라야만 나머지(신청자 정보/결제)를 보여준다 —
+  // 어차피 못 잡을 시간대인데 개인정보부터 입력하게 하면 다 쓰고 나서 막히는 허무함이 큼
+  const showRestOfForm = !!selectedTime && !consultationNeeded;
 
   const payWithWidget = async () => {
     if (!validate()) return;
@@ -253,26 +294,6 @@ export default function InspectionCheckoutPage() {
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-black text-gray-900 text-sm mb-4">신청자 정보</h2>
-              <div className="space-y-3">
-                <Field label="신청자 이름" required><input value={form.ownerName} onChange={set('ownerName')} placeholder="홍길동" className={inputCls} /></Field>
-                <Field label="연락처" required><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" className={inputCls} /></Field>
-                <Field label="이메일" optional><input value={form.email} onChange={set('email')} placeholder="example@email.com" type="email" className={inputCls} /></Field>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-black text-gray-900 text-sm mb-1">구매하려는 차량 정보</h2>
-              <p className="text-xs text-gray-400 mb-4">차량번호를 모르셔도 괜찮아요 — 아래 중 최소 하나만 입력해주세요.</p>
-              <div className="space-y-3">
-                <Field label="차량번호" optional><input value={form.carNumber} onChange={set('carNumber')} placeholder="모르면 비워두세요" className={inputCls} /></Field>
-                <Field label="딜러 이름" optional><input value={form.dealerName} onChange={set('dealerName')} placeholder="예: OO모터스 김OO 팀장" className={inputCls} /></Field>
-                <Field label="딜러 연락처" optional><input value={form.dealerContact} onChange={set('dealerContact')} placeholder="010-0000-0000" className={inputCls} /></Field>
-                <Field label="매물 링크" optional><input value={form.listingUrl} onChange={set('listingUrl')} placeholder="당근마켓 등 매물 페이지 링크" className={inputCls} /></Field>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">방문 장소</h2>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -307,30 +328,83 @@ export default function InspectionCheckoutPage() {
               {loadingSlots && (
                 <p className="text-xs text-gray-400 mb-2">예약 가능한 시간을 확인하는 중...</p>
               )}
-              {!loadingSlots && selectedDate && regionCovered === false && (
-                <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-2.5">죄송합니다. 아직 해당 지역은 서비스 준비 중입니다. 010-2285-6017로 문의해주세요.</p>
+              {consultationNeeded ? (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                  <p className="text-sm font-bold text-amber-800 mb-1">
+                    {regionCovered === false ? '😥 아직 이 지역은 서비스 준비 중이에요' : '😥 이 날짜엔 예약 가능한 평가사가 마감됐어요'}
+                  </p>
+                  <p className="text-xs text-amber-700 mb-4 leading-relaxed">
+                    걱정 마세요 — 연락처만 남겨주시면 담당 매니저가 빠르게 연락드려서<br />
+                    가능한 일정을 직접 확인해드릴게요.
+                  </p>
+                  {consultDone ? (
+                    <p className="text-sm font-bold text-green-700 bg-green-50 border border-green-100 rounded-lg px-3 py-2.5">
+                      ✅ 상담 신청이 접수되었습니다! 빠른 시일 내에 연락드릴게요.
+                    </p>
+                  ) : (
+                    <>
+                      <div className="space-y-2 mb-3">
+                        <input value={form.ownerName} onChange={set('ownerName')} placeholder="이름" className={inputCls} />
+                        <input value={form.phone} onChange={set('phone')} placeholder="연락처 (010-0000-0000)" className={inputCls} />
+                      </div>
+                      <button onClick={submitConsultRequest} disabled={consultSubmitting}
+                        className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-200 text-white font-black py-3 rounded-xl text-sm transition-colors">
+                        {consultSubmitting ? '접수 중...' : '상담 신청하기'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {TIME_SLOTS.map(t => {
+                    const slotOk = !selectedDate || !availableSlots ? true : availableSlots[t] !== false;
+                    const disabled = !selectedDate || loadingSlots || !slotOk;
+                    return (
+                      <button key={t} onClick={() => setSelectedTime(t)} disabled={disabled}
+                        className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === t ? 'border-blue-500 bg-blue-500 text-white' : disabled ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-              {!loadingSlots && selectedDate && regionCovered && availableSlots && Object.values(availableSlots).every(v => !v) && (
-                <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-2.5">이 날짜엔 방문 가능한 평가사가 없습니다. 다른 날짜를 선택해주세요.</p>
-              )}
-              <div className="grid grid-cols-4 gap-2">
-                {TIME_SLOTS.map(t => {
-                  const slotOk = !selectedDate || !availableSlots ? true : availableSlots[t] !== false;
-                  const disabled = !selectedDate || loadingSlots || !slotOk;
-                  return (
-                    <button key={t} onClick={() => setSelectedTime(t)} disabled={disabled}
-                      className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === t ? 'border-blue-500 bg-blue-500 text-white' : disabled ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
+
+            {showRestOfForm && (
+              <>
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                  <h2 className="font-black text-gray-900 text-sm mb-4">신청자 정보</h2>
+                  <div className="space-y-3">
+                    <Field label="신청자 이름" required><input value={form.ownerName} onChange={set('ownerName')} placeholder="홍길동" className={inputCls} /></Field>
+                    <Field label="연락처" required><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" className={inputCls} /></Field>
+                    <Field label="이메일" optional><input value={form.email} onChange={set('email')} placeholder="example@email.com" type="email" className={inputCls} /></Field>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                  <h2 className="font-black text-gray-900 text-sm mb-1">구매하려는 차량 정보</h2>
+                  <p className="text-xs text-gray-400 mb-4">차량번호를 모르셔도 괜찮아요 — 아래 중 최소 하나만 입력해주세요.</p>
+                  <div className="space-y-3">
+                    <Field label="차량번호" optional><input value={form.carNumber} onChange={set('carNumber')} placeholder="모르면 비워두세요" className={inputCls} /></Field>
+                    <Field label="딜러 이름" optional><input value={form.dealerName} onChange={set('dealerName')} placeholder="예: OO모터스 김OO 팀장" className={inputCls} /></Field>
+                    <Field label="딜러 연락처" optional><input value={form.dealerContact} onChange={set('dealerContact')} placeholder="010-0000-0000" className={inputCls} /></Field>
+                    <Field label="매물 링크" optional><input value={form.listingUrl} onChange={set('listingUrl')} placeholder="당근마켓 등 매물 페이지 링크" className={inputCls} /></Field>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* ── 오른쪽: 결제방법 토글 → 위젯/계좌 → 금액 → 약관 → 버튼 ── */}
           <div className="lg:col-span-2 space-y-4">
-
+          {!showRestOfForm ? (
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+              <div className="text-2xl mb-2">📍</div>
+              <p className="text-sm font-bold text-gray-700 mb-1">먼저 왼쪽에서 방문 가능한 시간을 선택해주세요</p>
+              <p className="text-xs text-gray-400 leading-relaxed">시간을 확정하면 결제 방법과 금액이 여기 나타나요.</p>
+            </div>
+          ) : (
+          <>
             {/* 결제 방법 토글 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <p className="text-xs font-black text-gray-500 mb-3">결제 방법</p>
@@ -414,6 +488,8 @@ export default function InspectionCheckoutPage() {
             )}
 
             <p className="text-center text-[10px] text-gray-400">검차 전날 18시까지 100% 환불 가능합니다.</p>
+          </>
+          )}
           </div>
 
         </div>
