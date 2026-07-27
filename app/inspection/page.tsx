@@ -80,7 +80,22 @@ export default function InspectionCheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.address, selectedDate]);
 
+  const consultationNeeded = !loadingSlots && !!selectedDate && (
+    regionCovered === false ||
+    (regionCovered === true && !!availableSlots && Object.values(availableSlots).every(v => !v))
+  );
+  // 방문 가능한 시간을 실제로 골라야만 나머지(신청자 정보/결제)를 보여준다 —
+  // 어차피 못 잡을 시간대인데 개인정보부터 입력하게 하면 다 쓰고 나서 막히는 허무함이 큼
+  const showRestOfForm = !!selectedTime && !consultationNeeded;
+
+  // 토스 위젯은 #toss-payment-widget/#toss-agreement-widget DOM에 직접 렌더링하는데,
+  // 그 div는 showRestOfForm(방문 시간 확정 전까진 숨김)이 true일 때만 존재한다 — 처음엔
+  // 마운트 시점에 무조건 초기화를 시도해서 그 div를 못 찾아 조용히 실패했었음(에러만 콘솔에
+  // 찍히고 "로딩 중..."에서 멈춤). showRestOfForm이 true가 된 뒤에야, 그리고 딱 한 번만 초기화.
+  const widgetInitStarted = useRef(false);
   useEffect(() => {
+    if (!showRestOfForm || widgetInitStarted.current) return;
+    widgetInitStarted.current = true;
     const init = async () => {
       const TP      = (window as any).TossPayments;
       const widgets = TP(TOSS_CLIENT_KEY).widgets({ customerKey: TP.ANONYMOUS });
@@ -97,7 +112,7 @@ export default function InspectionCheckoutPage() {
     s.src    = 'https://js.tosspayments.com/v2/standard';
     s.onload = () => init();
     document.head.appendChild(s);
-  }, []);
+  }, [showRestOfForm]);
 
   // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "도이치오토월드" 같은 매물 단지/상호명으로는
   // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면에서 이미 쓰고 있는 것과 동일 REST
@@ -187,14 +202,6 @@ export default function InspectionCheckoutPage() {
       setConsultSubmitting(false);
     }
   };
-
-  const consultationNeeded = !loadingSlots && !!selectedDate && (
-    regionCovered === false ||
-    (regionCovered === true && !!availableSlots && Object.values(availableSlots).every(v => !v))
-  );
-  // 방문 가능한 시간을 실제로 골라야만 나머지(신청자 정보/결제)를 보여준다 —
-  // 어차피 못 잡을 시간대인데 개인정보부터 입력하게 하면 다 쓰고 나서 막히는 허무함이 큼
-  const showRestOfForm = !!selectedTime && !consultationNeeded;
 
   const payWithWidget = async () => {
     if (!validate()) return;
