@@ -175,24 +175,25 @@ export default function InspectionCheckoutPage() {
 
   // 지역이 서비스 준비중이거나, 지역은 되는데 그 날짜엔 다 마감이라 예약 가능한 시간이
   // 하나도 없을 때 — 고객을 그냥 막지 않고 이름/연락처만 받아 결제 없이 접수해둔다.
-  // 담당자가 기존 알림톡으로 안내받아 직접 연락해서 일정을 조율하는 방식(결제 전이라
-  // 자동배정은 시도되지만 지역/시간이 안 맞으니 실패하고 관리자에게만 알림이 감).
+  // 결제 전 상담 요청이라 Booking(진단 신청) 테이블이 아니라 어드민 "상담 신청" 화면이
+  // 보고 있는 buyer_requests 테이블로 접수한다 — 담당자가 그 화면에서 직접 연락해 일정을
+  // 조율하고, 확정되면 "진단 신청으로 전환" 버튼으로 정식 접수(Booking)로 넘긴다.
   const submitConsultRequest = async () => {
     if (!form.ownerName) { alert('이름을 입력해주세요.'); return; }
     if (!form.phone)     { alert('연락처를 입력해주세요.'); return; }
     setConsultSubmitting(true);
     try {
-      await fetch('https://carvior.store/api/v1/external/request', {
+      await fetch('https://carvior.store/api/v1/external/buyer-request', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           source: 'CARVIOR_INSPECTION',
-          carNumber: '미정',
-          carOwner: form.ownerName,
+          buyerName: form.ownerName,
           contact: form.phone.replace(/-/g, ''),
-          address: `${form.address} ${form.addressDetail}`.trim(),
+          address: form.address,
+          detailAddress: form.addressDetail || undefined,
           preferredDateTime: `${selectedDate} 00:00`,
-          paymentMethod: 'CONSULTATION_REQUEST',
           additionalMemo: '희망 일정에 예약 가능한 평가사가 없어 상담 요청함',
+          privacyAgreed: true,
         }),
       });
       setConsultDone(true);
@@ -405,6 +406,9 @@ export default function InspectionCheckoutPage() {
                         className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-gray-200 text-white font-black py-3 rounded-xl text-sm transition-colors">
                         {consultSubmitting ? '접수 중...' : '상담 신청하기'}
                       </button>
+                      <p className="text-center text-[11px] text-amber-700 mt-3">
+                        급하시면 <a href="tel:070-4138-2017" className="font-bold underline">070-4138-2017</a>로 바로 전화 주셔도 돼요.
+                      </p>
                     </>
                   )}
                 </div>
