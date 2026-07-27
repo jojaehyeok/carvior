@@ -30,6 +30,7 @@ interface ReportData {
     driveDesc: string;
     optionsDesc: string;
     warningDesc: string;
+    engineDesc: string;
     memo: string;
   };
   // 번역 전 원문(한국어) 기준 이상유무 — 리포트 언어를 바꿔도 정상/이상 배지 색상이
@@ -39,12 +40,14 @@ interface ReportData {
     drive: boolean;
     options: boolean;
     warning: boolean;
+    engine: boolean;
   };
   checklistPhotos?: {
     warning?: string[];
     options?: string[];
     leak?: string[];
     drive?: string[];
+    engine?: string[];
   };
   car_status: {
     keys: { smart: number; folding: number; general: number; special: number };
@@ -177,6 +180,7 @@ const STR = {
   drive: { ko: "주행 상태", en: "Driving Condition", ru: "Состояние при движении", ar: "حالة القيادة" },
   options: { ko: "옵션 상태", en: "Options Status", ru: "Состояние опций", ar: "حالة الخيارات" },
   warning: { ko: "경고등", en: "Warning Lights", ru: "Индикаторы приборной панели", ar: "أضواء التحذير" },
+  engine: { ko: "엔진룸 이상", en: "Engine Bay Condition", ru: "Состояние моторного отсека", ar: "حالة حجرة المحرك" },
   noIssue: { ko: "이상 없음", en: "No Issues", ru: "Без замечаний", ar: "لا توجد مشاكل" },
   inspectorNote: { ko: "진단사 고지사항", en: "Inspector's Notes", ru: "Примечания инспектора", ar: "ملاحظات الفاحص" },
   damageArea: { ko: "손상 부위", en: "Damaged Areas", ru: "Поврежденные зоны", ar: "مناطق التلف" },
@@ -706,6 +710,7 @@ export default function PublicReportPage() {
             { label: t("drive", lang),   value: evaluation.driveDesc,   icon: "🏁", photoKey: "drive" as const },
             { label: t("options", lang), value: evaluation.optionsDesc, icon: "🔧", photoKey: "options" as const },
             { label: t("warning", lang), value: evaluation.warningDesc, icon: "⚡", photoKey: "warning" as const },
+            { label: t("engine", lang),  value: evaluation.engineDesc,  icon: "🔩", photoKey: "engine" as const },
           ].map((item) => {
             const isOk = evaluationOk ? evaluationOk[item.photoKey] : (item.value === "이상 없음" || !item.value);
             const photos = checklistPhotos?.[item.photoKey] ?? [];

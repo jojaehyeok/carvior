@@ -44,7 +44,7 @@ export interface ReportData {
   dealerName?: string | null;
   driverName?: string | null;
   car_info: { number:string; type:string; mileage:number; color:string; repairCost:number };
-  evaluation: { leakDesc:string; driveDesc:string; optionsDesc:string; warningDesc:string; memo:string };
+  evaluation: { leakDesc:string; driveDesc:string; optionsDesc:string; warningDesc:string; engineDesc:string; memo:string };
   car_status: {
     keys: { smart:number; folding:number; general:number; special:number };
     paintNeeded:number; wheelScratch:number;
@@ -169,14 +169,15 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
             <SectionLabel text="Inspection Result" />
             <div style={{ border:"1px solid #e5e7eb",borderRadius:8,overflow:"hidden",marginBottom:8 }}>
               {[
-                { label:"누유 상태",value:evaluation.leakDesc,    icon:"💧" },
-                { label:"주행 상태",value:evaluation.driveDesc,   icon:"🏁" },
-                { label:"옵션 상태",value:evaluation.optionsDesc, icon:"🔧" },
-                { label:"경고등",   value:evaluation.warningDesc, icon:"⚡" },
-              ].map((item,i)=>{
+                { label:"누유 상태",  value:evaluation.leakDesc,    icon:"💧" },
+                { label:"주행 상태",  value:evaluation.driveDesc,   icon:"🏁" },
+                { label:"옵션 상태",  value:evaluation.optionsDesc, icon:"🔧" },
+                { label:"경고등",     value:evaluation.warningDesc, icon:"⚡" },
+                { label:"엔진룸 이상",value:evaluation.engineDesc,  icon:"🔩" },
+              ].map((item,i,arr)=>{
                 const ok=isOk(item.value);
                 return (
-                  <div key={i} style={{ display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderBottom:i<3?"1px solid #f3f4f6":"none",backgroundColor:ok?"#f0fdf4":"#fff1f2" }}>
+                  <div key={i} style={{ display:"flex",alignItems:"center",gap:6,padding:"6px 10px",borderBottom:i<arr.length-1?"1px solid #f3f4f6":"none",backgroundColor:ok?"#f0fdf4":"#fff1f2" }}>
                     <span style={{ fontSize:12 }}>{item.icon}</span>
                     <div style={{ flex:1 }}>
                       <div style={{ fontSize:8,color:"#9ca3af" }}>{item.label}</div>

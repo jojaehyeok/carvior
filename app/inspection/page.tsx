@@ -43,7 +43,35 @@ export default function InspectionCheckoutPage() {
   const [transferDone, setTransferDone] = useState(false);
   const widgetsRef = useRef<any>(null);
 
+  // 방문 주소+날짜 기준 "실제 그 시간대에 뛸 수 있는 평가사가 있는지" 조회 —
+  // 헤이딜러처럼 미리 안 되는 시간을 걸러서, 아무도 배정 못 받는 시간에 결제부터
+  // 받아버리는 사고를 막는다. 주소나 날짜가 아직 없으면 null(조회 전 상태).
+  const [availableSlots, setAvailableSlots] = useState<Record<string, boolean> | null>(null);
+  const [regionCovered, setRegionCovered]   = useState<boolean | null>(null);
+  const [loadingSlots, setLoadingSlots]     = useState(false);
+
   const days = getAvailableDays();
+
+  useEffect(() => {
+    if (!form.address || !selectedDate) { setAvailableSlots(null); setRegionCovered(null); return; }
+    let cancelled = false;
+    setLoadingSlots(true);
+    fetch(`https://carvior.store/api/v1/external/request/available-slots?address=${encodeURIComponent(form.address)}&date=${selectedDate}`)
+      .then(res => res.json())
+      .then((data: { regionCovered: boolean; slots: { time: string; available: boolean }[] }) => {
+        if (cancelled) return;
+        const map: Record<string, boolean> = {};
+        (Array.isArray(data?.slots) ? data.slots : []).forEach(s => { map[s.time] = s.available; });
+        setAvailableSlots(map);
+        setRegionCovered(data?.regionCovered ?? true);
+        // 이미 골라둔 시간이 새 조회 결과에서 불가능하면 선택 해제
+        if (selectedTime && map[selectedTime] === false) setSelectedTime('');
+      })
+      .catch(() => { if (!cancelled) { setAvailableSlots(null); setRegionCovered(null); } })
+      .finally(() => { if (!cancelled) setLoadingSlots(false); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.address, selectedDate]);
 
   useEffect(() => {
     const init = async () => {
@@ -221,34 +249,6 @@ export default function InspectionCheckoutPage() {
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-black text-gray-900 text-sm mb-5">방문 일정</h2>
-              <p className="text-xs font-bold text-gray-500 mb-2.5">방문 날짜 <span className="text-red-500">*</span></p>
-              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
-                {days.map(d => {
-                  const iso = d.toISOString().slice(0, 10);
-                  const active = selectedDate === iso;
-                  const isSun = d.getDay() === 0, isSat = d.getDay() === 6;
-                  return (
-                    <button key={iso} onClick={() => setSelectedDate(iso)}
-                      className={`shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border-2 transition-all min-w-[52px] ${active ? 'border-blue-500 bg-blue-500 text-white' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
-                      <span className={`text-[10px] font-bold mb-0.5 ${active ? 'text-blue-100' : isSun ? 'text-red-400' : isSat ? 'text-blue-400' : 'text-gray-400'}`}>{DAY_LABELS[d.getDay()]}</span>
-                      <span className="text-sm font-black leading-none">{d.getDate()}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs font-bold text-gray-500 mt-5 mb-2.5">방문 시간 <span className="text-red-500">*</span></p>
-              <div className="grid grid-cols-4 gap-2">
-                {TIME_SLOTS.map(t => (
-                  <button key={t} onClick={() => setSelectedTime(t)} disabled={!selectedDate}
-                    className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === t ? 'border-blue-500 bg-blue-500 text-white' : !selectedDate ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">방문 장소</h2>
               <div className="space-y-2">
                 <div className="flex gap-2">
@@ -256,6 +256,50 @@ export default function InspectionCheckoutPage() {
                   <button onClick={openAddressSearch} className="px-4 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl shrink-0 hover:bg-gray-700 transition-colors">검색</button>
                 </div>
                 <input id="inspection-detail-address" value={form.addressDetail} onChange={set('addressDetail')} placeholder="상세주소 (동/호수, 층 등)" className={inputCls} />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+              <h2 className="font-black text-gray-900 text-sm mb-5">방문 일정</h2>
+              {!form.address && (
+                <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-4">먼저 위에서 방문 장소를 입력하면 실제 예약 가능한 날짜·시간이 표시됩니다.</p>
+              )}
+              <p className="text-xs font-bold text-gray-500 mb-2.5">방문 날짜 <span className="text-red-500">*</span></p>
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                {days.map(d => {
+                  const iso = d.toISOString().slice(0, 10);
+                  const active = selectedDate === iso;
+                  const isSun = d.getDay() === 0, isSat = d.getDay() === 6;
+                  return (
+                    <button key={iso} onClick={() => setSelectedDate(iso)} disabled={!form.address}
+                      className={`shrink-0 flex flex-col items-center px-3 py-2.5 rounded-xl border-2 transition-all min-w-[52px] ${active ? 'border-blue-500 bg-blue-500 text-white' : !form.address ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
+                      <span className={`text-[10px] font-bold mb-0.5 ${active ? 'text-blue-100' : isSun ? 'text-red-400' : isSat ? 'text-blue-400' : 'text-gray-400'}`}>{DAY_LABELS[d.getDay()]}</span>
+                      <span className="text-sm font-black leading-none">{d.getDate()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs font-bold text-gray-500 mt-5 mb-2.5">방문 시간 <span className="text-red-500">*</span></p>
+              {loadingSlots && (
+                <p className="text-xs text-gray-400 mb-2">예약 가능한 시간을 확인하는 중...</p>
+              )}
+              {!loadingSlots && selectedDate && regionCovered === false && (
+                <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-2.5">죄송합니다. 아직 해당 지역은 서비스 준비 중입니다. 010-2285-6017로 문의해주세요.</p>
+              )}
+              {!loadingSlots && selectedDate && regionCovered && availableSlots && Object.values(availableSlots).every(v => !v) && (
+                <p className="text-xs text-red-500 bg-red-50 rounded-lg px-3 py-2 mb-2.5">이 날짜엔 방문 가능한 평가사가 없습니다. 다른 날짜를 선택해주세요.</p>
+              )}
+              <div className="grid grid-cols-4 gap-2">
+                {TIME_SLOTS.map(t => {
+                  const slotOk = !selectedDate || !availableSlots ? true : availableSlots[t] !== false;
+                  const disabled = !selectedDate || loadingSlots || !slotOk;
+                  return (
+                    <button key={t} onClick={() => setSelectedTime(t)} disabled={disabled}
+                      className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === t ? 'border-blue-500 bg-blue-500 text-white' : disabled ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700'}`}>
+                      {t}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
