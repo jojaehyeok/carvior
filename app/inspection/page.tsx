@@ -99,23 +99,41 @@ export default function InspectionCheckoutPage() {
     document.head.appendChild(s);
   }, []);
 
-  const openAddressSearch = () => {
-    if (!(window as any).daum?.Postcode) {
-      alert('주소 검색 기능을 불러오는 중입니다. 잠시 후 다시 시도해주세요.'); return;
+  // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "도이치오토월드" 같은 매물 단지/상호명으로는
+  // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면에서 이미 쓰고 있는 것과 동일 REST
+  // 키)으로 바꿔서 상호명·도로명주소 둘 다 검색되게 한다.
+  const [placeQuery, setPlaceQuery]     = useState('');
+  const [placeResults, setPlaceResults] = useState<{ name: string; address: string }[]>([]);
+  const [showPlaceResults, setShowPlaceResults] = useState(false);
+  const [searchingPlace, setSearchingPlace]     = useState(false);
+
+  const searchPlace = async () => {
+    if (!placeQuery.trim()) return;
+    setSearchingPlace(true);
+    try {
+      const res = await fetch(
+        `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(placeQuery)}`,
+        { headers: { Authorization: 'KakaoAK 5d73c6482159874735a29becf6849e11' } },
+      );
+      const data = await res.json();
+      const docs = (data?.documents ?? []).slice(0, 8).map((d: any) => ({
+        name: d.place_name as string,
+        address: (d.road_address_name || d.address_name) as string,
+      }));
+      setPlaceResults(docs);
+      setShowPlaceResults(true);
+    } catch {
+      alert('위치 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setSearchingPlace(false);
     }
-    new (window as any).daum.Postcode({
-      oncomplete: (data: any) => {
-        let full = data.address;
-        if (data.addressType === 'R') {
-          let extra = '';
-          if (data.bname) extra += data.bname;
-          if (data.buildingName) extra += extra ? `, ${data.buildingName}` : data.buildingName;
-          if (extra) full += ` (${extra})`;
-        }
-        setForm(p => ({ ...p, address: full }));
-        document.getElementById('inspection-detail-address')?.focus();
-      },
-    }).open();
+  };
+
+  const selectPlace = (p: { name: string; address: string }) => {
+    setForm(prev => ({ ...prev, address: p.name ? `${p.address} (${p.name})` : p.address }));
+    setShowPlaceResults(false);
+    setPlaceQuery('');
+    document.getElementById('inspection-detail-address')?.focus();
   };
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -296,10 +314,39 @@ export default function InspectionCheckoutPage() {
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">방문 장소</h2>
               <div className="space-y-2">
-                <div className="flex gap-2">
-                  <input value={form.address} readOnly placeholder="주소 검색" className={`${inputCls} flex-1 bg-gray-50 cursor-pointer`} onClick={openAddressSearch} />
-                  <button onClick={openAddressSearch} className="px-4 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl shrink-0 hover:bg-gray-700 transition-colors">검색</button>
-                </div>
+                {form.address ? (
+                  <div className="flex items-start justify-between gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                    <p className="text-sm font-bold text-gray-800">{form.address}</p>
+                    <button onClick={() => setForm(p => ({ ...p, address: '' }))} className="text-xs text-gray-400 shrink-0 hover:text-gray-600">변경</button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="flex gap-2">
+                      <input
+                        value={placeQuery}
+                        onChange={e => setPlaceQuery(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } }}
+                        placeholder="매물 위치 검색 (예: 도이치오토월드, 또는 도로명주소)"
+                        className={inputCls}
+                      />
+                      <button onClick={searchPlace} disabled={searchingPlace} className="px-4 py-3 bg-gray-900 disabled:bg-gray-300 text-white text-sm font-bold rounded-xl shrink-0 hover:bg-gray-700 transition-colors">
+                        {searchingPlace ? '검색 중' : '검색'}
+                      </button>
+                    </div>
+                    {showPlaceResults && (
+                      <div className="mt-2 border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                        {placeResults.length === 0 ? (
+                          <p className="text-xs text-gray-400 px-4 py-3">검색 결과가 없습니다. 다른 키워드로 시도해주세요.</p>
+                        ) : placeResults.map((p, i) => (
+                          <button key={i} onClick={() => selectPlace(p)} className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
+                            <p className="text-sm font-bold text-gray-800">{p.name}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{p.address}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <input id="inspection-detail-address" value={form.addressDetail} onChange={set('addressDetail')} placeholder="상세주소 (동/호수, 층 등)" className={inputCls} />
               </div>
             </div>
