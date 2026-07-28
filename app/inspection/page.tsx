@@ -407,7 +407,15 @@ export default function InspectionCheckoutPage() {
                         {consultSubmitting ? '접수 중...' : '상담 신청하기'}
                       </button>
                       <p className="text-center text-[11px] text-amber-700 mt-3">
-                        급하시면 <a href="tel:070-4138-2017" className="font-bold underline">070-4138-2017</a>로 바로 전화 주셔도 돼요.
+                        급하시면{' '}
+                        <button
+                          type="button"
+                          onClick={() => (window as any).ChannelIO?.('show')}
+                          className="font-bold underline"
+                        >
+                          채팅으로 바로 문의
+                        </button>
+                        해주셔도 돼요.
                       </p>
                     </>
                   )}
