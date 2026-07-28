@@ -314,7 +314,7 @@ export default function InspectionCheckoutPage() {
                 <div>
                   <p className="font-bold text-gray-900 text-sm">카비어 검차 서비스</p>
                   <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">평가사 방문 · 100+ 항목 점검 · 디지털 리포트</p>
-                  <p className="font-black text-gray-900 text-base mt-2">80,000원 <span className="text-xs text-gray-400 font-normal">(VAT 별도)</span></p>
+                  <p className="font-black text-gray-900 text-base mt-2">88,000원 <span className="text-xs text-gray-400 font-normal">(VAT 포함)</span></p>
                 </div>
               </div>
             </div>
