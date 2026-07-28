@@ -116,6 +116,13 @@ export default function SimpleRequestByCompanyPage() {
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
+    // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "벤츠강남전시장" 같은 전시장/상호명으로는
+    // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면과 동일 REST 키)으로 교체
+    const [placeQuery, setPlaceQuery] = useState('');
+    const [placeResults, setPlaceResults] = useState<{ name: string; address: string }[]>([]);
+    const [showPlaceResults, setShowPlaceResults] = useState(false);
+    const [searchingPlace, setSearchingPlace] = useState(false);
+
     const checkDuplicateCar = async (carNum: string) => {
         if (carNum.length < 7) return;
         try {
@@ -146,22 +153,33 @@ export default function SimpleRequestByCompanyPage() {
         if (formData.carNumber) checkDuplicateCar(formData.carNumber);
     };
 
-    const handleAddressSearch = () => {
-        if (window.daum && window.daum.Postcode) {
-            new window.daum.Postcode({
-                oncomplete: function (data: any) {
-                    let fullAddress = data.address;
-                    if (data.addressType === 'R') {
-                        let extraAddress = '';
-                        if (data.bname !== '') extraAddress += data.bname;
-                        if (data.buildingName !== '') extraAddress += extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName;
-                        fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
-                    }
-                    setFormData(prev => ({ ...prev, address: fullAddress }));
-                    document.getElementById('detailAddress')?.focus();
-                },
-            }).open();
+    const searchPlace = async () => {
+        if (!placeQuery.trim()) return;
+        setSearchingPlace(true);
+        try {
+            const res = await fetch(
+                `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(placeQuery)}`,
+                { headers: { Authorization: 'KakaoAK 5d73c6482159874735a29becf6849e11' } },
+            );
+            const data = await res.json();
+            const docs = (data?.documents ?? []).slice(0, 8).map((d: any) => ({
+                name: d.place_name as string,
+                address: (d.road_address_name || d.address_name) as string,
+            }));
+            setPlaceResults(docs);
+            setShowPlaceResults(true);
+        } catch {
+            alert('위치 검색 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        } finally {
+            setSearchingPlace(false);
         }
+    };
+
+    const selectPlace = (p: { name: string; address: string }) => {
+        setFormData(prev => ({ ...prev, address: p.name ? `${p.address} (${p.name})` : p.address }));
+        setShowPlaceResults(false);
+        setPlaceQuery('');
+        document.getElementById('detailAddress')?.focus();
     };
 
     const handleFormSubmit = async (e: React.FormEvent) => {
@@ -169,6 +187,10 @@ export default function SimpleRequestByCompanyPage() {
         if (isSubmitting || carError) return;
         if (!privacyAgreed) {
             alert('개인정보 수집·이용에 동의해주세요.');
+            return;
+        }
+        if (!formData.address.trim()) {
+            alert('진단 장소를 검색해서 선택해주세요.');
             return;
         }
         if (!formData.preferredDateTime) {
@@ -385,24 +407,55 @@ export default function SimpleRequestByCompanyPage() {
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">04 · 장소 및 시간</p>
                         <DateTimeSelector onDateTimeSelect={handleDateTimeChange} />
                         <div className="pt-4 border-t border-zinc-50 space-y-4">
-                            <div className="flex gap-2">
-                                <input
-                                    readOnly
-                                    required
-                                    name="address"
-                                    placeholder="진단 장소 주소"
-                                    className="flex-1 border-b-2 border-zinc-100 pb-2 bg-transparent text-zinc-700 outline-none cursor-pointer font-medium placeholder:text-zinc-300"
-                                    value={formData.address}
-                                    onClick={handleAddressSearch}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleAddressSearch}
-                                    className="bg-zinc-900 text-white px-4 py-1.5 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
-                                >
-                                    주소 찾기
-                                </button>
-                            </div>
+                            {formData.address ? (
+                                <div className="flex items-start justify-between gap-3">
+                                    <p className="flex-1 pb-2 border-b-2 border-zinc-100 text-zinc-700 font-medium">{formData.address}</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, address: '' }))}
+                                        className="text-xs text-zinc-400 shrink-0 hover:text-zinc-600"
+                                    >
+                                        변경
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="relative">
+                                    <div className="flex gap-2">
+                                        <input
+                                            value={placeQuery}
+                                            onChange={e => setPlaceQuery(e.target.value)}
+                                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } }}
+                                            placeholder="진단 장소 검색 (예: 벤츠강남전시장, 또는 도로명주소)"
+                                            className="flex-1 border-b-2 border-zinc-100 pb-2 bg-transparent text-zinc-700 outline-none font-medium placeholder:text-zinc-300"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={searchPlace}
+                                            disabled={searchingPlace}
+                                            className="bg-zinc-900 disabled:bg-zinc-300 text-white px-4 py-1.5 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
+                                        >
+                                            {searchingPlace ? '검색 중' : '검색'}
+                                        </button>
+                                    </div>
+                                    {showPlaceResults && (
+                                        <div className="mt-2 border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100 max-h-64 overflow-y-auto">
+                                            {placeResults.length === 0 ? (
+                                                <p className="text-xs text-zinc-400 px-4 py-3">검색 결과가 없습니다. 다른 키워드로 시도해주세요.</p>
+                                            ) : placeResults.map((p, i) => (
+                                                <button
+                                                    key={i}
+                                                    type="button"
+                                                    onClick={() => selectPlace(p)}
+                                                    className="w-full text-left px-4 py-3 hover:bg-zinc-50 transition-colors"
+                                                >
+                                                    <p className="text-sm font-bold text-zinc-800">{p.name}</p>
+                                                    <p className="text-xs text-zinc-400 mt-0.5">{p.address}</p>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <input
                                 id="detailAddress"
                                 name="detailAddress"
