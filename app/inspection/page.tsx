@@ -334,7 +334,7 @@ export default function InspectionCheckoutPage() {
                         value={placeQuery}
                         onChange={e => setPlaceQuery(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } }}
-                        placeholder="매물 위치 검색 (예: 도이치오토월드, 또는 도로명주소)"
+                        placeholder="장소를 입력한 후 검색을 눌러주세요 (예: 도이치오토월드)"
                         className={inputCls}
                       />
                       <button onClick={searchPlace} disabled={searchingPlace} className="px-4 py-3 bg-gray-900 disabled:bg-gray-300 text-white text-sm font-bold rounded-xl shrink-0 hover:bg-gray-700 transition-colors">

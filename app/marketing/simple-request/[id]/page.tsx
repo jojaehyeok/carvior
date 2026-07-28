@@ -425,7 +425,7 @@ export default function SimpleRequestByCompanyPage() {
                                             value={placeQuery}
                                             onChange={e => setPlaceQuery(e.target.value)}
                                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } }}
-                                            placeholder="진단 장소 검색 (예: 벤츠강남전시장, 또는 도로명주소)"
+                                            placeholder="장소를 입력한 후 검색을 눌러주세요 (예: 벤츠강남전시장)"
                                             className="flex-1 border-b-2 border-zinc-100 pb-2 bg-transparent text-zinc-700 outline-none font-medium placeholder:text-zinc-300"
                                         />
                                         <button
