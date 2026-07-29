@@ -450,13 +450,6 @@ export default function PublicReportPage() {
   // 딜러 의뢰 리포트(수출용 차량 등)에서만 노출되는 언어 전환 — 구매동행 리포트는 항상 ko
   const [lang, setLang] = useState<Lang>("ko");
 
-  // 구매동행(카비어 검차 서비스) 리포트에만 노출되는 리뷰 작성 상태
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewComment, setReviewComment] = useState("");
-  const [reviewPhotos, setReviewPhotos] = useState<File[]>([]);
-  const [reviewSubmitting, setReviewSubmitting] = useState(false);
-  const [reviewStatus, setReviewStatus] = useState<"idle" | "done" | "duplicate" | "error">("idle");
-
   const downloadPDF = () => {
     if (!data || pdfLoading) return;
     setPdfLoading(true);
@@ -472,38 +465,6 @@ export default function PublicReportPage() {
     }
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 1500);
-  };
-
-  const submitReview = async () => {
-    if (!data?.bookingId || reviewRating === 0 || reviewSubmitting) return;
-    setReviewSubmitting(true);
-    try {
-      const form = new FormData();
-      form.append("bookingId", String(data.bookingId));
-      if (data.assignedDriverId) form.append("driverId", data.assignedDriverId);
-      if (data.driverName) form.append("driverName", data.driverName);
-      form.append("carNumber", data.car_info.number);
-      if (data.car_info.owner) form.append("carOwner", data.car_info.owner);
-      form.append("rating", String(reviewRating));
-      form.append("comment", reviewComment);
-      reviewPhotos.forEach((f) => form.append("photos", f));
-
-      const res = await fetch("https://carvior.store/api/v1/reviews", {
-        method: "POST",
-        body: form,
-      });
-      if (res.status === 409) {
-        setReviewStatus("duplicate");
-      } else if (!res.ok) {
-        throw new Error("리뷰 등록 실패");
-      } else {
-        setReviewStatus("done");
-      }
-    } catch {
-      setReviewStatus("error");
-    } finally {
-      setReviewSubmitting(false);
-    }
   };
 
   // pdfLoading=true → PdfTemplate 마운트 → useEffect 실행 순서 보장
@@ -821,61 +782,6 @@ export default function PublicReportPage() {
           ))}
         </div>
       </div>
-
-      {/* 리뷰 작성 — 카비어 검차 서비스(구매동행)로 직접 신청한 소비자 리포트에만 노출 */}
-      {isConsumerBooking && (
-        <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
-          <h2 className="flex items-center gap-2 mb-1 font-semibold text-gray-800">
-            <span>⭐</span> 이용 후기 남기기
-          </h2>
-          {reviewStatus === "done" ? (
-            <p className="py-6 text-sm text-center text-gray-500">소중한 후기 감사합니다! 🙏</p>
-          ) : reviewStatus === "duplicate" ? (
-            <p className="py-6 text-sm text-center text-gray-500">이미 후기를 남겨주셨어요. 감사합니다!</p>
-          ) : (
-            <>
-              <p className="mb-4 text-xs text-gray-400">검차 서비스는 어떠셨나요? 다른 고객분들께 큰 도움이 됩니다.</p>
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setReviewRating(n)}
-                    className={`text-3xl leading-none ${n <= reviewRating ? "text-amber-400" : "text-gray-200"}`}
-                    aria-label={`${n}점`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-              <textarea
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="후기를 남겨주세요 (선택)"
-                rows={3}
-                className="w-full p-3 mb-3 text-sm border rounded-xl border-gray-200 focus:outline-none focus:border-blue-400"
-              />
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => setReviewPhotos(Array.from(e.target.files || []).slice(0, 3))}
-                className="mb-4 text-xs text-gray-400"
-              />
-              {reviewStatus === "error" && (
-                <p className="mb-3 text-xs text-red-500">후기 등록 중 오류가 발생했습니다. 다시 시도해주세요.</p>
-              )}
-              <button
-                onClick={submitReview}
-                disabled={reviewRating === 0 || reviewSubmitting}
-                className="w-full py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl disabled:bg-gray-200 disabled:text-gray-400"
-              >
-                {reviewSubmitting ? "등록 중..." : "후기 등록하기"}
-              </button>
-            </>
-          )}
-        </div>
-      )}
 
       {/* 푸터 */}
       <div className="mt-8 text-xs text-center text-gray-400">
