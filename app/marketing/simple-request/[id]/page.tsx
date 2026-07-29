@@ -437,11 +437,9 @@ export default function SimpleRequestByCompanyPage() {
                                             {searchingPlace ? '검색 중' : '검색'}
                                         </button>
                                     </div>
-                                    {showPlaceResults && (
+                                    {showPlaceResults && placeResults.length > 0 && (
                                         <div className="mt-2 border border-zinc-100 rounded-xl overflow-hidden divide-y divide-zinc-100 max-h-64 overflow-y-auto">
-                                            {placeResults.length === 0 ? (
-                                                <p className="text-xs text-zinc-400 px-4 py-3">검색 결과가 없습니다. 다른 키워드로 시도해주세요.</p>
-                                            ) : placeResults.map((p, i) => (
+                                            {placeResults.map((p, i) => (
                                                 <button
                                                     key={i}
                                                     type="button"
@@ -453,6 +451,32 @@ export default function SimpleRequestByCompanyPage() {
                                                 </button>
                                             ))}
                                         </div>
+                                    )}
+                                    {/* 시골 지번주소 등 카카오 검색에 안 잡히는 주소를 위한 폴백 —
+                                        검색 결과가 없을 때 등록 방법이 없다는 인상을 주지 않도록 안내 */}
+                                    {showPlaceResults && placeQuery.trim() && (
+                                        placeResults.length === 0 ? (
+                                            <div className="mt-2 bg-zinc-50 border border-zinc-200 rounded-xl p-4">
+                                                <p className="text-xs text-zinc-500 mb-3">
+                                                    검색 결과가 없어요. 시골 지번주소 등은 검색에 안 잡힐 수 있으니, 입력하신 주소를 그대로 등록해드릴게요.
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
+                                                    className="w-full bg-zinc-900 hover:bg-zinc-700 text-white text-xs font-extrabold py-3 rounded-xl transition-colors"
+                                                >
+                                                    &ldquo;{placeQuery.trim()}&rdquo; 그대로 등록하기
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
+                                                className="w-full text-left px-4 py-3 mt-2 border border-dashed border-zinc-300 rounded-xl text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
+                                            >
+                                                검색결과에 없나요? <span className="font-bold text-zinc-900">&ldquo;{placeQuery.trim()}&rdquo;</span> 그대로 등록하기
+                                            </button>
+                                        )
                                     )}
                                 </div>
                             )}
