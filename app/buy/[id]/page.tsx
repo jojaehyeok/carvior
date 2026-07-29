@@ -1167,7 +1167,7 @@ function DetailTabs({ car }: { car: UnifiedCar }) {
                 디지털 리포트를 발급해 드립니다.
               </p>
               <a href="/inspection" className="inline-block font-black text-white bg-amber-500 hover:bg-amber-400 px-6 py-3 rounded-xl text-sm transition-colors">
-                검차 신청하기 (88,000원)
+                검차 신청하기 (11만원~)
               </a>
             </div>
           )}

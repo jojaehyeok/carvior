@@ -50,7 +50,7 @@ export default function InspectionPromoPopup() {
 
           <div className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5 mb-4">
             <span className="text-xs font-bold text-gray-600">검차 서비스 요금</span>
-            <span className="font-black text-violet-600">88,000원 <span className="text-[10px] font-normal text-gray-400">VAT 포함</span></span>
+            <span className="font-black text-violet-600">110,000원~ <span className="text-[10px] font-normal text-gray-400">VAT 포함 · 차종별 상이</span></span>
           </div>
 
           <Link
