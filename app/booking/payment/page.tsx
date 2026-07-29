@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// 국산차/수입차 구매동행 프로모션 가격
+const CAR_TYPE_PRICING = {
+  domestic: { label: "국산차", originalFee: 130000, fee: 110000 },
+  imported: { label: "수입차", originalFee: 160000, fee: 140000 },
+} as const;
+
+type CarTypeKey = keyof typeof CAR_TYPE_PRICING;
+
 // --- 🌟 심사용 고정 데모 데이터 🌟 ---
 const DEMO_DATA = {
   bookingId: "BK-20240522-001",
@@ -17,9 +25,6 @@ const DEMO_DATA = {
     title: "자동차 진단평가사 1급",
     avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
     rating: 4.9,
-    originalFee: 100000,
-    fee: 80000, // 20% 할인된 8만원 고정
-    discountRate: 20,
     type: "MASTER",
     region: "서울 전지역",
   },
@@ -28,6 +33,7 @@ const DEMO_DATA = {
 export default function PaymentPage() {
   const router = useRouter();
   const [booking, setBooking] = useState<any>(null);
+  const [carType, setCarType] = useState<CarTypeKey>("domestic");
 
   useEffect(() => {
     // 1. 일단 로컬스토리지 확인
@@ -48,7 +54,8 @@ export default function PaymentPage() {
     return <div className="min-h-screen flex items-center justify-center text-gray-500">결제 정보를 불러오는 중...</div>;
   }
 
-  const { car, address, schedule, evaluator } = booking;
+  const { car, address, schedule } = booking;
+  const pricing = CAR_TYPE_PRICING[carType];
 
   return (
     <main className="min-h-screen bg-gray-50 px-4 pt-24 pb-16">
@@ -67,17 +74,52 @@ export default function PaymentPage() {
           <p className="text-gray-800">📅 일정: {schedule.date} {schedule.time}</p>
         </div>
 
+        {/* 국산차/수입차 선택 */}
+        <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
+          <h2 className="font-semibold text-lg mb-3 text-gray-900">차량 구분</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {(Object.keys(CAR_TYPE_PRICING) as CarTypeKey[]).map((key) => {
+              const option = CAR_TYPE_PRICING[key];
+              const isSelected = carType === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCarType(key)}
+                  className={`rounded-lg border-2 py-3 px-3 text-center transition ${
+                    isSelected
+                      ? "border-blue-600 bg-blue-50"
+                      : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
+                >
+                  <p className={`font-bold ${isSelected ? "text-blue-600" : "text-gray-700"}`}>
+                    {option.label}
+                  </p>
+                  <p className="text-xs text-gray-400 line-through mt-1">
+                    {option.originalFee.toLocaleString()}원
+                  </p>
+                  <p className={`font-extrabold ${isSelected ? "text-blue-600" : "text-gray-900"}`}>
+                    {option.fee.toLocaleString()}원
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* 결제 금액 카드 */}
         <div className="rounded-xl bg-white p-6 shadow-sm border border-blue-100">
           <h2 className="font-semibold text-lg mb-4 text-gray-900">결제 예정 금액</h2>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-400 line-through">{evaluator.originalFee.toLocaleString()}원</span>
-            <span className="text-blue-600 font-bold">-{evaluator.discountRate}% 프로모션</span>
+            <span className="text-gray-400 line-through">{pricing.originalFee.toLocaleString()}원</span>
+            <span className="text-blue-600 font-bold">
+              -{(pricing.originalFee - pricing.fee).toLocaleString()}원 프로모션
+            </span>
           </div>
           <div className="flex justify-between items-end">
-            <span className="font-bold text-gray-900">최종 결제 금액</span>
+            <span className="font-bold text-gray-900">최종 결제 금액 ({pricing.label})</span>
             <span className="text-3xl font-extrabold text-blue-600">
-              {evaluator.fee.toLocaleString()}원
+              {pricing.fee.toLocaleString()}원
             </span>
           </div>
         </div>
@@ -91,7 +133,7 @@ export default function PaymentPage() {
           }}
           className="w-full rounded-xl bg-blue-600 py-5 text-white text-xl font-bold shadow-lg hover:bg-blue-700 transition"
         >
-          {evaluator.fee.toLocaleString()}원 결제하기
+          {pricing.fee.toLocaleString()}원 결제하기
         </button>
       </section>
     </main>

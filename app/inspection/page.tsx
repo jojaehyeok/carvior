@@ -4,9 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
-const AMOUNT      = 88_000;
-const AMOUNT_BASE = 80_000;
 const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder: '(주)카비어' };
+
+// 국산차/수입차 구매동행 프로모션 가격 (VAT 포함, 최종 결제 금액 기준)
+type CarOrigin = 'DOMESTIC' | 'IMPORTED';
+const CAR_TYPE_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
+  DOMESTIC: { label: '국산차', original: 130_000, amount: 110_000 },
+  IMPORTED: { label: '수입차', original: 160_000, amount: 140_000 },
+};
 
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -41,6 +46,8 @@ export default function InspectionCheckoutPage() {
   });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
+  const pricing = CAR_TYPE_PRICING[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
   const [widgetReady, setWidgetReady]   = useState(false);
@@ -100,7 +107,7 @@ export default function InspectionCheckoutPage() {
       const TP      = (window as any).TossPayments;
       const widgets = TP(TOSS_CLIENT_KEY).widgets({ customerKey: TP.ANONYMOUS });
       widgetsRef.current = widgets;
-      await widgets.setAmount({ currency: 'KRW', value: AMOUNT });
+      await widgets.setAmount({ currency: 'KRW', value: pricing.amount });
       await Promise.all([
         widgets.renderPaymentMethods({ selector: '#toss-payment-widget', variantKey: 'DEFAULT' }),
         widgets.renderAgreement({ selector: '#toss-agreement-widget', variantKey: 'AGREEMENT' }),
@@ -112,7 +119,15 @@ export default function InspectionCheckoutPage() {
     s.src    = 'https://js.tosspayments.com/v2/standard';
     s.onload = () => init();
     document.head.appendChild(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showRestOfForm]);
+
+  // 위젯 렌더링 후 차량 구분(국산/수입)을 바꾸면 실제 결제창 금액도 같이 갱신
+  useEffect(() => {
+    if (!widgetReady || !widgetsRef.current) return;
+    widgetsRef.current.setAmount({ currency: 'KRW', value: pricing.amount }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pricing.amount, widgetReady]);
 
   // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "도이치오토월드" 같은 매물 단지/상호명으로는
   // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면에서 이미 쓰고 있는 것과 동일 REST
@@ -219,9 +234,10 @@ export default function InspectionCheckoutPage() {
         preferredDateTime, email: form.email || '',
         dealerName: form.dealerName || '', dealerContact: form.dealerContact || '',
         listingUrl: form.listingUrl || '',
+        carOrigin,
       }));
       await widgetsRef.current.requestPayment({
-        orderId, orderName: '카비어 검차 서비스 (VAT 포함)',
+        orderId, orderName: `카비어 검차 서비스 (${pricing.label}, VAT 포함)`,
         successUrl: `${window.location.origin}/inspection/success`,
         failUrl:    `${window.location.origin}/inspection/fail`,
         customerName: form.ownerName,
@@ -244,7 +260,7 @@ export default function InspectionCheckoutPage() {
           source: 'CARVIOR_INSPECTION', carNumber: form.carNumber, carOwner: form.ownerName,
           contact: form.phone.replace(/-/g, ''),
           address: `${form.address} ${form.addressDetail}`.trim(),
-          preferredDateTime, paymentMethod: 'BANK_TRANSFER', amount: AMOUNT,
+          preferredDateTime, paymentMethod: 'BANK_TRANSFER', amount: pricing.amount, carOrigin,
           dealerName: form.dealerName || '', dealerContact: form.dealerContact || '',
           listingUrl: form.listingUrl || '',
         }),
@@ -264,7 +280,7 @@ export default function InspectionCheckoutPage() {
           <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🏦</div>
           <h1 className="text-xl font-black text-gray-900 mb-1">입금 신청이 완료되었습니다</h1>
           <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-            아래 계좌로 <strong className="text-gray-700">88,000원</strong>을 이체해 주세요.<br />
+            아래 계좌로 <strong className="text-gray-700">{pricing.amount.toLocaleString()}원</strong>을 이체해 주세요.<br />
             입금 확인 후 담당자가 연락드립니다.
           </p>
           <div className="bg-gray-50 rounded-xl p-4 text-left mb-6 space-y-1.5">
@@ -276,7 +292,7 @@ export default function InspectionCheckoutPage() {
             ))}
             <div className="border-t border-gray-100 pt-2 flex justify-between text-sm">
               <span className="text-gray-400">입금액</span>
-              <span className="font-black text-violet-600">88,000원</span>
+              <span className="font-black text-violet-600">{pricing.amount.toLocaleString()}원</span>
             </div>
           </div>
           <Link href="/" className="block w-full bg-gray-900 text-white font-black py-3.5 rounded-xl text-sm text-center">
@@ -309,14 +325,31 @@ export default function InspectionCheckoutPage() {
           <div className="lg:col-span-3 space-y-4">
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">주문 상품 정보</h2>
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-4 items-center mb-4">
                 <div className="w-16 h-16 bg-violet-50 rounded-xl flex items-center justify-center shrink-0 text-2xl">🔍</div>
                 <div>
                   <p className="font-bold text-gray-900 text-sm">카비어 검차 서비스</p>
                   <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">평가사 방문 · 100+ 항목 점검 · 디지털 리포트</p>
-                  <p className="font-black text-gray-900 text-base mt-2">88,000원 <span className="text-xs text-gray-400 font-normal">(VAT 포함)</span></p>
                 </div>
               </div>
+
+              <p className="text-xs font-bold text-gray-500 mb-2">차량 구분 <span className="text-red-500">*</span></p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {(Object.keys(CAR_TYPE_PRICING) as CarOrigin[]).map(key => {
+                  const opt = CAR_TYPE_PRICING[key];
+                  const active = carOrigin === key;
+                  return (
+                    <button key={key} type="button" onClick={() => setCarOrigin(key)}
+                      className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${active ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="font-black text-gray-900 text-base">
+                <span className="text-gray-400 line-through text-sm font-normal mr-2">{pricing.original.toLocaleString()}원</span>
+                {pricing.amount.toLocaleString()}원 <span className="text-xs text-gray-400 font-normal">(VAT 포함)</span>
+              </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -352,6 +385,16 @@ export default function InspectionCheckoutPage() {
                           </button>
                         ))}
                       </div>
+                    )}
+                    {/* 시골 지번주소 등 카카오 검색에 안 잡히는 주소를 위한 폴백 —
+                        검색을 한 번이라도 시도했으면(결과 유무 상관없이) 입력한 텍스트를 그대로 등록 가능 */}
+                    {showPlaceResults && placeQuery.trim() && (
+                      <button
+                        onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
+                        className="w-full text-left px-4 py-3 mt-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        검색결과에 없나요? <span className="font-bold text-gray-900">&ldquo;{placeQuery.trim()}&rdquo;</span> 그대로 등록하기
+                      </button>
                     )}
                   </div>
                 )}
@@ -511,7 +554,7 @@ export default function InspectionCheckoutPage() {
                   ))}
                   <div className="border-t border-gray-100 pt-2 flex justify-between text-sm">
                     <span className="text-gray-400">입금액</span>
-                    <span className="font-black text-gray-900">88,000원</span>
+                    <span className="font-black text-gray-900">{pricing.amount.toLocaleString()}원</span>
                   </div>
                 </div>
                 <p className="text-[11px] text-gray-400 mt-3">입금 확인 후 담당자가 24시간 내 연락드립니다.</p>
@@ -520,11 +563,12 @@ export default function InspectionCheckoutPage() {
 
             {/* 금액 요약 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-2">
-              <div className="flex justify-between text-sm"><span className="text-gray-500">카비어 검차 서비스</span><span className="font-semibold text-gray-700">{AMOUNT_BASE.toLocaleString()}원</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-500">카비어 검차 서비스 ({pricing.label})</span><span className="text-gray-400 line-through">{pricing.original.toLocaleString()}원</span></div>
+              <div className="flex justify-between text-sm"><span className="text-gray-500">프로모션 할인</span><span className="font-semibold text-violet-600">-{(pricing.original - pricing.amount).toLocaleString()}원</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-500">카비어 안심케어</span><span className="font-semibold text-gray-400">무료</span></div>
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                 <span className="text-sm font-black text-gray-900">총 결제 금액 <span className="text-[10px] text-gray-400 font-normal">(VAT 포함)</span></span>
-                <span className="font-black text-blue-600 text-lg">{AMOUNT.toLocaleString()}원</span>
+                <span className="font-black text-blue-600 text-lg">{pricing.amount.toLocaleString()}원</span>
               </div>
               {(selectedDate || selectedTime) && (
                 <div className="pt-3 border-t border-gray-100 space-y-1">

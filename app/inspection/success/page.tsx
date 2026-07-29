@@ -14,7 +14,10 @@ interface OrderMeta {
   dealerName?: string;
   dealerContact?: string;
   listingUrl?: string;
+  carOrigin?: 'DOMESTIC' | 'IMPORTED';
 }
+
+const CAR_ORIGIN_LABEL: Record<string, string> = { DOMESTIC: '국산차', IMPORTED: '수입차' };
 
 function SuccessContent() {
   const params = useSearchParams();
@@ -77,7 +80,7 @@ function SuccessContent() {
 
   const displayAmount = data?.totalAmount
     ? `${Number(data.totalAmount).toLocaleString()}원`
-    : '88,000원';
+    : '-';
 
   const methodLabel: Record<string, string> = {
     계좌이체: '토스 퀵계좌이체',
@@ -113,6 +116,7 @@ function SuccessContent() {
           <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-3">신청 정보</p>
           {meta.carOwner    && <Row label="신청자"   value={meta.carOwner} />}
           {meta.contact     && <Row label="연락처"   value={meta.contact} />}
+          {meta.carOrigin   && <Row label="차량 구분" value={CAR_ORIGIN_LABEL[meta.carOrigin] ?? meta.carOrigin} />}
           {meta.carNumber   && <Row label="차량번호" value={meta.carNumber} />}
           {meta.dealerName  && <Row label="딜러 이름" value={meta.dealerName} />}
           {meta.dealerContact && <Row label="딜러 연락처" value={meta.dealerContact} />}

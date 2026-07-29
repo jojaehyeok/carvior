@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     paymentKey, orderId, amount, carNumber, carOwner, contact, address, preferredDateTime, email,
-    dealerName, dealerContact, listingUrl,
+    dealerName, dealerContact, listingUrl, carOrigin,
   } = body;
 
   // 1. 토스 결제 확인
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
       preferredDateTime: preferredDateTime ?? '',
       paymentMethod:     'TOSS_TRANSFER',
       amount,
+      carOrigin:         carOrigin ?? null,
       paymentKey,
       orderId,
       email:             email ?? '',
