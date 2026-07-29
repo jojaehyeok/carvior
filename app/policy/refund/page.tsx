@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function RefundPolicyPage() {
@@ -103,8 +104,9 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 mb-3">06. 환불 절차 및 소요 기간</h2>
             <p className="mb-2">
-              취소 요청은 화면 우측 하단 채팅 문의를 통해 접수할 수 있습니다. 환불은 결제하신
-              수단과 동일하게 진행됩니다.
+              취소는 <Link href="/inspection/cancel" className="text-violet-600 underline font-semibold">예약 조회·취소 페이지</Link>에서
+              예약번호와 연락처로 직접 접수할 수 있고, 그 외 문의는 화면 우측 하단 채팅 문의로도
+              접수할 수 있습니다. 환불은 결제하신 수단과 동일하게 진행됩니다.
             </p>
             <ul className="list-disc ml-5 space-y-1 text-sm text-gray-500">
               <li>가상계좌 입금: 환불 정보 입력 안내(카카오 알림톡 또는 문자) 후 영업일 기준 2~5일 소요</li>
