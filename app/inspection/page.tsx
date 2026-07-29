@@ -424,6 +424,12 @@ export default function InspectionCheckoutPage() {
               </div>
             </div>
 
+            {loadingSlots && (
+              <div className="lg:hidden flex items-center justify-center gap-2 bg-white rounded-2xl border border-gray-100 py-4">
+                <div className="w-5 h-5 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
+                <span className="text-xs font-bold text-gray-500">예약 가능한 시간을 확인하는 중...</span>
+              </div>
+            )}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-5">방문 일정</h2>
               {!form.address && (
@@ -446,7 +452,7 @@ export default function InspectionCheckoutPage() {
               </div>
               <p className="text-xs font-bold text-gray-500 mt-5 mb-2.5">방문 시간 <span className="text-red-500">*</span></p>
               {loadingSlots && (
-                <p className="text-xs text-gray-400 mb-2">예약 가능한 시간을 확인하는 중...</p>
+                <p className="hidden lg:block text-xs text-gray-400 mb-2">예약 가능한 시간을 확인하는 중...</p>
               )}
               {consultationNeeded ? (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
