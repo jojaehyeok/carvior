@@ -103,7 +103,7 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 mb-3">06. 환불 절차 및 소요 기간</h2>
             <p className="mb-2">
-              취소 요청은 앱 내 [예약 내역] 또는 고객센터를 통해 접수할 수 있습니다. 환불은 결제하신
+              취소 요청은 화면 우측 하단 채팅 문의를 통해 접수할 수 있습니다. 환불은 결제하신
               수단과 동일하게 진행됩니다.
             </p>
             <ul className="list-disc ml-5 space-y-1 text-sm text-gray-500">
