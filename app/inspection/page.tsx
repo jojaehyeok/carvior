@@ -513,6 +513,9 @@ export default function InspectionCheckoutPage() {
           <div className="lg:col-span-2 space-y-4">
           {!showRestOfForm ? (
             <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 p-6 text-center">
+              <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
+              <p className="text-sm font-black text-violet-600 mb-1">지금 이 지역에서 활동 중인 진단사님이 고객님을 기다리고 있어요</p>
+              <p className="text-xs text-gray-400 mb-4">서두를수록 더 빠른 시간대를 잡을 수 있어요 🚗💨</p>
               <div className="text-2xl mb-2">📍</div>
               <p className="text-sm font-bold text-gray-700 mb-1">먼저 왼쪽에서 방문 가능한 시간을 선택해주세요</p>
               <p className="text-xs text-gray-400 leading-relaxed">시간을 확정하면 결제 방법과 금액이 여기 나타나요.</p>
