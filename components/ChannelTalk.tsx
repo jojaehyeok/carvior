@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
 const PLUGIN_KEY = "05a1c010-2e20-40f7-82d4-eeac8d09c879";
+
+// 특정 페이지(예: /inspection 결제 폼)에서 플로팅 버튼이 결제 버튼 등을 가려서
+// 방해될 때, 그 페이지가 이 이벤트로 노출 여부를 직접 제어할 수 있게 함.
+// ChannelIO SDK 자체(boot)는 그대로 유지되므로 ChannelIO('show') 호출은 계속 동작한다.
+export const CHANNEL_BUTTON_VISIBILITY_EVENT = "cvr:channel-button-visibility";
 
 export default function ChannelTalk() {
   const { data: session } = useSession();
@@ -14,6 +19,17 @@ export default function ChannelTalk() {
   const userId = user?.id;
   const userName = user?.name;
   const userEmail = user?.email;
+
+  const [buttonVisible, setButtonVisible] = useState(true);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const visible = (e as CustomEvent<boolean>).detail;
+      setButtonVisible(visible !== false);
+    };
+    window.addEventListener(CHANNEL_BUTTON_VISIBILITY_EVENT, handler);
+    return () => window.removeEventListener(CHANNEL_BUTTON_VISIBILITY_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     const w = window as Window & typeof globalThis & { ChannelIO?: any };
@@ -50,6 +66,8 @@ export default function ChannelTalk() {
     const ch = (window as Window & typeof globalThis & { ChannelIO?: any }).ChannelIO;
     ch?.("show");
   };
+
+  if (!buttonVisible) return null;
 
   return (
     <button

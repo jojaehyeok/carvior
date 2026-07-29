@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { CHANNEL_BUTTON_VISIBILITY_EVENT } from '@/components/ChannelTalk';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
 const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder: '(주)카비어' };
@@ -91,6 +92,19 @@ export default function InspectionCheckoutPage() {
     regionCovered === false ||
     (regionCovered === true && !!availableSlots && Object.values(availableSlots).every(v => !v))
   );
+
+  // 결제 페이지에서 플로팅 채팅 버튼이 결제 버튼 등을 가려서 방해가 된다는 피드백으로,
+  // 상담 폴백이 뜨는 경우(채팅으로 바로 문의 유도)를 제외하곤 이 페이지에서는 숨긴다.
+  // 페이지를 벗어나면 다른 페이지에 영향 없도록 다시 보이게 복원.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent(CHANNEL_BUTTON_VISIBILITY_EVENT, { detail: consultationNeeded }));
+  }, [consultationNeeded]);
+  useEffect(() => {
+    return () => {
+      window.dispatchEvent(new CustomEvent(CHANNEL_BUTTON_VISIBILITY_EVENT, { detail: true }));
+    };
+  }, []);
+
   // 방문 가능한 시간을 실제로 골라야만 나머지(신청자 정보/결제)를 보여준다 —
   // 어차피 못 잡을 시간대인데 개인정보부터 입력하게 하면 다 쓰고 나서 막히는 허무함이 큼
   const showRestOfForm = !!selectedTime && !consultationNeeded;
@@ -424,10 +438,11 @@ export default function InspectionCheckoutPage() {
               </div>
             </div>
 
-            {loadingSlots && (
-              <div className="lg:hidden flex items-center justify-center gap-2 bg-white rounded-2xl border border-gray-100 py-4">
-                <div className="w-5 h-5 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-                <span className="text-xs font-bold text-gray-500">예약 가능한 시간을 확인하는 중...</span>
+            {hasAvailability && (
+              <div className="lg:hidden bg-white rounded-2xl border border-gray-100 p-5 text-center">
+                <div className="w-6 h-6 mx-auto mb-2 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
+                <p className="text-sm font-black text-violet-600">활성 진단평가사님이 고객님을 기다리고 있어요!</p>
+                <p className="text-xs text-gray-400 mt-0.5">서두르시면 이른 시간 예약을 하실 수 있어요 🚗💨</p>
               </div>
             )}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
