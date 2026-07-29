@@ -306,15 +306,20 @@ export default function InspectionCheckoutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <nav className="text-xs text-gray-400 mb-1.5 flex items-center gap-1.5">
-            <Link href="/" className="hover:text-gray-600 transition-colors">홈</Link>
-            <span>›</span>
-            <Link href="/marketing/carvior-inspection" className="hover:text-gray-600 transition-colors">검차 서비스</Link>
-            <span>›</span>
-            <span className="text-gray-700 font-semibold">결제</span>
-          </nav>
-          <h1 className="text-2xl font-black text-gray-900">검차 신청 결제</h1>
+        <div className="max-w-6xl mx-auto px-6 py-5 flex items-end justify-between gap-3">
+          <div>
+            <nav className="text-xs text-gray-400 mb-1.5 flex items-center gap-1.5">
+              <Link href="/" className="hover:text-gray-600 transition-colors">홈</Link>
+              <span>›</span>
+              <Link href="/marketing/carvior-inspection" className="hover:text-gray-600 transition-colors">검차 서비스</Link>
+              <span>›</span>
+              <span className="text-gray-700 font-semibold">결제</span>
+            </nav>
+            <h1 className="text-2xl font-black text-gray-900">검차 신청 결제</h1>
+          </div>
+          <Link href="/inspection/cancel" className="shrink-0 text-xs text-gray-400 hover:text-violet-500 underline whitespace-nowrap">
+            기존 예약 조회·취소
+          </Link>
         </div>
       </div>
 
@@ -507,7 +512,7 @@ export default function InspectionCheckoutPage() {
           {/* ── 오른쪽: 결제방법 토글 → 위젯/계좌 → 금액 → 약관 → 버튼 ── */}
           <div className="lg:col-span-2 space-y-4">
           {!showRestOfForm ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 p-6 text-center">
               <div className="text-2xl mb-2">📍</div>
               <p className="text-sm font-bold text-gray-700 mb-1">먼저 왼쪽에서 방문 가능한 시간을 선택해주세요</p>
               <p className="text-xs text-gray-400 leading-relaxed">시간을 확정하면 결제 방법과 금액이 여기 나타나요.</p>
