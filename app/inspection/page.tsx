@@ -552,7 +552,7 @@ export default function InspectionCheckoutPage() {
           {!showRestOfForm ? (
             <>
               {hasAvailability && (
-                <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+                <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 p-6 text-center">
                   <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
                   <p className="text-sm font-black text-violet-600 mb-1">지금 이 지역에서 활동 중인 진단사님이 고객님을 기다리고 있어요</p>
                   <p className="text-xs text-gray-400">서두를수록 더 빠른 시간대를 잡을 수 있어요 🚗💨</p>
