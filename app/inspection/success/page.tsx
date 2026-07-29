@@ -151,7 +151,7 @@ function SuccessContent() {
       <Link href="/" className="block w-full bg-gray-900 hover:bg-gray-700 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors">
         홈으로 돌아가기
       </Link>
-      <Link href="/inspection/cancel" className="block w-full text-center text-xs text-gray-400 hover:text-violet-500 mt-3 underline">
+      <Link href="/inspection/cancel" className="block w-full text-center text-xs text-violet-600 hover:text-violet-500 mt-3 underline">
         예약 조회 · 취소하기
       </Link>
     </div>

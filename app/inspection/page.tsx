@@ -320,7 +320,7 @@ export default function InspectionCheckoutPage() {
             </nav>
             <h1 className="text-2xl font-black text-gray-900">검차 신청 결제</h1>
           </div>
-          <Link href="/inspection/cancel" className="shrink-0 text-xs text-gray-400 hover:text-violet-500 underline whitespace-nowrap">
+          <Link href="/inspection/cancel" className="shrink-0 text-xs text-violet-600 hover:text-violet-500 underline whitespace-nowrap">
             기존 예약 조회·취소
           </Link>
         </div>
@@ -597,7 +597,7 @@ export default function InspectionCheckoutPage() {
               <div className="flex justify-between text-sm"><span className="text-gray-500">카비어 검차 서비스 ({pricing.label})</span><span className="text-gray-400 line-through">{pricing.original.toLocaleString()}원</span></div>
               <div className="flex justify-between text-sm"><span className="text-gray-500">프로모션 할인</span><span className="font-semibold text-violet-600">-{(pricing.original - pricing.amount).toLocaleString()}원</span></div>
               <div className="flex justify-between text-sm">
-                <Link href="/policy/care" target="_blank" className="text-gray-500 underline underline-offset-2">카비어 안심케어</Link>
+                <Link href="/policy/care" target="_blank" className="text-violet-600 underline underline-offset-2">카비어 안심케어</Link>
                 <span className="font-semibold text-gray-400">무료</span>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-gray-100">
@@ -632,7 +632,7 @@ export default function InspectionCheckoutPage() {
             )}
 
             <p className="text-center text-[10px] text-gray-400">
-              검차 전날 18시까지 100% 환불 가능합니다. <Link href="/policy/refund" target="_blank" className="underline">환불 규정 보기</Link>
+              검차 전날 18시까지 100% 환불 가능합니다. <Link href="/policy/refund" target="_blank" className="text-violet-600 underline">환불 규정 보기</Link>
             </p>
           </>
           )}

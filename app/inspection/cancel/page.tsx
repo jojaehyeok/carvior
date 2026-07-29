@@ -189,7 +189,7 @@ export default function InspectionCancelPage() {
         )}
 
         <p className="text-center text-[11px] text-gray-400">
-          <Link href="/policy/refund" target="_blank" className="underline">환불 규정 보기</Link>
+          <Link href="/policy/refund" target="_blank" className="text-violet-600 underline">환불 규정 보기</Link>
         </p>
       </div>
     </main>
