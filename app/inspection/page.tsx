@@ -94,6 +94,9 @@ export default function InspectionCheckoutPage() {
   // 방문 가능한 시간을 실제로 골라야만 나머지(신청자 정보/결제)를 보여준다 —
   // 어차피 못 잡을 시간대인데 개인정보부터 입력하게 하면 다 쓰고 나서 막히는 허무함이 큼
   const showRestOfForm = !!selectedTime && !consultationNeeded;
+  // 실제로 그 지역/날짜에 뛸 수 있는 평가사가 있다고 확인된 경우에만 "기다리고 있어요" 문구를 보여준다 —
+  // 확인 전(null)이거나 상담 안내로 빠지는 경우엔 근거 없는 문구가 되므로 노출하지 않는다.
+  const hasAvailability = regionCovered === true && !!availableSlots && Object.values(availableSlots).some(v => v);
 
   // 토스 위젯은 #toss-payment-widget/#toss-agreement-widget DOM에 직접 렌더링하는데,
   // 그 div는 showRestOfForm(방문 시간 확정 전까진 숨김)이 true일 때만 존재한다 — 처음엔
@@ -379,11 +382,9 @@ export default function InspectionCheckoutPage() {
                         {searchingPlace ? '검색 중' : '검색'}
                       </button>
                     </div>
-                    {showPlaceResults && (
+                    {showPlaceResults && placeResults.length > 0 && (
                       <div className="mt-2 border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-64 overflow-y-auto">
-                        {placeResults.length === 0 ? (
-                          <p className="text-xs text-gray-400 px-4 py-3">검색 결과가 없습니다. 다른 키워드로 시도해주세요.</p>
-                        ) : placeResults.map((p, i) => (
+                        {placeResults.map((p, i) => (
                           <button key={i} onClick={() => selectPlace(p)} className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
                             <p className="text-sm font-bold text-gray-800">{p.name}</p>
                             <p className="text-xs text-gray-400 mt-0.5">{p.address}</p>
@@ -392,14 +393,30 @@ export default function InspectionCheckoutPage() {
                       </div>
                     )}
                     {/* 시골 지번주소 등 카카오 검색에 안 잡히는 주소를 위한 폴백 —
-                        검색을 한 번이라도 시도했으면(결과 유무 상관없이) 입력한 텍스트를 그대로 등록 가능 */}
+                        검색 결과가 없을 때 "찾을 방법이 없다"는 인상을 주지 않도록, 바로 등록
+                        가능하다는 걸 눈에 띄게 안내한다(결과가 있을 땐 덜 튀는 보조 링크로). */}
                     {showPlaceResults && placeQuery.trim() && (
-                      <button
-                        onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
-                        className="w-full text-left px-4 py-3 mt-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                      >
-                        검색결과에 없나요? <span className="font-bold text-gray-900">&ldquo;{placeQuery.trim()}&rdquo;</span> 그대로 등록하기
-                      </button>
+                      placeResults.length === 0 ? (
+                        <div className="mt-2 bg-violet-50 border border-violet-100 rounded-xl p-4">
+                          <p className="text-sm text-violet-700 mb-3">
+                            검색 결과가 없어요. 시골 지번주소 등은 검색에 안 잡힐 수 있으니,
+                            입력하신 주소를 그대로 등록해드릴게요.
+                          </p>
+                          <button
+                            onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
+                            className="w-full py-3 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-xl transition-colors"
+                          >
+                            &ldquo;{placeQuery.trim()}&rdquo; 그대로 등록하기
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
+                          className="w-full text-left px-4 py-3 mt-2 border border-dashed border-gray-300 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                        >
+                          검색결과에 없나요? <span className="font-bold text-gray-900">&ldquo;{placeQuery.trim()}&rdquo;</span> 그대로 등록하기
+                        </button>
+                      )
                     )}
                   </div>
                 )}
@@ -513,11 +530,13 @@ export default function InspectionCheckoutPage() {
           <div className="lg:col-span-2 space-y-4">
           {!showRestOfForm ? (
             <>
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
-                <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-                <p className="text-sm font-black text-violet-600 mb-1">지금 이 지역에서 활동 중인 진단사님이 고객님을 기다리고 있어요</p>
-                <p className="text-xs text-gray-400">서두를수록 더 빠른 시간대를 잡을 수 있어요 🚗💨</p>
-              </div>
+              {hasAvailability && (
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 text-center">
+                  <div className="w-8 h-8 mx-auto mb-3 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
+                  <p className="text-sm font-black text-violet-600 mb-1">지금 이 지역에서 활동 중인 진단사님이 고객님을 기다리고 있어요</p>
+                  <p className="text-xs text-gray-400">서두를수록 더 빠른 시간대를 잡을 수 있어요 🚗💨</p>
+                </div>
+              )}
               <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 p-6 text-center">
                 <div className="text-2xl mb-2">📍</div>
                 <p className="text-sm font-bold text-gray-700 mb-1">먼저 왼쪽에서 방문 가능한 시간을 선택해주세요</p>
