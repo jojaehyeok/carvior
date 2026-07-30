@@ -60,6 +60,8 @@ export default function InspectionCheckoutPage() {
   // 받아버리는 사고를 막는다. 주소나 날짜가 아직 없으면 null(조회 전 상태).
   const [availableSlots, setAvailableSlots] = useState<Record<string, boolean> | null>(null);
   const [regionCovered, setRegionCovered]   = useState<boolean | null>(null);
+  // 신청 지역에 실제로 활동 중인 평가사 이름 — "활성 평가사님이 기다리고 있어요" 카드에 표시(최대 2명)
+  const [activeDriverNames, setActiveDriverNames] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots]     = useState(false);
   const [consultSubmitting, setConsultSubmitting] = useState(false);
   const [consultDone, setConsultDone]       = useState(false);
@@ -68,21 +70,22 @@ export default function InspectionCheckoutPage() {
 
   useEffect(() => {
     setConsultDone(false);
-    if (!form.address || !selectedDate) { setAvailableSlots(null); setRegionCovered(null); return; }
+    if (!form.address || !selectedDate) { setAvailableSlots(null); setRegionCovered(null); setActiveDriverNames([]); return; }
     let cancelled = false;
     setLoadingSlots(true);
     fetch(`https://carvior.store/api/v1/external/request/available-slots?address=${encodeURIComponent(form.address)}&date=${selectedDate}`)
       .then(res => res.json())
-      .then((data: { regionCovered: boolean; slots: { time: string; available: boolean }[] }) => {
+      .then((data: { regionCovered: boolean; slots: { time: string; available: boolean }[]; activeDriverNames?: string[] }) => {
         if (cancelled) return;
         const map: Record<string, boolean> = {};
         (Array.isArray(data?.slots) ? data.slots : []).forEach(s => { map[s.time] = s.available; });
         setAvailableSlots(map);
         setRegionCovered(data?.regionCovered ?? true);
+        setActiveDriverNames(Array.isArray(data?.activeDriverNames) ? data.activeDriverNames : []);
         // 이미 골라둔 시간이 새 조회 결과에서 불가능하면 선택 해제
         if (selectedTime && map[selectedTime] === false) setSelectedTime('');
       })
-      .catch(() => { if (!cancelled) { setAvailableSlots(null); setRegionCovered(null); } })
+      .catch(() => { if (!cancelled) { setAvailableSlots(null); setRegionCovered(null); setActiveDriverNames([]); } })
       .finally(() => { if (!cancelled) setLoadingSlots(false); });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,6 +114,9 @@ export default function InspectionCheckoutPage() {
   // 실제로 그 지역/날짜에 뛸 수 있는 평가사가 있다고 확인된 경우에만 "기다리고 있어요" 문구를 보여준다 —
   // 확인 전(null)이거나 상담 안내로 빠지는 경우엔 근거 없는 문구가 되므로 노출하지 않는다.
   const hasAvailability = regionCovered === true && !!availableSlots && Object.values(availableSlots).some(v => v);
+  // 평가사 카드에 쓸 지역 표기 — "이 평가사가 배정된다"는 오해를 피하려고 "담당" 대신
+  // "활동 중"으로 표현한다(실제 배정은 거리 기반 자동배정이라 지목이 불가능함).
+  const activeDriverRegionLabel = form.address.trim().split(' ').slice(0, 2).join(' ');
 
   // 토스 위젯은 #toss-payment-widget/#toss-agreement-widget DOM에 직접 렌더링하는데,
   // 그 div는 showRestOfForm(방문 시간 확정 전까진 숨김)이 true일 때만 존재한다 — 처음엔
@@ -439,10 +445,29 @@ export default function InspectionCheckoutPage() {
             </div>
 
             {hasAvailability && (
-              <div className="lg:hidden bg-white rounded-2xl border border-gray-100 p-5 text-center">
-                <div className="w-6 h-6 mx-auto mb-2 rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
-                <p className="text-sm font-black text-violet-600">활성 진단평가사님이 고객님을 기다리고 있어요!</p>
-                <p className="text-xs text-gray-400 mt-0.5">서두르시면 이른 시간 예약을 하실 수 있어요 🚗💨</p>
+              <div className="lg:hidden bg-white rounded-2xl border border-gray-100 p-5">
+                {activeDriverNames.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto pb-1 mb-3 -mx-1 px-1" style={{ scrollbarWidth: 'none' }}>
+                    {activeDriverNames.map((name, i) => (
+                      <div key={i} className="shrink-0 w-56 border border-gray-100 rounded-xl p-3 bg-gray-50">
+                        <div className="flex items-center gap-2.5">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src="/logo-icon.svg" alt="" className="w-10 h-10 rounded-full bg-white border border-gray-100 p-1.5 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-black text-gray-900 truncate">{name} 평가사님</p>
+                            <p className="text-[11px] text-gray-400 truncate">{activeDriverRegionLabel} 지역에서 활동 중</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-amber-500 font-bold mt-2">★★★★★ <span className="text-gray-400 font-normal">5.0</span></p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="text-center">
+                  <p className="text-sm font-black text-violet-600">활성 진단평가사님이 고객님을 기다리고 있어요!</p>
+                  <p className="text-xs text-gray-400 mt-0.5 mb-2">서두르시면 이른 시간 예약을 하실 수 있어요 🚗💨</p>
+                  <div className="w-6 h-6 mx-auto rounded-full border-2 border-violet-200 border-t-violet-600 animate-spin" />
+                </div>
               </div>
             )}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
