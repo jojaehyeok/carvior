@@ -132,10 +132,9 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
           <div style={{ backgroundColor:"#f8fafc",padding:"8px 14px",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",gap:12 }}>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:9,color:"#9ca3af" }}>차종 / 차량번호</div>
-              {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" && (
-                <div style={{ fontSize:11,fontWeight:700,color:"#2563eb" }}>{car_info.type}</div>
-              )}
-              <div style={{ fontSize:16,fontWeight:900 }}>{car_info.number}</div>
+              <div style={{ fontSize:16,fontWeight:900 }}>
+                {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
+              </div>
               {dealerName && <div style={{ fontSize:9,color:"#9ca3af" }}>딜러: {dealerName}</div>}
               {driverName && <div style={{ fontSize:9,color:"#9ca3af" }}>담당 진단평가사: {driverName}</div>}
             </div>

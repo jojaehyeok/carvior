@@ -398,7 +398,7 @@ function ImageSection({ images, label, icon, lang }: { images: string[]; label: 
         <span>{icon}</span>{label}
         <span className="text-xs font-normal text-gray-400">({images.length}{lang === "ko" ? "장" : ""})</span>
       </h3>
-      <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="grid grid-cols-4 gap-1">
+      <LightGallery plugins={[lgZoom]} speed={400} selector="a" controls={false} elementClassNames="grid grid-cols-4 gap-1">
         {images.map((url, i) => (
           <a key={i} href={encodeURI(url)} data-src={encodeURI(url)} className="block aspect-square overflow-hidden rounded-md">
             <img
@@ -587,10 +587,9 @@ export default function PublicReportPage() {
         <div className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
           <span>🔍</span> {t("reportBadge", lang)}
         </div>
-        {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" && (
-          <p className="text-sm font-semibold text-blue-600">{car_info.type}</p>
-        )}
-        <h1 className="mt-1 text-3xl font-bold text-gray-900">{car_info.number}</h1>
+        <h1 className="mt-1 text-3xl font-bold text-gray-900">
+          {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
+        </h1>
         {dealerName && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
         {driverName && <p className="mt-1 text-sm text-gray-400">{t("inspector", lang)}: {driverName}</p>}
       </div>
@@ -638,7 +637,7 @@ export default function PublicReportPage() {
         {DOC_IMAGES.some((d) => images[d.key]?.length) && (
           <div className="mt-4">
             <p className="mb-2 text-xs text-gray-400">{t("docs", lang)}</p>
-            <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-3 flex-wrap">
+            <LightGallery plugins={[lgZoom]} speed={400} selector="a" controls={false} elementClassNames="flex gap-3 flex-wrap">
               {DOC_IMAGES.flatMap((d) =>
                 (images[d.key] ?? []).map((url, i) => (
                   <div key={`${d.key}-${i}`} className="flex flex-col items-center gap-1">
@@ -693,7 +692,7 @@ export default function PublicReportPage() {
                   <span className="text-lg">{isOk ? "✅" : "❌"}</span>
                 </div>
                 {photos.length > 0 && (
-                  <LightGallery plugins={[lgZoom]} speed={400} selector="a" elementClassNames="flex gap-2 mt-3 ml-8 flex-wrap">
+                  <LightGallery plugins={[lgZoom]} speed={400} selector="a" controls={false} elementClassNames="flex gap-2 mt-3 ml-8 flex-wrap">
                     {photos.map((url, i) => (
                       <a key={i} href={encodeURI(url)} data-src={encodeURI(url)} className="block">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
