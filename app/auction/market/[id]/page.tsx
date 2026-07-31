@@ -547,19 +547,6 @@ function AuctionDetailContent() {
           </div>
         )}
 
-        {/* ── 판매자 차량 소개 ── */}
-        {item.adminMemo && (
-          <div className="mt-6 bg-white border border-gray-100 rounded-2xl p-6">
-            <h3 className="text-sm font-black text-gray-900 mb-3 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 text-[10px] font-black">✎</span>
-              판매자 차량 소개
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {item.adminMemo}
-            </p>
-          </div>
-        )}
-
         {/* ── 하단: 상세 정보 탭 ── */}
         <div className="mt-10 border-t border-gray-100">
           <DetailTabs item={item} />
@@ -836,15 +823,6 @@ function DetailTabs({ item }: { item: AuctionItem }) {
             )}
           </div>
 
-          {/* 판매자 소개 */}
-          {item.adminMemo && (
-            <div className="mt-8 bg-gray-50 border border-gray-100 rounded-xl p-5">
-              <p className="text-sm font-black text-gray-700 mb-2">판매자 차량 소개</p>
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-                {item.adminMemo}
-              </p>
-            </div>
-          )}
         </div>
       )}
 
