@@ -49,6 +49,10 @@ interface ReportData {
     drive?: string[];
     engine?: string[];
   };
+  // (구) 엔진 소음 확인용 단일 영상 — videoUrls로 대체됨, 과거 리포트 호환용
+  engineNoiseVideoUrl?: string | null;
+  // 엔진 이음/조향 이음/옵션작동 이상 등 평가사가 촬영한 영상 여러 개
+  videoUrls?: string[];
   car_status: {
     keys: { smart: number; folding: number; general: number; special: number };
     paintNeeded: number;
@@ -177,10 +181,9 @@ const STR = {
   docs: { ko: "서류 및 계기판", en: "Documents & Odometer", ru: "Документы и приборная панель", ar: "المستندات وعداد المسافات" },
   resultTitle: { ko: "진단 결과", en: "Inspection Results", ru: "Результаты диагностики", ar: "نتائج الفحص" },
   leak: { ko: "누유 상태", en: "Leak Status", ru: "Состояние утечек", ar: "حالة التسريب" },
-  drive: { ko: "주행 상태", en: "Driving Condition", ru: "Состояние при движении", ar: "حالة القيادة" },
   options: { ko: "옵션 상태", en: "Options Status", ru: "Состояние опций", ar: "حالة الخيارات" },
   warning: { ko: "경고등", en: "Warning Lights", ru: "Индикаторы приборной панели", ar: "أضواء التحذير" },
-  engine: { ko: "엔진룸 이상", en: "Engine Bay Condition", ru: "Состояние моторного отсека", ar: "حالة حجرة المحرك" },
+  engine: { ko: "이상 확인 영상", en: "Issue Check Videos", ru: "Видео проверки неисправностей", ar: "مقاطع فيديو فحص الأعطال" },
   noIssue: { ko: "이상 없음", en: "No Issues", ru: "Без замечаний", ar: "لا توجد مشاكل" },
   inspectorNote: { ko: "진단사 고지사항", en: "Inspector's Notes", ru: "Примечания инспектора", ar: "ملاحظات الفاحص" },
   damageArea: { ko: "손상 부위", en: "Damaged Areas", ru: "Поврежденные зоны", ar: "مناطق التلف" },
@@ -549,7 +552,8 @@ export default function PublicReportPage() {
     );
   }
 
-  const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos, isConsumerBooking, evaluationOk } = data;
+  const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos, isConsumerBooking, evaluationOk, engineNoiseVideoUrl, videoUrls } = data;
+  const allIssueVideos = [...(videoUrls ?? []), ...(engineNoiseVideoUrl ? [engineNoiseVideoUrl] : [])];
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, 평가사 앱 입력은 그대로 두고
   // 리포트 표시에서만 B를 W로 합쳐서 보여준다(라벨도 "판금/용접"으로 통합)
   const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
@@ -667,10 +671,8 @@ export default function PublicReportPage() {
         <div className="space-y-3">
           {[
             { label: t("leak", lang),    value: evaluation.leakDesc,    icon: "💧", photoKey: "leak" as const },
-            { label: t("drive", lang),   value: evaluation.driveDesc,   icon: "🏁", photoKey: "drive" as const },
             { label: t("options", lang), value: evaluation.optionsDesc, icon: "🔧", photoKey: "options" as const },
             { label: t("warning", lang), value: evaluation.warningDesc, icon: "⚡", photoKey: "warning" as const },
-            { label: t("engine", lang),  value: evaluation.engineDesc,  icon: "🔩", photoKey: "engine" as const },
           ].map((item) => {
             const isOk = evaluationOk ? evaluationOk[item.photoKey] : (item.value === "이상 없음" || !item.value);
             const photos = checklistPhotos?.[item.photoKey] ?? [];
@@ -718,6 +720,27 @@ export default function PublicReportPage() {
           )}
         </div>
       </div>
+
+      {/* 이상 확인 영상 (엔진 이음/조향 이음/옵션작동 이상 등) */}
+      {allIssueVideos.length > 0 && (
+        <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">
+          <h2 className="flex items-center gap-2 mb-4 font-semibold text-gray-800">
+            <span>🔩</span> {t("engine", lang)}
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {allIssueVideos.map((url, i) => (
+              <video
+                key={i}
+                controls
+                playsInline
+                preload="metadata"
+                src={encodeURI(url)}
+                className="w-full max-w-xs rounded-xl border border-gray-200"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 손상 다이어그램 */}
       <div className="p-5 mb-5 bg-white border shadow-sm rounded-2xl">

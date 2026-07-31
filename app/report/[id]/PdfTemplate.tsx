@@ -169,10 +169,8 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
             <div style={{ border:"1px solid #e5e7eb",borderRadius:8,overflow:"hidden",marginBottom:8 }}>
               {[
                 { label:"누유 상태",  value:evaluation.leakDesc,    icon:"💧" },
-                { label:"주행 상태",  value:evaluation.driveDesc,   icon:"🏁" },
                 { label:"옵션 상태",  value:evaluation.optionsDesc, icon:"🔧" },
                 { label:"경고등",     value:evaluation.warningDesc, icon:"⚡" },
-                { label:"엔진룸 이상",value:evaluation.engineDesc,  icon:"🔩" },
               ].map((item,i,arr)=>{
                 const ok=isOk(item.value);
                 return (
