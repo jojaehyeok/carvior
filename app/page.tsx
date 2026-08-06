@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { clsx } from 'clsx';
 import AppFooter from '@/components/footermodal';
 import InspectionPromoPopup from '@/components/InspectionPromoPopup';
+import DealerPartnershipPopup from '@/components/DealerPartnershipPopup';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <InspectionPromoPopup />
+      <DealerPartnershipPopup />
 
       {/* ── 히어로 ── */}
       <section className="relative bg-zinc-900 overflow-hidden">
