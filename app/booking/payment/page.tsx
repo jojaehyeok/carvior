@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 
 // 국산차/수입차 구매동행 프로모션 가격
 const CAR_TYPE_PRICING = {
-  domestic: { label: "국산차", originalFee: 130000, fee: 110000 },
-  imported: { label: "수입차", originalFee: 160000, fee: 140000 },
+  domestic: { label: "국산차", originalFee: 139000, fee: 99000 },
+  imported: { label: "수입차", originalFee: 172000, fee: 132000 },
 } as const;
 
 type CarTypeKey = keyof typeof CAR_TYPE_PRICING;

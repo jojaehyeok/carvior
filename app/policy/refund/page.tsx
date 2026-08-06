@@ -63,14 +63,14 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 mb-3">03. 이해를 돕기 위한 예시</h2>
             <div className="bg-white border border-gray-100 rounded-xl p-5 space-y-3 text-sm">
-              <p className="text-gray-500">검수 희망일: 10월 20일 12시 · 검수비: 110,000원(국산차 기준)</p>
+              <p className="text-gray-500">검수 희망일: 10월 20일 12시 · 검수비: 99,000원(국산차 기준)</p>
               <div className="flex justify-between border-t pt-3 border-gray-100">
                 <span>10월 19일 18시 이전 취소</span>
-                <span className="font-bold text-green-600">100% 환불 (110,000원)</span>
+                <span className="font-bold text-green-600">100% 환불 (99,000원)</span>
               </div>
               <div className="flex justify-between">
                 <span>10월 20일 12시 이전 취소</span>
-                <span className="font-bold text-orange-500">취소수수료 차감 후 환불 (80,000원)</span>
+                <span className="font-bold text-orange-500">취소수수료 차감 후 환불 (69,000원)</span>
               </div>
               <div className="flex justify-between">
                 <span>10월 20일 12시 이후 취소</span>

@@ -10,8 +10,8 @@ const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder
 // 국산차/수입차 구매동행 프로모션 가격 (VAT 포함, 최종 결제 금액 기준)
 type CarOrigin = 'DOMESTIC' | 'IMPORTED';
 const CAR_TYPE_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
-  DOMESTIC: { label: '국산차', original: 130_000, amount: 110_000 },
-  IMPORTED: { label: '수입차', original: 160_000, amount: 140_000 },
+  DOMESTIC: { label: '국산차', original: 139_000, amount: 99_000 },
+  IMPORTED: { label: '수입차', original: 172_000, amount: 132_000 },
 };
 
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
