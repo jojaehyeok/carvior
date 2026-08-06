@@ -8,7 +8,7 @@ import PrivacyModal from '@/components/PrivacyModal';
 
 // 토스 결제 심사 완료 후 아래 주석 해제
 // const TOSS_CLIENT_KEY = 'test_ck_d46qopOB89x1jxbPMddLrZmM75y0';
-// const INSPECTION_PRICE = 80_000;
+// const INSPECTION_PRICE = 99_000;
 
 // ─────────────────────────────────────────
 // 데이터
@@ -21,7 +21,7 @@ const CHECK_ITEMS = [
 ];
 
 const STEPS = [
-    { num: '01', title: '평가 예약 & 결제', desc: '차량 정보와 방문 일정을 입력하고 간편 결제 (80,000원)', icon: '💳' },
+    { num: '01', title: '평가 예약 & 결제', desc: '차량 정보와 방문 일정을 입력하고 간편 결제 (99,000원)', icon: '💳' },
     { num: '02', title: '진단 평가사 방문', desc: '카비어 진단 평가사가 직접 찾아가 100+ 항목을 꼼꼼히 평가합니다', icon: '🔍' },
     { num: '03', title: '공식 평가 리포트 발행', desc: '객관적 데이터 기반의 차량 가치 리포트를 즉시 발행합니다', icon: '📄' },
     { num: '04', title: '딜러 매칭 & 최고가 제시', desc: '검증된 딜러 네트워크에서 리포트를 보고 경쟁적으로 최고가를 제시합니다', icon: '🤝' },
@@ -31,7 +31,7 @@ const STEPS = [
 const REVIEWS = [
     {
         name: '이*현', car: '링컨 에비에이터', stars: 5,
-        text: '8만원이 아깝지 않았어요. 리포트 덕분에 딜러들이 경쟁해서 예상보다 200만원 더 받았습니다.',
+        text: '9만9천원이 아깝지 않았어요. 리포트 덕분에 딜러들이 경쟁해서 예상보다 200만원 더 받았습니다.',
         img: '/images/review-1.jpg',
     },
     {
@@ -189,7 +189,7 @@ function BankTransferModal({ onClose }: { onClose: () => void }) {
                     {/* 금액 */}
                     <div className="flex items-center justify-between bg-zinc-50 rounded-2xl px-4 py-3.5 border border-zinc-100">
                         <p className="text-zinc-500 text-sm font-bold">입금 금액</p>
-                        <p className="text-zinc-900 text-2xl font-black tabular-nums">80,000<span className="text-sm font-bold">원</span></p>
+                        <p className="text-zinc-900 text-2xl font-black tabular-nums">99,000<span className="text-sm font-bold">원</span></p>
                     </div>
 
                     {/* 계좌 정보 */}
@@ -430,7 +430,7 @@ function InspectionForm({ light = false, formId }: { light?: boolean; formId?: s
                     <p className={clsx('text-[10px] mt-0.5', light ? 'text-zinc-600' : 'text-zinc-400')}>100+ 항목 · 방문 평가 · 리포트 포함</p>
                 </div>
                 <p className={clsx('text-2xl font-black tabular-nums', light ? 'text-white' : 'text-zinc-900')}>
-                    80,000<span className="text-sm font-bold">원</span>
+                    99,000<span className="text-sm font-bold">원</span>
                 </p>
             </div>
 
@@ -621,14 +621,14 @@ export default function CarviorInspectionPage() {
                         검증된 딜러 네트워크에서 <span className="font-bold text-white">최고가를 제시</span>합니다.
                     </p>
                     <p className="mb-8 text-xs text-zinc-500">
-                        8만원으로 수십~수백만원을 더 받아가세요.
+                        9만9천원으로 수십~수백만원을 더 받아가세요.
                     </p>
 
                     <button
                         onClick={scrollToForm}
                         className="w-full py-4 bg-white text-zinc-900 rounded-2xl font-extrabold text-lg shadow-2xl shadow-black/40 active:scale-[0.98] transition-all mb-4"
                     >
-                        평가 예약하기 (80,000원) →
+                        평가 예약하기 (99,000원) →
                     </button>
                     <p className="mb-10 text-xs text-center text-zinc-600">
                         방문 평가 · 리포트 포함 · 카드/간편결제 가능
@@ -667,7 +667,7 @@ export default function CarviorInspectionPage() {
                 <div className="max-w-xl mx-auto">
                     <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-2">WHY CARVIOR</p>
                     <h2 className="mb-3 text-2xl font-black leading-tight text-center text-zinc-900">
-                        8만원이 왜 이득인가요?
+                        9만9천원이 왜 이득인가요?
                     </h2>
                     <p className="mb-8 text-sm text-center text-zinc-400">
                         감가 없이 리포트로 증명하면, 딜러가 먼저 최고가를 씁니다
@@ -704,7 +704,7 @@ export default function CarviorInspectionPage() {
                         onClick={scrollToForm}
                         className="px-10 py-4 text-base font-extrabold transition-all bg-white shadow-xl text-zinc-900 rounded-2xl active:scale-95"
                     >
-                        80,000원으로 시작하기 →
+                        99,000원으로 시작하기 →
                     </button>
                 </div>
             </section>
@@ -886,7 +886,7 @@ export default function CarviorInspectionPage() {
                         onClick={scrollToForm}
                         className="w-full py-4 bg-zinc-900 text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-black/50 active:scale-[0.98] transition-all border border-zinc-700"
                     >
-                        평가 예약하기 (80,000원) →
+                        평가 예약하기 (99,000원) →
                     </button>
                 </div>
             </div>
