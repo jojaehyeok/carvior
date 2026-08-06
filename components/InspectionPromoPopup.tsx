@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+const FEATURES = [
+  { icon: '📋', label: '100+ 항목 점검' },
+  { icon: '🚗', label: '사고·누유·하부 확인' },
+  { icon: '📄', label: '사진·PDF 리포트' },
+  { icon: '📍', label: '매물 위치로 방문' },
+];
+
 export default function InspectionPromoPopup() {
   const [visible, setVisible] = useState(false);
 
@@ -24,41 +31,49 @@ export default function InspectionPromoPopup() {
     <div className="fixed top-20 left-4 right-4 z-[200] sm:left-6 sm:right-auto sm:w-96">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* 상단 헤더 */}
-        <div className="bg-gradient-to-r from-violet-600 to-violet-700 px-5 py-4 flex items-center gap-3">
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl shrink-0">🔍</div>
           <div className="flex-1 min-w-0">
-            <p className="text-white font-black text-base leading-tight">검차받고 빠르게 팔자</p>
-            <p className="text-violet-200 text-xs mt-0.5">공인진단 매물은 3배 빠르게 판매됩니다</p>
+            <p className="text-white font-black text-base leading-tight">중고차 구매 전, 전문가 출장검차</p>
+            <p className="text-violet-200 text-xs mt-0.5">한 번의 진단으로 큰 손해를 막으세요</p>
           </div>
           <button onClick={() => setVisible(false)} className="text-white/50 hover:text-white transition-colors shrink-0 text-xl leading-none">×</button>
         </div>
 
         {/* 내용 */}
         <div className="px-5 py-4">
-          <div className="space-y-2.5 mb-4">
-            {[
-              '공인 평가사 직접 방문 점검',
-              '100+ 항목 진단 · 디지털 리포트',
-              '해외 바이어 신뢰도 3배 상승',
-            ].map(text => (
-              <div key={text} className="flex items-center gap-2 text-sm text-gray-600">
-                <span className="text-amber-500 font-black shrink-0">✦</span>
-                {text}
+          {/* 기능 2x2 그리드 */}
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {FEATURES.map(f => (
+              <div key={f.label} className="flex items-center gap-2 bg-violet-50 rounded-lg px-2.5 py-2">
+                <span className="text-base shrink-0">{f.icon}</span>
+                <span className="text-[11px] font-bold text-gray-700 leading-tight">{f.label}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 bg-gray-50 rounded-xl px-3 py-3 mb-4">
-            <span className="text-sm font-bold text-gray-600">검차 서비스 요금</span>
-            <span className="font-black text-violet-600 text-base whitespace-nowrap">
-              110,000원~ <span className="text-xs font-normal text-gray-400">VAT 포함 · 차종별 상이</span>
-            </span>
+          {/* 프로모션 가격 */}
+          <div className="rounded-xl border-2 border-violet-200 bg-gradient-to-b from-violet-50 to-white px-3 py-3 mb-4">
+            <p className="text-center text-[11px] font-black text-violet-600 mb-2">🎉 지금이 기회! 프로모션 가격</p>
+            <div className="flex items-stretch gap-2">
+              <div className="flex-1 text-center">
+                <span className="inline-block text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full mb-1">국산차</span>
+                <p className="text-xl font-black text-gray-900 leading-none">99,000<span className="text-xs font-bold">원</span></p>
+                <p className="text-[10px] text-gray-400 mt-0.5">VAT 포함</p>
+              </div>
+              <div className="w-px bg-violet-100" />
+              <div className="flex-1 text-center">
+                <span className="inline-block text-[10px] font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full mb-1">수입차</span>
+                <p className="text-xl font-black text-gray-900 leading-none">132,000<span className="text-xs font-bold">원</span></p>
+                <p className="text-[10px] text-gray-400 mt-0.5">VAT 포함</p>
+              </div>
+            </div>
           </div>
 
           <Link
             href="/inspection"
             onClick={() => setVisible(false)}
-            className="block w-full bg-violet-600 hover:bg-violet-500 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors mb-2"
+            className="block w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors mb-2 shadow-lg shadow-violet-200"
           >
             지금 검차 신청하기 →
           </Link>

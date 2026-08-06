@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
@@ -105,6 +105,13 @@ export default function RegisterPage() {
   const [pw2, setPw2]           = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+
+  // 스마트옥션 딜러 제휴 팝업 등에서 /register?role=dealer로 들어오면 딜러 탭을 바로 선택해준다
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('role') === 'dealer') {
+      setRole('dealer');
+    }
+  }, []);
   const [marketingConsent, setMarketingConsent] = useState(false);
 
   // 딜러 전용
