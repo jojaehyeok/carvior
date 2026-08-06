@@ -20,7 +20,7 @@ export default function InspectionPromoPopup() {
     if (daysSince >= 1) setVisible(true);
   }, []);
 
-  const dismissForWeek = () => {
+  const dismissForDay = () => {
     localStorage.setItem('inspection_popup_dismissed_at', String(Date.now()));
     setVisible(false);
   };
@@ -28,7 +28,7 @@ export default function InspectionPromoPopup() {
   if (!visible) return null;
 
   return (
-    <div className="fixed top-20 left-4 right-4 z-[200] sm:left-6 sm:right-auto sm:w-96">
+    <div className="hidden sm:block fixed top-20 left-6 z-[200] w-96">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
         {/* 상단 헤더 */}
         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-4 flex items-center gap-3">
@@ -37,7 +37,6 @@ export default function InspectionPromoPopup() {
             <p className="text-white font-black text-base leading-tight">중고차 구매 전, 전문가 출장검차</p>
             <p className="text-violet-200 text-xs mt-0.5">한 번의 진단으로 큰 손해를 막으세요</p>
           </div>
-          <button onClick={() => setVisible(false)} className="text-white/50 hover:text-white transition-colors shrink-0 text-xl leading-none">×</button>
         </div>
 
         {/* 내용 */}
@@ -80,16 +79,20 @@ export default function InspectionPromoPopup() {
           <Link
             href="/marketing/carvior-inspection"
             onClick={() => setVisible(false)}
-            className="block w-full text-center text-xs text-gray-400 hover:text-violet-500 transition-colors mb-3"
+            className="block w-full text-center text-xs text-gray-400 hover:text-violet-500 transition-colors"
           >
             서비스 자세히 보기
           </Link>
+        </div>
 
-          <div className="flex items-center justify-center gap-3">
-            <button onClick={dismissForWeek} className="text-xs text-gray-300 hover:text-gray-500 transition-colors">
-              하루간 보지않기
-            </button>
-          </div>
+        {/* 하단 바: 다시 보지 않기 | 닫기 */}
+        <div className="flex items-stretch border-t border-gray-100">
+          <button onClick={dismissForDay} className="flex-1 text-xs font-bold text-gray-400 hover:text-gray-600 py-2.5 transition-colors">
+            다시 보지 않기
+          </button>
+          <button onClick={() => setVisible(false)} className="w-11 flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white/70 hover:text-white transition-colors text-base">
+            ×
+          </button>
         </div>
       </div>
     </div>
