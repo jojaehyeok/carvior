@@ -23,6 +23,28 @@ interface StoreItem {
   ownerAccessToken?: string;
   auctionEndAt?: string;
   transferredRegistrationUrl?: string;
+  selfRegistered?: boolean;
+  category?: string;
+}
+
+// 낙찰 이후 세부단계(winner_selected/in_transit/transit_done/completed)를
+// 사용자 친화적인 4단계 라벨로 매핑 — DB의 saleStage 값 자체는 안 바꾸고 필터 UI에서만 재해석
+const STAGE_FILTER_MAP: { key: string; label: string; stage: string }[] = [
+  { key: 'need_payment', label: '입력필요',   stage: 'winner_selected' },
+  { key: 'paid',         label: '입력완료',   stage: 'in_transit' },
+  { key: 'transit',      label: '탁송예정',   stage: 'transit_done' },
+  { key: 'done',         label: '거래완료',   stage: 'completed' },
+];
+
+const DOMESTIC_BRANDS = ['현대', '기아', '쉐보레', '제네시스', '르노코리아', '르노삼성', 'KG모빌리티', '쌍용', '대우'];
+
+function getBrand(titleKo: string): string {
+  return (titleKo || '').split(' ')[0]?.replace(/\(.*\)/, '').trim() || '기타';
+}
+
+function isDomestic(titleKo: string): boolean {
+  const brand = getBrand(titleKo);
+  return DOMESTIC_BRANDS.some(b => brand.includes(b) || b.includes(brand));
 }
 
 const STATUS_MAP: Record<Status, { label: string; color: string }> = {
@@ -53,6 +75,10 @@ export default function MypagePage() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [serviceFilter, setServiceFilter] = useState<Set<'inspection' | 'self'>>(new Set<'inspection' | 'self'>(['inspection', 'self']));
+  const [stageFilter, setStageFilter] = useState<Set<string>>(new Set(STAGE_FILTER_MAP.map(s => s.key)));
+  const [originFilter, setOriginFilter] = useState<'all' | 'domestic' | 'import'>('all');
+  const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
 
   const user = session?.user as any;
 
@@ -147,6 +173,49 @@ export default function MypagePage() {
       ?? null;
   };
 
+  const toggleInSet = <T,>(set: Set<T>, value: T, setter: (s: Set<T>) => void) => {
+    const next = new Set(set);
+    if (next.has(value)) next.delete(value); else next.add(value);
+    setter(next);
+  };
+
+  // 필터 카운트 (전체 items 기준 — 다른 필터와 무관하게 각 옵션의 총 개수를 보여줌)
+  const serviceCounts = {
+    inspection: items.filter(i => !i.selfRegistered).length,
+    self: items.filter(i => i.selfRegistered).length,
+  };
+  const stageCounts = Object.fromEntries(
+    STAGE_FILTER_MAP.map(s => [s.key, items.filter(i => (i.saleStage ?? 'bidding') === s.stage).length])
+  );
+  const domesticCount = items.filter(i => isDomestic(i.titleKo)).length;
+  const importCount = items.length - domesticCount;
+  const brandCounts = items.reduce<Record<string, number>>((acc, i) => {
+    const b = getBrand(i.titleKo);
+    acc[b] = (acc[b] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const filteredItems = items.filter(item => {
+    const svc = item.selfRegistered ? 'self' : 'inspection';
+    if (!serviceFilter.has(svc)) return false;
+
+    // 낙찰 이후 단계인 매물만 진행상태 필터 대상 — 검토중/판매중(입찰중) 매물은 필터와 무관하게 항상 표시
+    if (item.status === 'sold' || (item.saleStage && item.saleStage !== 'bidding')) {
+      const stageEntry = STAGE_FILTER_MAP.find(s => s.stage === (item.saleStage ?? 'winner_selected'));
+      if (stageEntry && !stageFilter.has(stageEntry.key)) return false;
+    }
+
+    if (originFilter !== 'all') {
+      const domestic = isDomestic(item.titleKo);
+      if (originFilter === 'domestic' && !domestic) return false;
+      if (originFilter === 'import' && domestic) return false;
+    }
+
+    if (brandFilter.size > 0 && !brandFilter.has(getBrand(item.titleKo))) return false;
+
+    return true;
+  });
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -210,7 +279,7 @@ export default function MypagePage() {
       </div>
 
       {/* 내 매물 */}
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-black text-gray-900">내 매물</h2>
           <button
@@ -233,39 +302,122 @@ export default function MypagePage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {items.map(item => {
-              const s = STATUS_MAP[item.status] ?? STATUS_MAP.hidden;
-              const img = thumb(item);
-              return (
-                <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-                  <div className="flex">
-                    {/* 썸네일 — 카드 전체 높이 채움 */}
-                    <div className="w-36 shrink-0 self-stretch bg-gray-100 min-h-[9rem]">
+          <div className="flex gap-6 items-start">
+            {/* 좌측 필터 */}
+            <aside className="w-52 shrink-0 hidden md:block space-y-6 sticky top-6">
+              <div>
+                <p className="text-xs font-black text-gray-900 mb-2.5">카비어 서비스</p>
+                <div className="space-y-1.5">
+                  {[{ key: 'inspection' as const, label: '진단' }, { key: 'self' as const, label: '셀프' }].map(o => (
+                    <label key={o.key} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
+                      <span className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={serviceFilter.has(o.key)}
+                          onChange={() => toggleInSet(serviceFilter, o.key, setServiceFilter)}
+                          className="accent-violet-600"
+                        />
+                        <span className="text-gray-700">{o.label}</span>
+                      </span>
+                      <span className="text-gray-300 text-xs">{serviceCounts[o.key]}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-5">
+                <p className="text-xs font-black text-gray-900 mb-2.5">진행상태</p>
+                <div className="space-y-1.5">
+                  {STAGE_FILTER_MAP.map(o => (
+                    <label key={o.key} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
+                      <span className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={stageFilter.has(o.key)}
+                          onChange={() => toggleInSet(stageFilter, o.key, setStageFilter)}
+                          className="accent-violet-600"
+                        />
+                        <span className="text-gray-700">{o.label}</span>
+                      </span>
+                      <span className="text-gray-300 text-xs">{stageCounts[o.key] ?? 0}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 pt-5">
+                <p className="text-xs font-black text-gray-900 mb-2.5">제조사 · 모델</p>
+                <div className="flex gap-1.5 mb-3">
+                  {[
+                    { key: 'all' as const, label: '전체' },
+                    { key: 'domestic' as const, label: '국산' },
+                    { key: 'import' as const, label: '수입' },
+                  ].map(o => (
+                    <button
+                      key={o.key}
+                      onClick={() => setOriginFilter(o.key)}
+                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors ${originFilter === o.key ? 'bg-violet-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                  {Object.entries(brandCounts)
+                    .filter(([brand]) => originFilter === 'all' || isDomestic(brand) === (originFilter === 'domestic'))
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([brand, count]) => (
+                      <label key={brand} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
+                        <span className="flex items-center gap-2 min-w-0">
+                          <input
+                            type="checkbox"
+                            checked={brandFilter.has(brand)}
+                            onChange={() => toggleInSet(brandFilter, brand, setBrandFilter)}
+                            className="accent-violet-600 shrink-0"
+                          />
+                          <span className="text-gray-700 truncate">{brand}</span>
+                        </span>
+                        <span className="text-gray-300 text-xs shrink-0">{count}</span>
+                      </label>
+                    ))}
+                </div>
+              </div>
+            </aside>
+
+            {/* 우측 그리드 */}
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
+              {filteredItems.length === 0 ? (
+                <div className="col-span-full bg-white rounded-2xl p-10 text-center border border-gray-100 text-sm text-gray-400">
+                  선택한 조건에 맞는 매물이 없습니다
+                </div>
+              ) : filteredItems.map(item => {
+                const s = STATUS_MAP[item.status] ?? STATUS_MAP.hidden;
+                const img = thumb(item);
+                return (
+                  <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
+                    {/* 썸네일 */}
+                    <div className="aspect-[4/3] bg-gray-100 relative">
                       {img ? (
                         <img src={img} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">🚗</div>
                       )}
+                      <span className={`absolute top-2 right-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${s.color}`}>{s.label}</span>
                     </div>
 
                     {/* 정보 */}
-                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col justify-between gap-2">
-                      {/* 상단: 제목 + 뱃지 */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{item.titleKo}</p>
-                          <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
-                            {item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km
-                          </p>
-                          <p className="text-base font-black text-violet-600 mt-1 leading-none">
-                            {item.priceKRW ? `${Math.round(Number(item.priceKRW) / 10000).toLocaleString()}만원` : '가격 미정'}
-                          </p>
-                        </div>
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${s.color}`}>{s.label}</span>
+                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{item.titleKo}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
+                          {item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km
+                        </p>
+                        <p className="text-base font-black text-violet-600 mt-1 leading-none">
+                          {item.priceKRW ? `${Math.round(Number(item.priceKRW) / 10000).toLocaleString()}만원` : '가격 미정'}
+                        </p>
                       </div>
 
-                      {/* 하단: 버튼 + 상태 메시지 */}
+                      {/* 버튼 + 상태 메시지 */}
                       <div className="space-y-2">
                         <div className="flex flex-wrap gap-1.5">
                           {(item.status === 'pending' || item.status === 'active') && !item.hasReport && (
@@ -341,31 +493,31 @@ export default function MypagePage() {
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  {expandedId === item.id && (item.status === 'active' || item.status === 'sold') && (
-                    <div className="border-t border-gray-100 px-4 py-5 bg-gray-50/50">
-                      <SaleStageTimeline
-                        status={item.status}
-                        saleStage={item.saleStage}
-                        auctionEndAt={item.auctionEndAt}
-                        transferredRegistrationUrl={item.transferredRegistrationUrl}
-                      />
-                      {item.status === 'active' && item.ownerAccessToken && (
-                        <a
-                          href={`/my-listing/${item.ownerAccessToken}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
-                        >
-                          입찰 내역 상세보기 →
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                    {expandedId === item.id && (item.status === 'active' || item.status === 'sold') && (
+                      <div className="border-t border-gray-100 px-4 py-5 bg-gray-50/50">
+                        <SaleStageTimeline
+                          status={item.status}
+                          saleStage={item.saleStage}
+                          auctionEndAt={item.auctionEndAt}
+                          transferredRegistrationUrl={item.transferredRegistrationUrl}
+                        />
+                        {item.status === 'active' && item.ownerAccessToken && (
+                          <a
+                            href={`/my-listing/${item.ownerAccessToken}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
+                          >
+                            입찰 내역 상세보기 →
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
