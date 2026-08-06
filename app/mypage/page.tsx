@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import SaleStageTimeline from '@/components/SaleStageTimeline';
 
 type Status = 'pending' | 'active' | 'sold' | 'hidden';
 
@@ -18,6 +19,10 @@ interface StoreItem {
   registeredAt: string;
   carHash?: string;
   hasReport?: boolean;
+  saleStage?: string;
+  ownerAccessToken?: string;
+  auctionEndAt?: string;
+  transferredRegistrationUrl?: string;
 }
 
 const STATUS_MAP: Record<Status, { label: string; color: string }> = {
@@ -47,6 +52,7 @@ export default function MypagePage() {
   });
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const user = session?.user as any;
 
@@ -324,9 +330,39 @@ export default function MypagePage() {
                             </p>
                           </div>
                         )}
+
+                        {(item.status === 'active' || item.status === 'sold') && (
+                          <button
+                            onClick={() => setExpandedId(prev => prev === item.id ? null : item.id)}
+                            className="text-[11px] font-bold text-gray-400 hover:text-violet-600 transition-colors"
+                          >
+                            {expandedId === item.id ? '진행상황 접기 ▲' : '진행상황 보기 ▼'}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {expandedId === item.id && (item.status === 'active' || item.status === 'sold') && (
+                    <div className="border-t border-gray-100 px-4 py-5 bg-gray-50/50">
+                      <SaleStageTimeline
+                        status={item.status}
+                        saleStage={item.saleStage}
+                        auctionEndAt={item.auctionEndAt}
+                        transferredRegistrationUrl={item.transferredRegistrationUrl}
+                      />
+                      {item.status === 'active' && item.ownerAccessToken && (
+                        <a
+                          href={`/my-listing/${item.ownerAccessToken}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
+                        >
+                          입찰 내역 상세보기 →
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
