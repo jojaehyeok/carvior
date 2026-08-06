@@ -35,7 +35,7 @@ function DocUploadField({
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await fetch('/api/upload/dealer-doc', { method: 'POST', body: fd });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/upload-doc`, { method: 'POST', body: fd });
       const data = await res.json();
       if (data.url) onChange({ file, url: data.url, uploading: false, uploaded: true });
       else { onChange({ file, url: '', uploading: false, uploaded: false }); alert('업로드 실패. 다시 시도해주세요.'); }
@@ -71,7 +71,7 @@ function DocUploadField({
   );
 }
 
-function DealerApplyForm({ onDone }: { onDone: () => void }) {
+function DealerApplyForm({ userId, onDone }: { userId?: string; onDone: () => void }) {
   const [licenseDoc, setLicenseDoc] = useState<DocFile>(emptyDoc());
   const [businessDoc, setBusinessDoc] = useState<DocFile>(emptyDoc());
   const [hasBusiness, setHasBusiness] = useState(false);
@@ -84,12 +84,13 @@ function DealerApplyForm({ onDone }: { onDone: () => void }) {
     setError('');
     if (!licenseDoc.uploaded) { setError('자동차 매매종사원증을 업로드해주세요.'); return; }
     if (hasBusiness && !businessDoc.uploaded) { setError('사업자등록증을 업로드해주세요.'); return; }
+    if (!userId) { setError('로그인이 필요합니다.'); return; }
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/account/apply-dealer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/${userId}/apply-dealer`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '' },
         body: JSON.stringify({
           dealerLicenseUrl: licenseDoc.url,
           businessRegUrl: hasBusiness ? businessDoc.url : undefined,
@@ -98,7 +99,7 @@ function DealerApplyForm({ onDone }: { onDone: () => void }) {
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? '신청 실패'); return; }
+      if (!res.ok) { setError(data.message ?? '신청 실패'); return; }
       onDone();
     } catch {
       setError('서버와 통신할 수 없습니다.');
@@ -240,7 +241,7 @@ export default function AuctionAccessGate({ children }: { children: React.ReactN
         자동차 매매종사원증(또는 사업자등록증)을 등록하면<br />
         검토 후 스마트옥션을 이용하실 수 있어요.
       </p>
-      <DealerApplyForm onDone={() => setApplied(true)} />
+      <DealerApplyForm userId={user.id} onDone={() => setApplied(true)} />
       <button
         onClick={openChannelTalk}
         className="w-full mt-3 text-white/40 hover:text-white/70 font-bold py-2 rounded-xl text-xs transition-colors"

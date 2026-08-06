@@ -40,7 +40,7 @@ function FileUploadField({
     const fd = new FormData();
     fd.append('file', file);
     try {
-      const res = await fetch('/api/upload/dealer-doc', { method: 'POST', body: fd });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/upload-doc`, { method: 'POST', body: fd });
       const data = await res.json();
       if (data.url) {
         onChange({ file, url: data.url, uploading: false, uploaded: true });
