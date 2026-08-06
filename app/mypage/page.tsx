@@ -264,6 +264,20 @@ export default function MypagePage() {
           </div>
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
         </Link>
+
+        <Link
+          href="/marketing/partner-panel"
+          className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-800 transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">🔑</span>
+            <div className="min-w-0">
+              <p className="text-white font-black text-sm">자주 이용해주셔서 감사해요, 전용 관리페이지 어떠세요?</p>
+              <p className="text-zinc-400 text-xs mt-0.5">개별 검차 10회 이상 고객 대상 · 무료</p>
+            </div>
+          </div>
+          <span className="text-white text-xs font-bold shrink-0">자격 확인 →</span>
+        </Link>
       </div>
 
       {/* 내 매물 */}
