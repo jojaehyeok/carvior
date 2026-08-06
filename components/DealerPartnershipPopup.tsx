@@ -30,19 +30,19 @@ export default function DealerPartnershipPopup() {
   if (!visible) return null;
 
   return (
-    <div className="hidden sm:block fixed top-20 right-6 z-[200] w-96">
-      <div className="bg-zinc-900 rounded-2xl shadow-2xl border border-purple-500/20 overflow-hidden">
-        {/* 상단 헤더 */}
-        <div className="bg-gradient-to-r from-purple-700 to-indigo-700 px-5 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center text-xl shrink-0">🔨</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-black text-base leading-tight">딜러 제휴 파트너십</p>
-            <p className="text-purple-200 text-xs mt-0.5">매칭되지 않은 매물, 새로운 가치로 만드세요</p>
-          </div>
+    <div className="w-80 shrink-0 bg-zinc-900 rounded-2xl shadow-2xl border border-purple-500/20 overflow-hidden flex flex-col">
+      {/* 상단 헤더 */}
+      <div className="bg-gradient-to-r from-purple-700 to-indigo-700 px-5 py-4 flex items-center gap-3">
+        <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center text-xl shrink-0">🔨</div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-black text-base leading-tight">딜러 제휴 파트너십</p>
+          <p className="text-purple-200 text-xs mt-0.5">매칭되지 않은 매물, 새로운 가치로 만드세요</p>
         </div>
+      </div>
 
-        {/* 내용 */}
-        <div className="px-5 py-4">
+      {/* 내용 */}
+      <div className="px-5 py-4 flex-1 flex flex-col justify-between">
+        <div>
           {/* 3단계 플로우 */}
           <div className="flex items-center justify-between gap-1 mb-4 bg-white/5 border border-white/10 rounded-xl px-3 py-3">
             {STEPS.map((s, i) => (
@@ -64,25 +64,25 @@ export default function DealerPartnershipPopup() {
               </div>
             ))}
           </div>
-
-          <Link
-            href="/auction"
-            onClick={() => setVisible(false)}
-            className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors shadow-lg shadow-purple-900/40"
-          >
-            제휴 문의하기 →
-          </Link>
         </div>
 
-        {/* 하단 바: 다시 보지 않기 | 닫기 */}
-        <div className="flex items-stretch border-t border-white/10">
-          <button onClick={dismissForDay} className="flex-1 text-xs font-bold text-white/40 hover:text-white/70 py-2.5 transition-colors">
-            다시 보지 않기
-          </button>
-          <button onClick={() => setVisible(false)} className="w-11 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white/50 hover:text-white transition-colors text-base">
-            ×
-          </button>
-        </div>
+        <Link
+          href="/auction"
+          onClick={() => setVisible(false)}
+          className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors shadow-lg shadow-purple-900/40"
+        >
+          제휴 문의하기 →
+        </Link>
+      </div>
+
+      {/* 하단 바: 오늘 하루 보지 않기 | 닫기 */}
+      <div className="flex items-stretch border-t border-white/10">
+        <button onClick={dismissForDay} className="flex-1 text-xs font-bold text-white/40 hover:text-white/70 py-2.5 transition-colors">
+          오늘 하루 보지 않기
+        </button>
+        <button onClick={() => setVisible(false)} className="w-11 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white/50 hover:text-white transition-colors text-base">
+          ×
+        </button>
       </div>
     </div>
   );

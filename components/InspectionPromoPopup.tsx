@@ -28,19 +28,19 @@ export default function InspectionPromoPopup() {
   if (!visible) return null;
 
   return (
-    <div className="hidden sm:block fixed top-20 left-6 z-[200] w-96">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-        {/* 상단 헤더 */}
-        <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl shrink-0">🔍</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-black text-base leading-tight">중고차 구매 전, 전문가 출장검차</p>
-            <p className="text-violet-200 text-xs mt-0.5">한 번의 진단으로 큰 손해를 막으세요</p>
-          </div>
+    <div className="w-80 shrink-0 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col">
+      {/* 상단 헤더 */}
+      <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-4 flex items-center gap-3">
+        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl shrink-0">🔍</div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-black text-base leading-tight">중고차 구매 전, 전문가 출장검차</p>
+          <p className="text-violet-200 text-xs mt-0.5">한 번의 진단으로 큰 손해를 막으세요</p>
         </div>
+      </div>
 
-        {/* 내용 */}
-        <div className="px-5 py-4">
+      {/* 내용 */}
+      <div className="px-5 py-4 flex-1 flex flex-col justify-between">
+        <div>
           {/* 기능 2x2 그리드 */}
           <div className="grid grid-cols-2 gap-2 mb-4">
             {FEATURES.map(f => (
@@ -68,7 +68,9 @@ export default function InspectionPromoPopup() {
               </div>
             </div>
           </div>
+        </div>
 
+        <div>
           <Link
             href="/inspection"
             onClick={() => setVisible(false)}
@@ -84,16 +86,16 @@ export default function InspectionPromoPopup() {
             서비스 자세히 보기
           </Link>
         </div>
+      </div>
 
-        {/* 하단 바: 다시 보지 않기 | 닫기 */}
-        <div className="flex items-stretch border-t border-gray-100">
-          <button onClick={dismissForDay} className="flex-1 text-xs font-bold text-gray-400 hover:text-gray-600 py-2.5 transition-colors">
-            다시 보지 않기
-          </button>
-          <button onClick={() => setVisible(false)} className="w-11 flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white/70 hover:text-white transition-colors text-base">
-            ×
-          </button>
-        </div>
+      {/* 하단 바: 오늘 하루 보지 않기 | 닫기 */}
+      <div className="flex items-stretch border-t border-gray-100">
+        <button onClick={dismissForDay} className="flex-1 text-xs font-bold text-gray-400 hover:text-gray-600 py-2.5 transition-colors">
+          오늘 하루 보지 않기
+        </button>
+        <button onClick={() => setVisible(false)} className="w-11 flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white/70 hover:text-white transition-colors text-base">
+          ×
+        </button>
       </div>
     </div>
   );
