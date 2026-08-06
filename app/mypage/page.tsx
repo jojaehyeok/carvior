@@ -142,6 +142,17 @@ export default function MypagePage() {
     }
   };
 
+  // 새 탭 대신 화면 왼쪽 1/3 크기의 작은 팝업창으로 입찰현황 페이지를 띄움
+  const openMyListingPopup = (token: string) => {
+    const w = Math.round(window.screen.availWidth / 3);
+    const h = window.screen.availHeight;
+    window.open(
+      `/my-listing/${token}`,
+      'my-listing',
+      `width=${w},height=${h},left=0,top=0,scrollbars=yes,resizable=yes`
+    );
+  };
+
   const thumb = (item: StoreItem) => {
     return (item.photos as any)?.exterior?.[0]
       ?? Object.values(item.photos ?? {}).flat()[0]
@@ -499,14 +510,12 @@ export default function MypagePage() {
                           transferredRegistrationUrl={item.transferredRegistrationUrl}
                         />
                         {item.status === 'active' && item.ownerAccessToken && (
-                          <a
-                            href={`/my-listing/${item.ownerAccessToken}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="block text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
+                          <button
+                            onClick={() => openMyListingPopup(item.ownerAccessToken!)}
+                            className="block w-full text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
                           >
                             입찰 내역 상세보기 →
-                          </a>
+                          </button>
                         )}
                       </div>
                     )}
