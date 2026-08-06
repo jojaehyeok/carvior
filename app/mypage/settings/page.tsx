@@ -22,6 +22,11 @@ export default function MypageSettingsPage() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [consentSaving, setConsentSaving] = useState(false);
 
+  const [newPassword, setNewPassword] = useState('');
+  const [newPassword2, setNewPassword2] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwSaved, setPwSaved] = useState(false);
+
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
@@ -96,6 +101,30 @@ export default function MypageSettingsPage() {
     }
   };
 
+  const handleSetPassword = async () => {
+    if (!user?.id) return;
+    if (newPassword.length < 8) { alert('비밀번호는 8자 이상이어야 합니다.'); return; }
+    if (newPassword !== newPassword2) { alert('비밀번호가 일치하지 않습니다.'); return; }
+    setPwSaving(true);
+    setPwSaved(false);
+    try {
+      const res = await fetch(`${API}/users/${user.id}/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (!res.ok) throw new Error();
+      setNewPassword('');
+      setNewPassword2('');
+      setPwSaved(true);
+      setTimeout(() => setPwSaved(false), 2000);
+    } catch {
+      alert('비밀번호 설정에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setPwSaving(false);
+    }
+  };
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -154,6 +183,37 @@ export default function MypageSettingsPage() {
             className="w-full mt-4 py-3 rounded-xl bg-violet-600 text-white text-sm font-bold disabled:opacity-50 hover:bg-violet-500 transition-colors"
           >
             {saving ? '저장 중…' : saved ? '저장됨 ✓' : '저장하기'}
+          </button>
+        </div>
+
+        {/* 비밀번호 설정 */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-6">
+          <p className="text-xs font-black text-gray-700 mb-1">이메일 로그인 비밀번호</p>
+          <p className="text-[11px] text-gray-400 mb-4">
+            카카오·네이버로 가입하셨어도 여기서 비밀번호를 설정하면 이메일+비밀번호로도 로그인하실 수 있어요.
+          </p>
+          <div className="space-y-2.5">
+            <input
+              type="password"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              placeholder="새 비밀번호 (8자 이상)"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+            />
+            <input
+              type="password"
+              value={newPassword2}
+              onChange={e => setNewPassword2(e.target.value)}
+              placeholder="새 비밀번호 확인"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+            />
+          </div>
+          <button
+            onClick={handleSetPassword}
+            disabled={pwSaving || !newPassword || !newPassword2}
+            className="w-full mt-3 py-3 rounded-xl bg-violet-600 text-white text-sm font-bold disabled:opacity-50 hover:bg-violet-500 transition-colors"
+          >
+            {pwSaving ? '설정 중…' : pwSaved ? '설정됨 ✓' : '비밀번호 설정하기'}
           </button>
         </div>
 
