@@ -202,7 +202,7 @@ function AuctionContent() {
                     {/* 다른 딜러 입찰 현황은 금액을 공개하지 않음(경쟁입찰 원칙) — 건수/예상가만 표시 */}
                     <div className="bg-gray-50 rounded-xl p-3 mb-3 flex items-center justify-between">
                       <div>
-                        <p className="text-[10px] text-gray-400">예상 낙찰가</p>
+                        <p className="text-[10px] text-gray-400">판매자 희망가</p>
                         <p className="text-lg font-black text-gray-900">{fmtKRW(item.priceKRW)}</p>
                       </div>
                       <div className="text-right">

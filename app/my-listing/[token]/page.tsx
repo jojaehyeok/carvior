@@ -19,6 +19,7 @@ interface ListingItem {
   titleKo: string;
   year?: number;
   mileage?: number;
+  priceKRW?: number;
   status: string;
   saleStage?: string;
   auctionEndAt?: string | null;
@@ -121,6 +122,9 @@ export default function MyListingPage() {
                 {item.year ? ` · ${item.year}년` : ''}
                 {item.mileage ? ` · ${item.mileage.toLocaleString()}km` : ''}
               </p>
+              {!!item.priceKRW && (
+                <p className="text-xs text-violet-600 font-bold mt-0.5">내 희망가 {fmtKRW(item.priceKRW)}</p>
+              )}
             </div>
           </div>
         </div>

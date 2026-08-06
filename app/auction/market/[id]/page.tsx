@@ -391,10 +391,13 @@ function AuctionDetailContent() {
 
             {/* 가격 */}
             <div className="border-t border-b border-gray-100 py-4 mb-4">
-              <p className="text-[11px] font-bold text-gray-400 mb-1">예상 낙찰가</p>
+              <p className="text-[11px] font-bold text-gray-400 mb-1">판매자 희망가 (참고용)</p>
               <p className="text-3xl font-black text-gray-900 tracking-tight">
                 {priceLabel}
               </p>
+              {!closed && (
+                <p className="text-[11px] text-gray-400 mt-1">이 금액에 꼭 맞출 필요는 없어요 — 자유롭게 입찰해주세요</p>
+              )}
               {usd > 0 && (
                 <p className="text-sm text-gray-400 mt-1">
                   예상 수출가 ≈ ${usd.toLocaleString()}
