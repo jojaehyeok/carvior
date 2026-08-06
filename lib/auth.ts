@@ -56,7 +56,13 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
 
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      // 마이페이지 설정에서 닉네임/프로필사진 저장 후 useSession().update()로 호출되는 경로 —
+      // 재로그인 없이 세션 토큰에 바로 반영
+      if (trigger === 'update' && session) {
+        if (session.name) token.name = session.name;
+        if (session.image) token.picture = session.image;
+      }
       if (user) {
         token.role         = (user as any).role;
         token.userId       = (user as any).id;

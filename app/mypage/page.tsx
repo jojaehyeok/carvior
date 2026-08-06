@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import SaleStageTimeline from '@/components/SaleStageTimeline';
 
 type Status = 'pending' | 'active' | 'sold' | 'hidden';
@@ -72,9 +73,8 @@ export default function MypagePage() {
   const [soldRating, setSoldRating] = useState<Record<number, number>>(() => {
     try { return JSON.parse(localStorage.getItem('soldRating') ?? '{}'); } catch { return {}; }
   });
-  const [marketingConsent, setMarketingConsent] = useState(false);
-  const [consentSaving, setConsentSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [statusTab, setStatusTab] = useState<'all' | Status>('all');
   const [serviceFilter, setServiceFilter] = useState<Set<'inspection' | 'self'>>(new Set<'inspection' | 'self'>(['inspection', 'self']));
   const [stageFilter, setStageFilter] = useState<Set<string>>(new Set(STAGE_FILTER_MAP.map(s => s.key)));
   const [originFilter, setOriginFilter] = useState<'all' | 'domestic' | 'import'>('all');
@@ -93,31 +93,6 @@ export default function MypagePage() {
       .then(data => { setItems(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [status]);
-
-  useEffect(() => {
-    if (status !== 'authenticated') return;
-    fetch('/api/mypage/marketing-consent')
-      .then(r => r.json())
-      .then(data => setMarketingConsent(!!data.marketingConsent))
-      .catch(() => {});
-  }, [status]);
-
-  const toggleMarketingConsent = async () => {
-    const next = !marketingConsent;
-    setMarketingConsent(next);
-    setConsentSaving(true);
-    try {
-      await fetch('/api/mypage/marketing-consent', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ marketingConsent: next }),
-      });
-    } catch {
-      setMarketingConsent(!next);
-    } finally {
-      setConsentSaving(false);
-    }
-  };
 
   const markSold = async (item: StoreItem) => {
     const res = await fetch(`/api/mypage/store-items?id=${item.id}`, {
@@ -196,6 +171,8 @@ export default function MypagePage() {
   }, {});
 
   const filteredItems = items.filter(item => {
+    if (statusTab !== 'all' && item.status !== statusTab) return false;
+
     const svc = item.selfRegistered ? 'self' : 'inspection';
     if (!serviceFilter.has(svc)) return false;
 
@@ -246,36 +223,36 @@ export default function MypagePage() {
                 )}
               </div>
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-xs text-white/40 hover:text-white transition-colors"
-            >
-              로그아웃
-            </button>
+            <div className="flex items-center gap-3">
+              <Link href="/mypage/settings" className="text-xs text-white/40 hover:text-white transition-colors">
+                계정 설정
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-xs text-white/40 hover:text-white transition-colors"
+              >
+                로그아웃
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 계정 설정 */}
-      <div className="max-w-2xl mx-auto px-4 pt-6">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
-          <p className="text-xs font-black text-gray-700 mb-3">계정 설정</p>
-
-          <label className="flex items-center justify-between gap-2.5 cursor-pointer select-none">
-            <span className="text-sm text-gray-700">광고성 정보 수신 동의</span>
-            <div
-              onClick={toggleMarketingConsent}
-              className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${consentSaving ? 'opacity-50' : ''} ${marketingConsent ? 'bg-violet-600' : 'bg-gray-200'}`}
-            >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${marketingConsent ? 'translate-x-5' : 'translate-x-1'}`} />
+      {/* 제휴 검차 서비스 유도 배너 */}
+      <div className="max-w-6xl mx-auto px-4 pt-6">
+        <Link
+          href="/inspection?promo=member"
+          className="flex items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl px-5 py-4 hover:from-violet-500 hover:to-indigo-500 transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">🤝</span>
+            <div className="min-w-0">
+              <p className="text-white font-black text-sm">제휴 검차 서비스, 회원 전용가로 받아보세요</p>
+              <p className="text-violet-200 text-xs mt-0.5">국산 88,000원 · 수입 110,000원 (VAT 포함)</p>
             </div>
-          </label>
-
-          <div className="flex gap-4 mt-4 pt-3 border-t border-gray-100">
-            <a href="/policy/privacy" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-400 underline">개인정보처리방침</a>
-            <a href="/policy/terms" target="_blank" rel="noopener noreferrer" className="text-[11px] text-gray-400 underline">이용약관</a>
           </div>
-        </div>
+          <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
+        </Link>
       </div>
 
       {/* 내 매물 */}
@@ -289,6 +266,25 @@ export default function MypagePage() {
             + 차량 등록
           </button>
         </div>
+
+        {items.length > 0 && (
+          <div className="flex gap-2 mb-5 overflow-x-auto">
+            {[
+              { key: 'all' as const, label: '전체', count: items.length },
+              { key: 'active' as const, label: '판매중', count: items.filter(i => i.status === 'active').length },
+              { key: 'pending' as const, label: '판매대기', count: items.filter(i => i.status === 'pending').length },
+              { key: 'sold' as const, label: '판매완료', count: items.filter(i => i.status === 'sold').length },
+            ].map(t => (
+              <button
+                key={t.key}
+                onClick={() => setStatusTab(t.key)}
+                className={`shrink-0 text-xs font-bold px-3.5 py-2 rounded-lg transition-colors ${statusTab === t.key ? 'bg-gray-900 text-white' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'}`}
+              >
+                {t.label} {t.count}
+              </button>
+            ))}
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">

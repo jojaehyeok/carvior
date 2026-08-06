@@ -14,6 +14,12 @@ const CAR_TYPE_PRICING: Record<CarOrigin, { label: string; original: number; amo
   IMPORTED: { label: '수입차', original: 172_000, amount: 132_000 },
 };
 
+// 마이페이지 "제휴 검차 서비스" 배너(?promo=member)로 들어왔을 때 적용되는 회원 전용가
+const MEMBER_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
+  DOMESTIC: { label: '국산차', original: 99_000, amount: 88_000 },
+  IMPORTED: { label: '수입차', original: 132_000, amount: 110_000 },
+};
+
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -48,7 +54,12 @@ export default function InspectionCheckoutPage() {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
-  const pricing = CAR_TYPE_PRICING[carOrigin];
+  const [isMemberPromo, setIsMemberPromo] = useState(false);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('promo') === 'member') setIsMemberPromo(true);
+  }, []);
+  const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
+  const pricing = pricingTable[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
   const [widgetReady, setWidgetReady]   = useState(false);
@@ -356,6 +367,11 @@ export default function InspectionCheckoutPage() {
 
           {/* ── 왼쪽: 폼 ── */}
           <div className="lg:col-span-3 space-y-4">
+            {isMemberPromo && (
+              <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-2.5 text-xs font-bold text-violet-700 flex items-center gap-2">
+                🤝 제휴 검차 서비스 회원 전용가가 적용되었습니다
+              </div>
+            )}
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="font-black text-gray-900 text-sm mb-4">주문 상품 정보</h2>
               <div className="flex gap-4 items-center mb-4">
@@ -368,8 +384,8 @@ export default function InspectionCheckoutPage() {
 
               <p className="text-xs font-bold text-gray-500 mb-2">차량 구분 <span className="text-red-500">*</span></p>
               <div className="grid grid-cols-2 gap-2 mb-3">
-                {(Object.keys(CAR_TYPE_PRICING) as CarOrigin[]).map(key => {
-                  const opt = CAR_TYPE_PRICING[key];
+                {(Object.keys(pricingTable) as CarOrigin[]).map(key => {
+                  const opt = pricingTable[key];
                   const active = carOrigin === key;
                   return (
                     <button key={key} type="button" onClick={() => setCarOrigin(key)}
