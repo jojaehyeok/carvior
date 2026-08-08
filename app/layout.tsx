@@ -35,6 +35,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
           strategy="afterInteractive"
         />
+
+        {/* 구글 애즈 전환 추적 태그 */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18378467566"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-gtag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-18378467566');
+          `}
+        </Script>
       </body>
     </html>
   );
