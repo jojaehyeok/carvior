@@ -371,15 +371,9 @@ export default function MypagePage() {
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
         </Link>
 
-        {/* 탁송/파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로 */}
+        {/* 파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로. 탁송 신청은 매물별로
+            (판매완료된 카드의 "진행상황" 안에서) 받으므로 여기 전역 버튼은 없앰. */}
         <div className="flex gap-2 mt-3">
-          <Link
-            href="/transport"
-            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors"
-          >
-            🚚 탁송 신청
-          </Link>
-
           {partnerAppStatus === 'approved' ? (
             <a
               href="https://carvior.store/admin/login"
@@ -578,15 +572,20 @@ export default function MypagePage() {
                 const img = thumb(item);
                 return (
                   <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
-                    {/* 썸네일 */}
-                    <div className="aspect-[4/3] bg-gray-100 relative">
+                    {/* 썸네일 — 누르면 입찰 내역 상세보기로 이동 */}
+                    <button
+                      type="button"
+                      onClick={() => item.ownerAccessToken && openMyListingPopup(item.ownerAccessToken)}
+                      disabled={!item.ownerAccessToken}
+                      className="aspect-[4/3] bg-gray-100 relative block w-full text-left disabled:cursor-default"
+                    >
                       {img ? (
                         <img src={img} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">🚗</div>
                       )}
                       <span className={`absolute top-2 right-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${s.color}`}>{s.label}</span>
-                    </div>
+                    </button>
 
                     {/* 정보 */}
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
