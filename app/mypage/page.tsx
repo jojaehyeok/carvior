@@ -62,6 +62,26 @@ interface BookingForm {
   preferredDateTime: string;
 }
 
+interface InspectionBooking {
+  id: number;
+  carNumber: string;
+  carModel?: string;
+  address: string;
+  preferredDateTime: string;
+  status: string;
+  amount?: number;
+  paymentMethod?: string;
+  createdAt: string;
+  refundPreview?: { tier: 'FULL' | 'FEE' | 'NONE'; refundAmount: number; cancelFee: number };
+}
+
+const BOOKING_STATUS_MAP: Record<string, { label: string; color: string }> = {
+  PENDING:   { label: '배정 대기중', color: 'bg-yellow-100 text-yellow-700' },
+  ASSIGNED:  { label: '평가사 배정됨', color: 'bg-blue-100 text-blue-700' },
+  COMPLETED: { label: '진단 완료', color: 'bg-green-100 text-green-700' },
+  CANCELLED: { label: '취소됨', color: 'bg-gray-100 text-gray-500' },
+};
+
 export default function MypagePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -79,12 +99,58 @@ export default function MypagePage() {
   const [stageFilter, setStageFilter] = useState<Set<string>>(new Set(STAGE_FILTER_MAP.map(s => s.key)));
   const [originFilter, setOriginFilter] = useState<'all' | 'domestic' | 'import'>('all');
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
+  const [bookings, setBookings] = useState<InspectionBooking[]>([]);
+  const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
 
   const user = session?.user as any;
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
+
+  // bookings(검차 예약) 테이블엔 userId 컬럼이 없어서(비회원도 신청 가능한 예전 테이블),
+  // 로그인 회원과 연결할 방법이 가입 시 등록한 휴대폰번호뿐이라 그걸로 조회함.
+  // /api/v1/*는 항상 백엔드로 보장 라우팅되는 경로라(Apache 화이트리스트 이슈 없음) 프론트에서 직접 호출.
+  useEffect(() => {
+    if (status !== 'authenticated' || !user?.email) return;
+    const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+    (async () => {
+      try {
+        const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+        if (!uRes.ok) return;
+        const u = await uRes.json();
+        if (!u?.phone) return;
+        const bRes = await fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(u.phone)}`);
+        if (!bRes.ok) { setBookings([]); return; } // 일치하는 예약 없음(404)도 빈 배열로
+        const data = await bRes.json();
+        setBookings(Array.isArray(data) ? data : []);
+      } catch {
+        setBookings([]);
+      }
+    })();
+  }, [status, user?.email]);
+
+  const cancelBooking = async (booking: InspectionBooking) => {
+    if (!window.confirm('정말 취소하시겠어요? 취소 후에는 되돌릴 수 없어요.')) return;
+    setCancellingBookingId(booking.id);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (!u?.phone) throw new Error();
+      const res = await fetch(`${API}/external/request/${booking.id}/self-cancel`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: u.phone }),
+      });
+      if (!res.ok) throw new Error();
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'CANCELLED' } : b));
+    } catch {
+      alert('취소 처리 중 오류가 발생했습니다.');
+    } finally {
+      setCancellingBookingId(null);
+    }
+  };
 
   useEffect(() => {
     if (status !== 'authenticated') return;
@@ -280,6 +346,45 @@ export default function MypagePage() {
         </Link>
       </div>
 
+      {/* 내 검차 신청 */}
+      {bookings.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 pt-2">
+          <h2 className="text-lg font-black text-gray-900 mb-5">내 검차 신청</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {bookings.map(b => {
+              const bs = BOOKING_STATUS_MAP[b.status] ?? { label: b.status, color: 'bg-gray-100 text-gray-500' };
+              const canCancel = b.status === 'PENDING' || b.status === 'ASSIGNED';
+              return (
+                <div key={b.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-bold text-sm text-gray-900">{b.carNumber || b.carModel || '차량 정보 미입력'}</p>
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${bs.color}`}>{bs.label}</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    {b.address}<br />
+                    {b.preferredDateTime && new Date(b.preferredDateTime).toLocaleString('ko-KR', {
+                      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </p>
+                  {typeof b.amount === 'number' && (
+                    <p className="text-sm font-black text-violet-600">{b.amount.toLocaleString()}원</p>
+                  )}
+                  {canCancel && (
+                    <button
+                      onClick={() => cancelBooking(b)}
+                      disabled={cancellingBookingId === b.id}
+                      className="text-[11px] font-bold text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
+                    >
+                      {cancellingBookingId === b.id ? '취소 처리 중...' : '신청 취소'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* 내 매물 */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-5">
@@ -463,20 +568,22 @@ export default function MypagePage() {
                                 <p className="text-xs font-black text-green-800">🎉 판매 완료!</p>
                                 <p className="text-[10px] text-green-600 mt-0.5">카비어를 이용해주셔서 감사합니다</p>
                               </div>
-                              {!soldRating[item.id] ? (
-                                <div>
-                                  <p className="text-[10px] text-gray-400 mb-1">이용 경험을 평가해주세요</p>
-                                  <div className="flex gap-0.5">
-                                    {[1,2,3,4,5].map(s => (
-                                      <button key={s} onClick={() => submitRating(item, s)}
-                                        className="text-xl text-gray-200 hover:text-amber-400 transition-colors leading-none">★</button>
-                                    ))}
+                              {item.saleStage === 'completed' && (
+                                !soldRating[item.id] ? (
+                                  <div>
+                                    <p className="text-[10px] text-gray-400 mb-1">이용 경험을 평가해주세요</p>
+                                    <div className="flex gap-0.5">
+                                      {[1,2,3,4,5].map(s => (
+                                        <button key={s} onClick={() => submitRating(item, s)}
+                                          className="text-xl text-gray-200 hover:text-amber-400 transition-colors leading-none">★</button>
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
-                              ) : (
-                                <p className="text-[11px] text-amber-500 font-bold">
-                                  {'★'.repeat(soldRating[item.id])}{'☆'.repeat(5 - soldRating[item.id])} 감사합니다!
-                                </p>
+                                ) : (
+                                  <p className="text-[11px] text-amber-500 font-bold">
+                                    {'★'.repeat(soldRating[item.id])}{'☆'.repeat(5 - soldRating[item.id])} 감사합니다!
+                                  </p>
+                                )
                               )}
                               <button
                                 onClick={() => router.push('/sell/register')}
@@ -523,7 +630,7 @@ export default function MypagePage() {
                           auctionEndAt={item.auctionEndAt}
                           transferredRegistrationUrl={item.transferredRegistrationUrl}
                         />
-                        {item.status === 'active' && item.ownerAccessToken && (
+                        {(item.status === 'active' || item.status === 'sold') && item.ownerAccessToken && (
                           <button
                             onClick={() => openMyListingPopup(item.ownerAccessToken!)}
                             className="block w-full text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"

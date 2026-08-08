@@ -689,15 +689,18 @@ export default function InspectionCheckoutPage() {
             {/* 결제 방법 토글 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <p className="text-xs font-black text-gray-500 mb-3">결제 방법</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setPayMethod('widget')}
                   className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'widget' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                   카드·간편결제
                 </button>
+                {/* 네이버페이 — 가맹점 심사 완료 전까지 노출 중단. 로직/버튼 자체는 그대로 두고
+                    이 토글만 숨겨서 payMethod가 'naverpay'가 될 수 없게 함(심사 끝나면 이 주석 풀면 됨).
                 <button onClick={() => setPayMethod('naverpay')}
                   className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'naverpay' ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                   네이버페이
                 </button>
+                */}
                 <button onClick={() => setPayMethod('direct')}
                   className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'direct' ? 'border-gray-700 bg-gray-50 text-gray-900' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                   직접 계좌이체

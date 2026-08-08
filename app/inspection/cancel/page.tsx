@@ -44,22 +44,25 @@ export default function InspectionCancelPage() {
   const [cancelledMap, setCancelledMap] = useState<Record<number, number>>({});
 
   const handleLookup = async () => {
-    if (!name.trim() || !contact.trim()) {
-      setError("이름과 연락처를 모두 입력해주세요.");
+    if (!name.trim() && !contact.trim()) {
+      setError("이름 또는 연락처 중 하나는 입력해주세요.");
       return;
     }
     setError(null);
     setBookings(null);
     setLoading(true);
     try {
+      const params = new URLSearchParams();
+      if (name.trim()) params.set("name", name.trim());
+      if (contact.trim()) params.set("contact", contact.trim());
       const res = await fetch(
-        `https://carvior.store/api/v1/external/request/lookup-by-name?name=${encodeURIComponent(name.trim())}&contact=${encodeURIComponent(contact.trim())}`,
+        `https://carvior.store/api/v1/external/request/lookup-by-name?${params.toString()}`,
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "일치하는 예약을 찾을 수 없습니다.");
       setBookings(data);
     } catch (e: any) {
-      setError(e.message || "일치하는 예약을 찾을 수 없습니다. 이름과 연락처를 다시 확인해주세요.");
+      setError(e.message || "일치하는 예약을 찾을 수 없습니다. 이름 또는 연락처를 다시 확인해주세요.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +78,7 @@ export default function InspectionCancelPage() {
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contact: contact.trim() }),
+          body: JSON.stringify({ contact: contact.trim(), name: name.trim() }),
         },
       );
       const data = await res.json();
@@ -110,7 +113,7 @@ export default function InspectionCancelPage() {
           />
           <input
             type="tel"
-            placeholder="연락처 (신청 시 입력한 번호)"
+            placeholder="연락처 (신청 시 입력한 번호) — 이름 또는 연락처 중 하나만 입력해도 돼요"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
