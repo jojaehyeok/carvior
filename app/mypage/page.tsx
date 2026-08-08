@@ -26,6 +26,9 @@ interface StoreItem {
   transferredRegistrationUrl?: string;
   selfRegistered?: boolean;
   category?: string;
+  depositConfirmed?: boolean;
+  transportPreferredDateTime?: string | null;
+  transportRequestedAt?: string | null;
 }
 
 // 낙찰 이후 세부단계(winner_selected/in_transit/transit_done/completed)를
@@ -102,6 +105,8 @@ export default function MypagePage() {
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
   const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
+  const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
 
   const user = session?.user as any;
 
@@ -174,6 +179,31 @@ export default function MypagePage() {
       body: JSON.stringify({ status: 'sold' }),
     });
     if (res.ok) setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'sold' } : i));
+  };
+
+  // 차대금 입금확인(depositConfirmed) 이후 차주가 탁송 희망 일시를 신청 — ownerAccessToken으로
+  // 본인 인증(로그인 계정과 별개로 매물마다 발급된 토큰, /my-listing 페이지와 동일한 방식)
+  const requestTransport = async (item: StoreItem) => {
+    const dt = transportDateTime[item.id];
+    if (!dt) { alert('탁송 희망 일시를 입력해주세요.'); return; }
+    if (!item.ownerAccessToken) return;
+    setRequestingTransportId(item.id);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const res = await fetch(`${API}/external/my-listing/${item.ownerAccessToken}/request-transport`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ preferredDateTime: dt }),
+      });
+      if (!res.ok) throw new Error();
+      setItems(prev => prev.map(i => i.id === item.id
+        ? { ...i, transportPreferredDateTime: dt, transportRequestedAt: new Date().toISOString() }
+        : i));
+    } catch {
+      alert('탁송 신청 중 오류가 발생했습니다.');
+    } finally {
+      setRequestingTransportId(null);
+    }
   };
 
   const submitRating = (item: StoreItem, stars: number) => {
@@ -679,6 +709,36 @@ export default function MypagePage() {
                           auctionEndAt={item.auctionEndAt}
                           transferredRegistrationUrl={item.transferredRegistrationUrl}
                         />
+
+                        {item.depositConfirmed && (
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            {item.transportRequestedAt ? (
+                              <p className="text-xs font-bold text-violet-600">
+                                🚚 탁송 신청 완료 · 희망일시: {new Date(item.transportPreferredDateTime!).toLocaleString('ko-KR', {
+                                  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+                                })}
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                <p className="text-xs font-bold text-gray-700">차대금 입금이 확인됐어요. 탁송 희망 일시를 알려주세요.</p>
+                                <input
+                                  type="datetime-local"
+                                  value={transportDateTime[item.id] ?? ''}
+                                  onChange={e => setTransportDateTime(prev => ({ ...prev, [item.id]: e.target.value }))}
+                                  className="w-full text-xs border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-violet-500"
+                                />
+                                <button
+                                  onClick={() => requestTransport(item)}
+                                  disabled={requestingTransportId === item.id}
+                                  className="w-full py-2 text-xs font-bold rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
+                                >
+                                  {requestingTransportId === item.id ? '신청 중...' : '🚚 탁송 신청하기'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
                         {(item.status === 'active' || item.status === 'sold') && item.ownerAccessToken && (
                           <button
                             onClick={() => openMyListingPopup(item.ownerAccessToken!)}
