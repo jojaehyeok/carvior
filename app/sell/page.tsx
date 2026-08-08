@@ -13,7 +13,7 @@ const STEPS = [
 ];
 
 const FAQS = [
-  { q: '등록 비용이 있나요?', a: 'MVP 기간 동안 완전 무료입니다. 딜러와 직접 거래 시에도 별도 수수료는 없습니다.' },
+  { q: '등록 비용이 있나요?', a: '등록비는 없습니다. 딜러와 직접 거래 시에도 별도 수수료는 없습니다.' },
   { q: '일반인도 등록할 수 있나요?', a: '네, 딜러가 아닌 일반 개인도 등록 가능합니다. 카비어 검토 후 스토어에 노출됩니다.' },
   { q: '수출용 차량도 등록되나요?', a: '수출 셀프 등록도 가능합니다. 차량 정보 입력 시 수출 희망 여부를 체크해주세요.' },
   { q: '사진 없이도 등록할 수 있나요?', a: '기본 정보만으로 접수는 가능하나, 사진이 있는 매물이 딜러 관심을 3배 이상 더 받습니다.' },
@@ -40,11 +40,11 @@ export default function SellPage() {
         <div className="max-w-xl mx-auto px-5 pt-10 pb-8">
           <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/30 rounded-full px-3 py-1.5 mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-green-300 tracking-wider">완전 무료 · MVP 한정</span>
+            <span className="text-[11px] font-bold text-green-300 tracking-wider">수수료 0원 · 딜러 직거래</span>
           </div>
 
           <h1 className="text-[1.9rem] sm:text-[2.2rem] font-black leading-[1.2] mb-3 tracking-tight">
-            내 차를 무료로 올리고<br />
+            내 차를 등록하고<br />
             <span className="text-violet-400">더 많이 받아가세요</span>
           </h1>
           <p className="text-zinc-400 text-sm leading-relaxed mb-6">
@@ -84,7 +84,7 @@ export default function SellPage() {
           <div className="flex items-center gap-3 mb-5">
             <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/30 rounded-full px-3 py-1.5">
               <span className="text-[11px] text-green-400 font-bold">등록비</span>
-              <span className="text-sm font-black text-green-300">무료</span>
+              <span className="text-sm font-black text-green-300">0원</span>
             </div>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
               <span className="text-[11px] text-zinc-400">딜러 수수료</span>
@@ -96,7 +96,7 @@ export default function SellPage() {
             onClick={() => router.push('/sell/register')}
             className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-900/40"
           >
-            무료로 등록하기 →
+            등록하기 →
           </button>
           <p className="text-center text-zinc-600 text-[11px] mt-2">일반인·딜러·수출 차량 모두 가능 · 지금 바로 시작</p>
         </div>
@@ -140,7 +140,7 @@ export default function SellPage() {
             onClick={() => router.push('/sell/register')}
             className="inline-block px-10 py-3.5 bg-white text-violet-700 font-extrabold text-sm rounded-2xl hover:bg-violet-50 active:scale-95 transition-all shadow-lg"
           >
-            무료로 시작하기 →
+            지금 시작하기 →
           </button>
         </div>
       </section>
@@ -245,7 +245,7 @@ export default function SellPage() {
             onClick={() => router.push('/sell/register')}
             className="w-full max-w-xs py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all mx-auto block"
           >
-            무료로 등록하기 →
+            등록하기 →
           </button>
           <div className="pt-4 border-t border-zinc-800">
             <p className="text-zinc-600 text-xs mb-1.5">등록 문의</p>
@@ -268,8 +268,8 @@ export default function SellPage() {
             onClick={() => router.push('/sell/register')}
             className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl shadow-2xl shadow-violet-900/50 transition-all flex items-center justify-center gap-3 border border-violet-500/30"
           >
-            <span>무료로 등록하기</span>
-            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">무료</span>
+            <span>등록하기</span>
+            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-xs font-black">0원</span>
           </button>
         </div>
       </div>

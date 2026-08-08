@@ -19,7 +19,7 @@ export default function HomePage() {
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-8">
               <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
-              MVP 한정 · 등록 완전 무료
+              전문 평가사 진단 기반 · 신뢰 거래
             </span>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
@@ -36,7 +36,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-3">
               <Link href="/sell/register"
                 className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-                내 차 무료 등록 →
+                내 차 등록하기 →
               </Link>
               <Link href="/price"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
@@ -47,8 +47,8 @@ export default function HomePage() {
 
           <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: '🚗', title: '무료 등록', sub: '지금 바로 올려보세요' },
-              { icon: '💰', title: '등록비 무료', sub: 'MVP 기간 한정' },
+              { icon: '🚗', title: '간편 등록', sub: '지금 바로 올려보세요' },
+              { icon: '📝', title: '진단 기반 시세', sub: '평가사 정밀 진단' },
               { icon: '🌏', title: '딜러 네트워크', sub: '수출업자까지 연결' },
               { icon: '📋', title: '투명한 이력', sub: '사고·침수 전수 공개' },
             ].map(c => (
@@ -89,13 +89,13 @@ export default function HomePage() {
           <Link href="/sell"
             className="group relative overflow-hidden rounded-2xl bg-violet-600 p-7 hover:bg-violet-500 transition-colors duration-200">
             <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">💵</div>
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60 mb-4">SELL · FREE</p>
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60 mb-4">SELL</p>
             <h3 className="text-xl font-black text-white mb-2">차 팔고 싶어요</h3>
             <p className="text-white/70 text-sm leading-relaxed mb-6">
-              등록비도, 수수료도 0원.<br />진단만 받으면 딜러 네트워크에 바로 노출.
+              진단만 받으면<br />딜러 네트워크에 바로 노출.
             </p>
             <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
-              무료로 등록하기
+              등록하기
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
@@ -158,7 +158,7 @@ export default function HomePage() {
 
           <Link href="/inspection"
             className="inline-flex items-center gap-2 mt-10 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-            무료 검차 신청하기
+검차 신청하기
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -233,7 +233,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-3 gap-4 max-w-2xl">
             {[
-              { label: '입찰 수수료', value: '0원' },
+              { label: '출품 조건', value: '진단신청 필수' },
               { label: '매매정보 공개', value: '승인 딜러만' },
               { label: '참여 가능', value: '딜러·수출·폐차' },
             ].map(s => (
@@ -360,16 +360,16 @@ export default function HomePage() {
       <section className="bg-violet-600 py-20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
-            <p className="text-violet-300 text-xs font-bold tracking-widest uppercase mb-3">MVP 기간 한정</p>
+            <p className="text-violet-300 text-xs font-bold tracking-widest uppercase mb-3">지금 시작하세요</p>
             <h2 className="text-3xl font-black text-white leading-tight mb-2">
-              내 차, 지금 바로<br />무료로 올려보세요.
+              내 차, 지금 바로<br />등록해보세요.
             </h2>
-            <p className="text-violet-200 text-sm">등록비 0원 · 수수료 0원 · 딜러 네트워크 자동 연결</p>
+            <p className="text-violet-200 text-sm">진단만 받으면 딜러 네트워크 자동 연결</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <Link href="/sell/register"
               className="bg-white text-violet-700 font-black px-8 py-4 rounded-xl text-sm hover:bg-violet-50 transition-colors text-center">
-              지금 무료 등록하기
+              지금 등록하기
             </Link>
             <Link href="/price"
               className="border border-white/30 text-white font-bold px-8 py-4 rounded-xl text-sm hover:bg-white/10 transition-colors text-center">

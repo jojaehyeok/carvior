@@ -15,7 +15,7 @@ const AUDIENCE = [
 const STEPS = [
   { num: '01', title: '딜러 인증', desc: '매매종사원증 또는 사업자등록증을 등록하고 승인을 받아요.' },
   { num: '02', title: '진단 매물 확인', desc: '카비어 평가사가 진단한 차량 정보를 실시간으로 확인해요.' },
-  { num: '03', title: '직접 입찰', desc: '원하는 가격에 자유롭게 입찰, 수수료는 0원이에요.' },
+  { num: '03', title: '직접 입찰', desc: '진단신청 필수 매물만 올라와요, 원하는 가격에 자유롭게 입찰하세요.' },
 ];
 
 export default function AuctionPage() {
@@ -44,7 +44,7 @@ export default function AuctionPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10 max-w-3xl">
             {[
               { icon: '✦', title: '진단 데이터 공개', desc: '사고·침수 이력, 주행거리까지 투명하게' },
-              { icon: '⚡', title: '수수료 없는 입찰', desc: '원하는 가격에 자유롭게 제안' },
+              { icon: '⚡', title: '진단신청 필수', desc: '진단 완료 매물만 자유롭게 입찰' },
               { icon: '🔒', title: '승인 딜러만 열람', desc: '매매정보는 인증된 딜러에게만 공개' },
             ].map(f => (
               <div key={f.title} className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4">
@@ -118,7 +118,7 @@ export default function AuctionPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { label: '진단 완료율', value: '100%' },
-              { label: '입찰 수수료', value: '0원' },
+              { label: '진단신청', value: '필수' },
               { label: '매매정보 공개', value: '승인 딜러만' },
             ].map(s => (
               <div key={s.label} className="bg-white/5 border border-white/10 rounded-xl px-4 py-5">
