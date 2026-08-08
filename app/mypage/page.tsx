@@ -441,7 +441,7 @@ export default function MypagePage() {
                       {/* 버튼 + 상태 메시지 */}
                       <div className="space-y-2">
                         <div className="flex flex-wrap gap-1.5">
-                          {(item.status === 'pending' || item.status === 'active') && !item.hasReport && (
+                          {(item.status === 'pending' || item.status === 'active' || item.status === 'sold') && !item.hasReport && (
                             <a
                               href="/inspection"
                               className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-amber-400 text-amber-900 hover:bg-amber-300 transition-colors"

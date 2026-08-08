@@ -7,6 +7,12 @@ import { CHANNEL_BUTTON_VISIBILITY_EVENT } from '@/components/ChannelTalk';
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
 const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder: '(주)카비어' };
 
+// 네이버페이 — 가맹점 승인 전까지는 개발가이드 샘플 값으로 폴백(실결제 불가, 결제창 자체가 안 열림).
+// 승인 완료 후 발급받는 진짜 Client ID/Chain ID를 .env에 넣으면 그대로 적용됨.
+const NAVERPAY_CLIENT_ID = process.env.NEXT_PUBLIC_NAVERPAY_CLIENT_ID ?? 'HN3GGCMDdTgGUfl0kFCo';
+const NAVERPAY_CHAIN_ID  = process.env.NEXT_PUBLIC_NAVERPAY_CHAIN_ID ?? 'bXJhWkw4dEhmRkw';
+const NAVERPAY_MODE      = (process.env.NEXT_PUBLIC_NAVERPAY_MODE as 'development' | 'production') || 'development';
+
 // 국산차/수입차 구매동행 프로모션 가격 (VAT 포함, 최종 결제 금액 기준)
 type CarOrigin = 'DOMESTIC' | 'IMPORTED';
 const CAR_TYPE_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
@@ -20,10 +26,16 @@ const MEMBER_PRICING: Record<CarOrigin, { label: string; original: number; amoun
   IMPORTED: { label: '수입차', original: 132_000, amount: 110_000 },
 };
 
+// 결제 플로우 실결제 테스트용(?promo=test) — 실제 고객에게는 노출되지 않고 링크를 아는 사람만 진입
+const TEST_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
+  DOMESTIC: { label: '국산차', original: 139_000, amount: 500 },
+  IMPORTED: { label: '수입차', original: 172_000, amount: 500 },
+};
+
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
-type PayMethod = 'widget' | 'direct';
+type PayMethod = 'widget' | 'direct' | 'naverpay';
 
 interface Form {
   carNumber:     string;
@@ -55,16 +67,21 @@ export default function InspectionCheckoutPage() {
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
   const [isMemberPromo, setIsMemberPromo] = useState(false);
+  const [isTestPromo, setIsTestPromo]     = useState(false);
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('promo') === 'member') setIsMemberPromo(true);
+    const promo = new URLSearchParams(window.location.search).get('promo');
+    if (promo === 'member') setIsMemberPromo(true);
+    if (promo === 'test')   setIsTestPromo(true);
   }, []);
-  const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
+  const pricingTable = isTestPromo ? TEST_PRICING : isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
   const pricing = pricingTable[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
   const [widgetReady, setWidgetReady]   = useState(false);
   const [transferDone, setTransferDone] = useState(false);
   const widgetsRef = useRef<any>(null);
+  const [naverPayReady, setNaverPayReady] = useState(false);
+  const naverPayRef = useRef<any>(null);
 
   // 방문 주소+날짜 기준 "실제 그 시간대에 뛸 수 있는 평가사가 있는지" 조회 —
   // 헤이딜러처럼 미리 안 되는 시간을 걸러서, 아무도 배정 못 받는 시간에 결제부터
@@ -167,6 +184,30 @@ export default function InspectionCheckoutPage() {
     widgetsRef.current.setAmount({ currency: 'KRW', value: pricing.amount }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pricing.amount, widgetReady]);
+
+  // 네이버페이 SDK — 토스 위젯과 마찬가지로 showRestOfForm 시점에 딱 한 번만 초기화.
+  // 가맹점 승인 전(샘플 clientId)에는 oPay.open() 호출 시 "연결된 가맹점이 없어…" 안내가 뜸 —
+  // SDK 로딩 자체는 정상이라 naverPayReady는 true가 되고, 버튼을 눌러야 그 안내가 노출됨.
+  const naverPayInitStarted = useRef(false);
+  useEffect(() => {
+    if (!showRestOfForm || naverPayInitStarted.current) return;
+    naverPayInitStarted.current = true;
+    const init = () => {
+      const NP = (window as any).Naver;
+      if (!NP?.Pay) return;
+      naverPayRef.current = NP.Pay.create({
+        mode: NAVERPAY_MODE,
+        clientId: NAVERPAY_CLIENT_ID,
+        chainId: NAVERPAY_CHAIN_ID,
+      });
+      setNaverPayReady(true);
+    };
+    if ((window as any).Naver?.Pay) { init(); return; }
+    const s  = document.createElement('script');
+    s.src    = 'https://nsp.pay.naver.com/sdk/js/naverpay.min.js';
+    s.onload = () => init();
+    document.head.appendChild(s);
+  }, [showRestOfForm]);
 
   // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "도이치오토월드" 같은 매물 단지/상호명으로는
   // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면에서 이미 쓰고 있는 것과 동일 REST
@@ -287,6 +328,32 @@ export default function InspectionCheckoutPage() {
       if (e?.code !== 'USER_CANCEL') alert('결제 중 오류가 발생했습니다. 다시 시도해주세요.');
       setLoading(false);
     }
+  };
+
+  const payWithNaverPay = () => {
+    if (!validate()) return;
+    if (!naverPayReady || !naverPayRef.current) {
+      alert('결제 준비 중입니다. 잠시 후 다시 시도해주세요.'); return;
+    }
+    const merchantPayKey = `CARVIOR-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+    sessionStorage.setItem(`order_${merchantPayKey}`, JSON.stringify({
+      carNumber: form.carNumber, carOwner: form.ownerName,
+      contact: form.phone.replace(/-/g, ''),
+      address: `${form.address} ${form.addressDetail}`.trim(),
+      preferredDateTime, email: form.email || '',
+      dealerName: form.dealerName || '', dealerContact: form.dealerContact || '',
+      listingUrl: form.listingUrl || '',
+      carOrigin, amount: pricing.amount,
+    }));
+    naverPayRef.current.open({
+      merchantPayKey,
+      productName: `카비어 검차 서비스 (${pricing.label})`,
+      productCount: '1',
+      totalPayAmount: String(pricing.amount),
+      taxScopeAmount: String(pricing.amount),
+      taxExScopeAmount: '0',
+      returnUrl: `${window.location.origin}/inspection/naverpay-return`,
+    });
   };
 
   const submitTransfer = async () => {
@@ -631,10 +698,14 @@ export default function InspectionCheckoutPage() {
             {/* 결제 방법 토글 */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <p className="text-xs font-black text-gray-500 mb-3">결제 방법</p>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button onClick={() => setPayMethod('widget')}
                   className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'widget' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                   카드·간편결제
+                </button>
+                <button onClick={() => setPayMethod('naverpay')}
+                  className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'naverpay' ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                  네이버페이
                 </button>
                 <button onClick={() => setPayMethod('direct')}
                   className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'direct' ? 'border-gray-700 bg-gray-50 text-gray-900' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
@@ -654,6 +725,14 @@ export default function InspectionCheckoutPage() {
               )}
               <div id="toss-payment-widget" />
             </div>
+
+            {/* 네이버페이 안내 (naverpay 선택 시) */}
+            {payMethod === 'naverpay' && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                <p className="text-xs font-bold text-gray-500 mb-2">네이버페이로 결제</p>
+                <p className="text-xs text-gray-400 leading-relaxed">아래 결제 버튼을 누르면 네이버페이 결제창이 열립니다.</p>
+              </div>
+            )}
 
             {/* 직접 계좌이체 안내 */}
             {payMethod === 'direct' && (
@@ -706,6 +785,11 @@ export default function InspectionCheckoutPage() {
               <button onClick={payWithWidget} disabled={loading || !widgetReady}
                 className="w-full bg-blue-500 hover:bg-blue-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors">
                 {loading ? '결제 처리 중...' : !widgetReady ? '로딩 중...' : '결제하기'}
+              </button>
+            ) : payMethod === 'naverpay' ? (
+              <button onClick={payWithNaverPay} disabled={loading || !naverPayReady}
+                className="w-full bg-green-500 hover:bg-green-400 disabled:bg-gray-200 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl text-sm transition-colors">
+                {!naverPayReady ? '로딩 중...' : '네이버페이로 결제하기'}
               </button>
             ) : (
               <button onClick={submitTransfer} disabled={loading}
