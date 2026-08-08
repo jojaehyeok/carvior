@@ -73,7 +73,7 @@ export default function InspectionCheckoutPage() {
   const [regionCovered, setRegionCovered]   = useState<boolean | null>(null);
   // 신청 지역에 실제로 활동 중인 평가사 — "활성 평가사님이 기다리고 있어요" 카드에 표시.
   // rating은 실제 리뷰 평균(리뷰 없으면 5점 기본), highlight는 축약된 실제 후기 한 줄.
-  const [activeDrivers, setActiveDrivers] = useState<{ name: string; rating: number; reviewCount: number; highlight: string | null }[]>([]);
+  const [activeDrivers, setActiveDrivers] = useState<{ name: string; rating: number; reviewCount: number; highlight: string | null; photoUrl: string | null; completedCount: number }[]>([]);
   const [loadingSlots, setLoadingSlots]     = useState(false);
   const [consultSubmitting, setConsultSubmitting] = useState(false);
   const [consultDone, setConsultDone]       = useState(false);
@@ -90,7 +90,7 @@ export default function InspectionCheckoutPage() {
       .then((data: {
         regionCovered: boolean;
         slots: { time: string; available: boolean }[];
-        activeDrivers?: { name: string; rating: number; reviewCount: number; highlight: string | null }[];
+        activeDrivers?: { name: string; rating: number; reviewCount: number; highlight: string | null; photoUrl: string | null; completedCount: number }[];
       }) => {
         if (cancelled) return;
         const map: Record<string, boolean> = {};
@@ -475,7 +475,11 @@ export default function InspectionCheckoutPage() {
                         <div key={i} className="shrink-0 w-56 border border-gray-100 rounded-xl p-3 bg-gray-50">
                           <div className="flex items-center gap-2.5">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/logo-icon.svg" alt="" className="w-10 h-10 rounded-full bg-white border border-gray-100 p-1.5 shrink-0" />
+                            <img
+                              src={d.photoUrl || '/logo-icon.svg'}
+                              alt=""
+                              className={`w-10 h-10 rounded-full bg-white border border-gray-100 shrink-0 ${d.photoUrl ? 'object-cover' : 'p-1.5'}`}
+                            />
                             <div className="min-w-0">
                               <p className="text-sm font-black text-gray-900 truncate">{d.name} 평가사님</p>
                               <p className="text-[11px] text-gray-400 truncate">{activeDriverRegionLabel} 지역에서 활동 중</p>
@@ -485,6 +489,9 @@ export default function InspectionCheckoutPage() {
                             {'★'.repeat(filledStars)}{'☆'.repeat(5 - filledStars)}{' '}
                             <span className="text-gray-400 font-normal">{d.rating.toFixed(1)}</span>
                           </p>
+                          {d.completedCount > 0 && (
+                            <p className="text-[11px] text-gray-400 mt-0.5 truncate">누적 진단 {d.completedCount.toLocaleString()}대</p>
+                          )}
                           {d.highlight && (
                             <p className="text-[11px] text-gray-500 mt-1 truncate">&ldquo;{d.highlight}&rdquo;</p>
                           )}

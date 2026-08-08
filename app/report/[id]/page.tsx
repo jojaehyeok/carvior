@@ -16,6 +16,8 @@ interface ReportData {
   dealerName?: string | null;
   driverName?: string | null;
   assignedDriverId?: string | null;
+  driverPhotoUrl?: string | null;
+  driverCompletedCount?: number;
   isConsumerBooking?: boolean;
   car_info: {
     number: string;
@@ -552,7 +554,7 @@ export default function PublicReportPage() {
     );
   }
 
-  const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos, isConsumerBooking, evaluationOk, engineNoiseVideoUrl, videoUrls } = data;
+  const { dealerName, driverName, driverPhotoUrl, driverCompletedCount, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos, isConsumerBooking, evaluationOk, engineNoiseVideoUrl, videoUrls } = data;
   const allIssueVideos = [...(videoUrls ?? []), ...(engineNoiseVideoUrl ? [engineNoiseVideoUrl] : [])];
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, 평가사 앱 입력은 그대로 두고
   // 리포트 표시에서만 B를 W로 합쳐서 보여준다(라벨도 "판금/용접"으로 통합)
@@ -595,7 +597,22 @@ export default function PublicReportPage() {
           {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
         </h1>
         {dealerName && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
-        {driverName && <p className="mt-1 text-sm text-gray-400">{t("inspector", lang)}: {driverName}</p>}
+        {driverName && (
+          <div className="mt-3 inline-flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={driverPhotoUrl || "/logo-icon.svg"}
+              alt=""
+              className={`w-11 h-11 rounded-full bg-white border border-gray-100 shrink-0 ${driverPhotoUrl ? "object-cover" : "p-2"}`}
+            />
+            <div className="text-left">
+              <p className="text-sm font-bold text-gray-900">{driverName} {t("inspector", lang)}</p>
+              {!!driverCompletedCount && driverCompletedCount > 0 && (
+                <p className="text-xs text-gray-400">누적 진단 {driverCompletedCount.toLocaleString()}대</p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 차량 기본 정보 */}
