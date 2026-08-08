@@ -332,6 +332,20 @@ export default function MypagePage() {
         </Link>
 
         <Link
+          href="/transport"
+          className="flex items-center justify-between gap-4 bg-zinc-800 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-700 transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-2xl shrink-0">🚚</span>
+            <div className="min-w-0">
+              <p className="text-white font-black text-sm">차량 탁송, 카비어에 맡겨보세요</p>
+              <p className="text-zinc-400 text-xs mt-0.5">출발지·도착지만 남기면 상담부터 무료</p>
+            </div>
+          </div>
+          <span className="text-white text-xs font-bold shrink-0">탁송 신청 →</span>
+        </Link>
+
+        <Link
           href="/marketing/partner-panel"
           className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-800 transition-colors"
         >
