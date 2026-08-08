@@ -89,6 +89,12 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                   >
                     마이페이지
                   </button>
+                  <button
+                    onClick={() => { setProfileOpen(false); router.push('/mypage/settings'); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    계정 설정
+                  </button>
                   <div className="border-t border-gray-100 my-1" />
                   <button
                     onClick={() => { setProfileOpen(false); signOut({ callbackUrl: '/' }); }}

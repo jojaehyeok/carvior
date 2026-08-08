@@ -103,6 +103,7 @@ export default function MypagePage() {
   const [originFilter, setOriginFilter] = useState<'all' | 'domestic' | 'import'>('all');
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
+  const [bookingsExpanded, setBookingsExpanded] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
   const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
@@ -400,7 +401,14 @@ export default function MypagePage() {
       {/* 내 검차 신청 */}
       {bookings.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 pt-2">
-          <h2 className="text-lg font-black text-gray-900 mb-5">내 검차 신청</h2>
+          <button
+            onClick={() => setBookingsExpanded(v => !v)}
+            className="flex items-center justify-between w-full mb-5"
+          >
+            <h2 className="text-lg font-black text-gray-900">내 검차 신청 ({bookings.length})</h2>
+            <span className="text-xs font-bold text-gray-400">{bookingsExpanded ? '접기 ▲' : '펼쳐보기 ▼'}</span>
+          </button>
+          {bookingsExpanded && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {bookings.map(b => {
               const bs = BOOKING_STATUS_MAP[b.status] ?? { label: b.status, color: 'bg-gray-100 text-gray-500' };
@@ -433,6 +441,7 @@ export default function MypagePage() {
               );
             })}
           </div>
+          )}
         </div>
       )}
 
