@@ -26,12 +26,6 @@ const MEMBER_PRICING: Record<CarOrigin, { label: string; original: number; amoun
   IMPORTED: { label: '수입차', original: 132_000, amount: 110_000 },
 };
 
-// 결제 플로우 실결제 테스트용(?promo=test) — 실제 고객에게는 노출되지 않고 링크를 아는 사람만 진입
-const TEST_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
-  DOMESTIC: { label: '국산차', original: 139_000, amount: 500 },
-  IMPORTED: { label: '수입차', original: 172_000, amount: 500 },
-};
-
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
 const DAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -67,13 +61,10 @@ export default function InspectionCheckoutPage() {
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
   const [isMemberPromo, setIsMemberPromo] = useState(false);
-  const [isTestPromo, setIsTestPromo]     = useState(false);
   useEffect(() => {
-    const promo = new URLSearchParams(window.location.search).get('promo');
-    if (promo === 'member') setIsMemberPromo(true);
-    if (promo === 'test')   setIsTestPromo(true);
+    if (new URLSearchParams(window.location.search).get('promo') === 'member') setIsMemberPromo(true);
   }, []);
-  const pricingTable = isTestPromo ? TEST_PRICING : isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
+  const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
   const pricing = pricingTable[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
