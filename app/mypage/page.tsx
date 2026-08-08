@@ -75,6 +75,7 @@ interface InspectionBooking {
   amount?: number;
   paymentMethod?: string;
   createdAt: string;
+  buyerPurchaseCompleted?: boolean;
   refundPreview?: { tier: 'FULL' | 'FEE' | 'NONE'; refundAmount: number; cancelFee: number };
 }
 
@@ -97,14 +98,14 @@ export default function MypagePage() {
     try { return JSON.parse(localStorage.getItem('soldRating') ?? '{}'); } catch { return {}; }
   });
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [statusTab, setStatusTab] = useState<'all' | Status>('all');
+  const [statusTab, setStatusTab] = useState<'all' | Status | 'buying' | 'bought'>('all');
   const [serviceFilter, setServiceFilter] = useState<Set<'inspection' | 'self'>>(new Set<'inspection' | 'self'>(['inspection', 'self']));
   const [stageFilter, setStageFilter] = useState<Set<string>>(new Set(STAGE_FILTER_MAP.map(s => s.key)));
   const [originFilter, setOriginFilter] = useState<'all' | 'domestic' | 'import'>('all');
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
-  const [bookingsExpanded, setBookingsExpanded] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
+  const [togglingBuyerId, setTogglingBuyerId] = useState<number | null>(null);
   const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
@@ -162,6 +163,30 @@ export default function MypagePage() {
       alert('취소 처리 중 오류가 발생했습니다.');
     } finally {
       setCancellingBookingId(null);
+    }
+  };
+
+  // 검차 신청은 대부분 남의 차를 사려고 신청한 거라, 신청자 본인이 마이페이지에서
+  // "구매완료" 여부를 셀프로 표시/해제(검증 수단 없는 자기신고, StoreItem 판매완료와 동일 패턴)
+  const toggleBuyerPurchaseCompleted = async (booking: InspectionBooking) => {
+    const next = !booking.buyerPurchaseCompleted;
+    setTogglingBuyerId(booking.id);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (!u?.phone) throw new Error();
+      const res = await fetch(`${API}/external/request/${booking.id}/buyer-purchase-status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: u.phone, completed: next }),
+      });
+      if (!res.ok) throw new Error();
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, buyerPurchaseCompleted: next } : b));
+    } catch {
+      alert('처리 중 오류가 발생했습니다.');
+    } finally {
+      setTogglingBuyerId(null);
     }
   };
 
@@ -273,8 +298,9 @@ export default function MypagePage() {
   };
 
   // 필터 카운트 (전체 items 기준 — 다른 필터와 무관하게 각 옵션의 총 개수를 보여줌)
+  // "진단"은 검차 신청(대부분 남의 차를 사려고 신청한 것) + 진단 기반으로 등록된 매물을 합친 것
   const serviceCounts = {
-    inspection: items.filter(i => !i.selfRegistered).length,
+    inspection: bookings.length + items.filter(i => !i.selfRegistered).length,
     self: items.filter(i => i.selfRegistered).length,
   };
   const stageCounts = Object.fromEntries(
@@ -289,6 +315,8 @@ export default function MypagePage() {
   }, {});
 
   const filteredItems = items.filter(item => {
+    // 구매중/구매완료 탭은 검차 신청(bookings) 전용 — 매물(items)은 그 탭에서 안 보임
+    if (statusTab === 'buying' || statusTab === 'bought') return false;
     if (statusTab !== 'all' && item.status !== statusTab) return false;
 
     const svc = item.selfRegistered ? 'self' : 'inspection';
@@ -308,6 +336,16 @@ export default function MypagePage() {
 
     if (brandFilter.size > 0 && !brandFilter.has(getBrand(item.titleKo))) return false;
 
+    return true;
+  });
+
+  // 검차 신청(대부분 남의 차를 사려고 신청한 것) — 판매쪽 탭/브랜드·진행상태 필터는
+  // 이 도메인과 안 맞아서 서비스 필터(진단)와 구매중/구매완료 탭만 적용함.
+  const filteredBookings = bookings.filter(b => {
+    if (!serviceFilter.has('inspection')) return false;
+    if (statusTab === 'buying') return !!b.buyerPurchaseCompleted === false;
+    if (statusTab === 'bought') return !!b.buyerPurchaseCompleted === true;
+    if (statusTab !== 'all') return false; // 판매 관련 탭에서는 검차신청 카드 숨김
     return true;
   });
 
@@ -398,53 +436,6 @@ export default function MypagePage() {
         </div>
       </div>
 
-      {/* 내 검차 신청 */}
-      {bookings.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 pt-2">
-          <button
-            onClick={() => setBookingsExpanded(v => !v)}
-            className="flex items-center justify-between w-full mb-5"
-          >
-            <h2 className="text-lg font-black text-gray-900">내 검차 신청 ({bookings.length})</h2>
-            <span className="text-xs font-bold text-gray-400">{bookingsExpanded ? '접기 ▲' : '펼쳐보기 ▼'}</span>
-          </button>
-          {bookingsExpanded && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {bookings.map(b => {
-              const bs = BOOKING_STATUS_MAP[b.status] ?? { label: b.status, color: 'bg-gray-100 text-gray-500' };
-              const canCancel = b.status === 'PENDING' || b.status === 'ASSIGNED';
-              return (
-                <div key={b.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="font-bold text-sm text-gray-900">{b.carNumber || b.carModel || '차량 정보 미입력'}</p>
-                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${bs.color}`}>{bs.label}</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">
-                    {b.address}<br />
-                    {b.preferredDateTime && new Date(b.preferredDateTime).toLocaleString('ko-KR', {
-                      year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
-                    })}
-                  </p>
-                  {typeof b.amount === 'number' && (
-                    <p className="text-sm font-black text-violet-600">{b.amount.toLocaleString()}원</p>
-                  )}
-                  {canCancel && (
-                    <button
-                      onClick={() => cancelBooking(b)}
-                      disabled={cancellingBookingId === b.id}
-                      className="text-[11px] font-bold text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
-                    >
-                      {cancellingBookingId === b.id ? '취소 처리 중...' : '신청 취소'}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          )}
-        </div>
-      )}
-
       {/* 내 매물 */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-5">
@@ -457,13 +448,15 @@ export default function MypagePage() {
           </button>
         </div>
 
-        {items.length > 0 && (
+        {(items.length > 0 || bookings.length > 0) && (
           <div className="flex gap-2 mb-5 overflow-x-auto">
             {[
-              { key: 'all' as const, label: '전체', count: items.length },
+              { key: 'all' as const, label: '전체', count: items.length + bookings.length },
               { key: 'active' as const, label: '판매중', count: items.filter(i => i.status === 'active').length },
               { key: 'pending' as const, label: '판매대기', count: items.filter(i => i.status === 'pending').length },
               { key: 'sold' as const, label: '판매완료', count: items.filter(i => i.status === 'sold').length },
+              { key: 'buying' as const, label: '구매중', count: bookings.filter(b => !b.buyerPurchaseCompleted).length },
+              { key: 'bought' as const, label: '구매완료', count: bookings.filter(b => b.buyerPurchaseCompleted).length },
             ].map(t => (
               <button
                 key={t.key}
@@ -476,7 +469,7 @@ export default function MypagePage() {
           </div>
         )}
 
-        {items.length === 0 ? (
+        {items.length === 0 && bookings.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
             <div className="text-4xl mb-3">🚗</div>
             <p className="text-gray-400 text-sm font-semibold">등록된 매물이 없습니다</p>
@@ -572,11 +565,12 @@ export default function MypagePage() {
 
             {/* 우측 그리드 */}
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
-              {filteredItems.length === 0 ? (
+              {filteredItems.length === 0 && filteredBookings.length === 0 && (
                 <div className="col-span-full bg-white rounded-2xl p-10 text-center border border-gray-100 text-sm text-gray-400">
-                  선택한 조건에 맞는 매물이 없습니다
+                  선택한 조건에 맞는 항목이 없습니다
                 </div>
-              ) : filteredItems.map(item => {
+              )}
+              {filteredItems.map(item => {
                 const s = STATUS_MAP[item.status] ?? STATUS_MAP.hidden;
                 const img = thumb(item);
                 return (
@@ -727,6 +721,63 @@ export default function MypagePage() {
                         )}
                       </div>
                     )}
+                  </div>
+                );
+              })}
+              {filteredBookings.map(booking => {
+                const bs = BOOKING_STATUS_MAP[booking.status] ?? BOOKING_STATUS_MAP.PENDING;
+                const cancellable = booking.status === 'PENDING' || booking.status === 'ASSIGNED';
+                return (
+                  <div key={`booking-${booking.id}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
+                    <div className="aspect-[4/3] bg-gray-50 relative flex items-center justify-center">
+                      <img src="/logo-icon.svg" alt="" className="w-16 h-16 opacity-20" />
+                      <span className={`absolute top-2 right-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${bs.color}`}>{bs.label}</span>
+                      <span className={`absolute top-2 left-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${booking.buyerPurchaseCompleted ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700'}`}>
+                        {booking.buyerPurchaseCompleted ? '구매완료' : '구매중'}
+                      </span>
+                    </div>
+
+                    <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{booking.carModel || '검차 신청 차량'}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
+                          {booking.carNumber} · {booking.address}
+                        </p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
+                          희망일시: {new Date(booking.preferredDateTime).toLocaleString('ko-KR', {
+                            year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+                          })}
+                        </p>
+                        {typeof booking.amount === 'number' && (
+                          <p className="text-base font-black text-violet-600 mt-1 leading-none">
+                            {booking.amount.toLocaleString()}원
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            onClick={() => toggleBuyerPurchaseCompleted(booking)}
+                            disabled={togglingBuyerId === booking.id}
+                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                          >
+                            {togglingBuyerId === booking.id
+                              ? '처리 중...'
+                              : booking.buyerPurchaseCompleted ? '구매중으로 되돌리기' : '구매완료로 표시'}
+                          </button>
+                          {cancellable && (
+                            <button
+                              onClick={() => cancelBooking(booking)}
+                              disabled={cancellingBookingId === booking.id}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                            >
+                              {cancellingBookingId === booking.id ? '취소 중...' : '신청 취소'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
