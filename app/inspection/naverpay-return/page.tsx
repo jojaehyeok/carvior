@@ -46,7 +46,7 @@ function NaverPayReturnContent() {
     }
     if (!paymentId) { setStatus('error'); setErrorMessage('결제 정보를 확인할 수 없습니다.'); return; }
 
-    fetch('/api/inspection/confirm-naverpay', {
+    fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/inspection-payments/confirm-naverpay`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ paymentId, merchantPayKey, ...order }),

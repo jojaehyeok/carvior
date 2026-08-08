@@ -36,7 +36,10 @@ function SuccessContent() {
     const order: OrderMeta = raw ? JSON.parse(raw) : {};
     setMeta(order);
 
-    fetch('/api/inspection/confirm', {
+    // 결제승인은 시크릿키가 필요해 서버에서만 가능한데, Apache가 새 Next API 라우트를
+    // 화이트리스트에 안 넣어두면 404가 나는 인프라 이슈가 있어 백엔드(v1/*, 항상 보장 라우팅)에서
+    // 직접 처리하도록 함 — 브라우저에서 NestJS를 바로 호출.
+    fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/inspection-payments/confirm-toss`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({
