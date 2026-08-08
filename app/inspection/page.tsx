@@ -702,7 +702,7 @@ export default function InspectionCheckoutPage() {
                 </button>
                 */}
                 <button onClick={() => setPayMethod('direct')}
-                  className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'direct' ? 'border-gray-700 bg-gray-50 text-gray-900' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                  className={`py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${payMethod === 'direct' ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                   직접 계좌이체
                 </button>
               </div>
