@@ -173,12 +173,15 @@ export default function MypagePage() {
   }, [status]);
 
   const markSold = async (item: StoreItem) => {
+    // 판매완료 누르면 진행상황(saleStage)도 같이 낙찰 단계로 넘겨서 타임라인이 멈춰있지 않게 함.
+    // 이 버튼은 status==='active'일 때만 보이는데, 실제 경매로 낙찰된 매물은 이미 selectWinner()에서
+    // status를 'sold'로 바꿔버려서 이 버튼 자체가 안 뜨니 — 진행 중인 진짜 경매를 덮어쓸 위험은 없음.
     const res = await fetch(`/api/mypage/store-items?id=${item.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'sold' }),
+      body: JSON.stringify({ status: 'sold', saleStage: 'winner_selected' }),
     });
-    if (res.ok) setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'sold' } : i));
+    if (res.ok) setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: 'sold', saleStage: 'winner_selected' } : i));
   };
 
   // 차대금 입금확인(depositConfirmed) 이후 차주가 탁송 희망 일시를 신청 — ownerAccessToken으로
@@ -616,35 +619,27 @@ export default function MypagePage() {
                               판매완료
                             </button>
                           )}
-                          {item.status === 'sold' && (
+                          {item.status === 'sold' && item.saleStage === 'completed' && (
                             <div className="w-full space-y-2 mt-1">
                               <div className="bg-green-50 border border-green-100 rounded-xl px-3 py-2">
-                                <p className="text-xs font-black text-green-800">🎉 판매 완료!</p>
+                                <p className="text-xs font-black text-green-800">🎉 거래완료!</p>
                                 <p className="text-[10px] text-green-600 mt-0.5">카비어를 이용해주셔서 감사합니다</p>
                               </div>
-                              {item.saleStage === 'completed' && (
-                                !soldRating[item.id] ? (
-                                  <div>
-                                    <p className="text-[10px] text-gray-400 mb-1">이용 경험을 평가해주세요</p>
-                                    <div className="flex gap-0.5">
-                                      {[1,2,3,4,5].map(s => (
-                                        <button key={s} onClick={() => submitRating(item, s)}
-                                          className="text-xl text-gray-200 hover:text-amber-400 transition-colors leading-none">★</button>
-                                      ))}
-                                    </div>
+                              {!soldRating[item.id] ? (
+                                <div>
+                                  <p className="text-[10px] text-gray-400 mb-1">이용 경험을 평가해주세요</p>
+                                  <div className="flex gap-0.5">
+                                    {[1,2,3,4,5].map(s => (
+                                      <button key={s} onClick={() => submitRating(item, s)}
+                                        className="text-xl text-gray-200 hover:text-amber-400 transition-colors leading-none">★</button>
+                                    ))}
                                   </div>
-                                ) : (
-                                  <p className="text-[11px] text-amber-500 font-bold">
-                                    {'★'.repeat(soldRating[item.id])}{'☆'.repeat(5 - soldRating[item.id])} 감사합니다!
-                                  </p>
-                                )
+                                </div>
+                              ) : (
+                                <p className="text-[11px] text-amber-500 font-bold">
+                                  {'★'.repeat(soldRating[item.id])}{'☆'.repeat(5 - soldRating[item.id])} 감사합니다!
+                                </p>
                               )}
-                              <button
-                                onClick={() => router.push('/sell/register')}
-                                className="w-full py-2 text-[11px] font-bold rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-                              >
-                                + 다음 차량도 카비어에 등록하기
-                              </button>
                             </div>
                           )}
                         </div>
@@ -685,7 +680,7 @@ export default function MypagePage() {
                           transferredRegistrationUrl={item.transferredRegistrationUrl}
                         />
 
-                        {item.depositConfirmed && (
+                        {(item.depositConfirmed || item.status === 'sold') && (
                           <div className="mt-4 pt-4 border-t border-gray-100">
                             {item.transportRequestedAt ? (
                               <p className="text-xs font-bold text-violet-600">
