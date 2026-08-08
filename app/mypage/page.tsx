@@ -368,61 +368,36 @@ export default function MypagePage() {
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
         </Link>
 
-        <Link
-          href="/transport"
-          className="flex items-center justify-between gap-4 bg-zinc-800 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-700 transition-colors"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="text-2xl shrink-0">🚚</span>
-            <div className="min-w-0">
-              <p className="text-white font-black text-sm">차량 탁송, 카비어에 맡겨보세요</p>
-              <p className="text-zinc-400 text-xs mt-0.5">출발지·도착지만 남기면 상담부터 무료</p>
-            </div>
-          </div>
-          <span className="text-white text-xs font-bold shrink-0">탁송 신청 →</span>
-        </Link>
-
-        {partnerAppStatus === 'approved' ? (
-          <a
-            href="https://carvior.store/admin/login"
-            target="_blank" rel="noreferrer"
-            className="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-5 py-4 mt-3 hover:from-emerald-500 hover:to-teal-500 transition-colors"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl shrink-0">🔑</span>
-              <div className="min-w-0">
-                <p className="text-white font-black text-sm">파트너패널 승인 완료!</p>
-                <p className="text-emerald-100 text-xs mt-0.5">전달받은 계정으로 로그인해서 바로 이용해보세요</p>
-              </div>
-            </div>
-            <span className="text-white text-xs font-bold shrink-0">파트너패널 바로가기 →</span>
-          </a>
-        ) : partnerAppStatus === 'pending' ? (
-          <div className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl shrink-0">🔑</span>
-              <div className="min-w-0">
-                <p className="text-white font-black text-sm">파트너패널 제휴신청 접수됨</p>
-                <p className="text-zinc-400 text-xs mt-0.5">담당자 확인 후 전용 계정을 만들어드려요</p>
-              </div>
-            </div>
-            <span className="text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-full shrink-0">신청완료</span>
-          </div>
-        ) : (
+        {/* 탁송/파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로 */}
+        <div className="flex gap-2 mt-3">
           <Link
-            href="/marketing/partner-panel"
-            className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-800 transition-colors"
+            href="/transport"
+            className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors"
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-2xl shrink-0">🔑</span>
-              <div className="min-w-0">
-                <p className="text-white font-black text-sm">자주 이용해주셔서 감사해요, 전용 관리페이지 어떠세요?</p>
-                <p className="text-zinc-400 text-xs mt-0.5">개별 검차 10회 이상 고객 대상 · 무료</p>
-              </div>
-            </div>
-            <span className="text-white text-xs font-bold shrink-0">자격 확인 →</span>
+            🚚 탁송 신청
           </Link>
-        )}
+
+          {partnerAppStatus === 'approved' ? (
+            <a
+              href="https://carvior.store/admin/login"
+              target="_blank" rel="noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 hover:bg-emerald-100 transition-colors"
+            >
+              🔑 파트너패널 바로가기
+            </a>
+          ) : partnerAppStatus === 'pending' ? (
+            <div className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+              🔑 파트너패널 신청완료
+            </div>
+          ) : (
+            <Link
+              href="/marketing/partner-panel"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              🔑 파트너패널
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* 내 검차 신청 */}

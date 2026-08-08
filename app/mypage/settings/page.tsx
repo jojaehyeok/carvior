@@ -14,6 +14,7 @@ export default function MypageSettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [image, setImage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,6 +45,15 @@ export default function MypageSettingsPage() {
       .then(data => setMarketingConsent(!!data.marketingConsent))
       .catch(() => {});
   }, [status]);
+
+  // 세션엔 phone이 안 들어있어서(next-auth 콜백에 phone 미포함) 백엔드에서 직접 조회
+  useEffect(() => {
+    if (status !== 'authenticated' || !user?.email) return;
+    fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`)
+      .then(r => r.json())
+      .then(data => setPhone(data?.phone ?? ''))
+      .catch(() => {});
+  }, [status, user?.email]);
 
   const toggleMarketingConsent = async () => {
     const next = !marketingConsent;
@@ -88,7 +98,7 @@ export default function MypageSettingsPage() {
       const res = await fetch(`${API}/users/${user.id}/admin-info`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, profileImage: image }),
+        body: JSON.stringify({ name, phone, profileImage: image }),
       });
       if (!res.ok) throw new Error();
       await update({ name, image });
@@ -175,6 +185,18 @@ export default function MypageSettingsPage() {
               placeholder="닉네임을 입력하세요"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
             />
+          </label>
+
+          <label className="block mt-4">
+            <span className="text-xs font-bold text-gray-500 mb-1.5 block">휴대폰번호</span>
+            <input
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="010-0000-0000"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+            />
+            <span className="text-[11px] text-gray-400 mt-1 block">검차 신청 내역 확인 등에 사용돼요.</span>
           </label>
 
           <button

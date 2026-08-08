@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { CHANNEL_BUTTON_VISIBILITY_EVENT } from '@/components/ChannelTalk';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
@@ -52,11 +53,56 @@ function getAvailableDays() {
 }
 
 export default function InspectionCheckoutPage() {
+  const { data: session } = useSession();
+  const sessionUser = session?.user as any;
   const [form, setForm] = useState<Form>({
     carNumber: '', ownerName: '', phone: '', email: '',
     address: '', addressDetail: '',
     dealerName: '', dealerContact: '', listingUrl: '',
   });
+  // 계정에 저장된 휴대폰번호 — null: 아직 조회 안 됨(비회원이거나 조회중), '': 조회했는데 없음.
+  // 로그인 유저인데 계정에 번호가 없으면 검차 신청 전에 먼저 저장하도록 유도한다.
+  const [accountPhone, setAccountPhone] = useState<string | null>(null);
+  const [savingAccountPhone, setSavingAccountPhone] = useState(false);
+
+  useEffect(() => {
+    if (!sessionUser?.email) return;
+    const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+    fetch(`${API}/users/by-email?email=${encodeURIComponent(sessionUser.email)}`)
+      .then(r => r.json())
+      .then(data => {
+        setAccountPhone(data?.phone ?? '');
+        // 회원이면 신청자 정보를 계정 정보로 자동 채움(이미 입력한 값은 덮어쓰지 않음)
+        setForm(prev => ({
+          ownerName: prev.ownerName || data?.name || '',
+          phone: prev.phone || data?.phone || '',
+          email: prev.email || data?.email || '',
+          carNumber: prev.carNumber, address: prev.address, addressDetail: prev.addressDetail,
+          dealerName: prev.dealerName, dealerContact: prev.dealerContact, listingUrl: prev.listingUrl,
+        }));
+      })
+      .catch(() => setAccountPhone(''));
+  }, [sessionUser?.email]);
+
+  const saveAccountPhone = async () => {
+    if (!sessionUser?.id || !form.phone.trim()) { alert('연락처를 입력해주세요.'); return; }
+    setSavingAccountPhone(true);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const res = await fetch(`${API}/users/${sessionUser.id}/admin-info`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: form.phone.trim() }),
+      });
+      if (!res.ok) throw new Error();
+      setAccountPhone(form.phone.trim());
+    } catch {
+      alert('휴대폰번호 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setSavingAccountPhone(false);
+    }
+  };
+
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
@@ -246,6 +292,12 @@ export default function InspectionCheckoutPage() {
   const validate = () => {
     if (!form.ownerName) { alert('신청자 이름을 입력해주세요.'); return false; }
     if (!form.phone)     { alert('연락처를 입력해주세요.'); return false; }
+    // 회원인데 계정에 저장된 번호가 없으면(마이페이지 "내 검차 신청" 등 계정 연동 기능이
+    // 안 되니) 결제 전에 먼저 저장하도록 막는다 — 위 휴대폰 저장 UI에서 저장하면 풀림.
+    if (sessionUser && accountPhone === '') {
+      alert('휴대폰번호를 계정에 먼저 저장해주세요. 신청자 정보 아래 "계정에 저장하기" 버튼을 눌러주시면 됩니다.');
+      return false;
+    }
     // 구매를 고려중인 차량 정보 — 차주 본인이 아니라 "구매하려는" 사람이 신청하는 경우가
     // 많아서 차량번호를 모를 수 있다. 차량번호/딜러 연락처/매물 링크 중 최소 하나만 있으면
     // 담당 평가사가 어떤 차량인지 확인할 수 있으므로 이 중 하나만 있어도 접수 가능하게 한다.
@@ -651,6 +703,22 @@ export default function InspectionCheckoutPage() {
                     <Field label="연락처" required><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" className={inputCls} /></Field>
                     <Field label="이메일" optional><input value={form.email} onChange={set('email')} placeholder="example@email.com" type="email" className={inputCls} /></Field>
                   </div>
+
+                  {sessionUser && accountPhone === '' && (
+                    <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                      <p className="text-xs font-bold text-amber-800 mb-2">
+                        계정에 저장된 휴대폰번호가 없어요. 마이페이지에서 신청 내역을 보려면 먼저 저장해주세요.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={saveAccountPhone}
+                        disabled={savingAccountPhone || !form.phone.trim()}
+                        className="text-xs font-bold bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-amber-900 px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {savingAccountPhone ? '저장 중...' : '위 연락처를 계정에 저장하기'}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-white rounded-2xl border border-gray-100 p-6">
