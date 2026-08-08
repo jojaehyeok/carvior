@@ -101,6 +101,7 @@ export default function MypagePage() {
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
+  const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
 
   const user = session?.user as any;
 
@@ -120,10 +121,16 @@ export default function MypagePage() {
         if (!uRes.ok) return;
         const u = await uRes.json();
         if (!u?.phone) return;
+
         const bRes = await fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(u.phone)}`);
-        if (!bRes.ok) { setBookings([]); return; } // 일치하는 예약 없음(404)도 빈 배열로
-        const data = await bRes.json();
-        setBookings(Array.isArray(data) ? data : []);
+        const bData = bRes.ok ? await bRes.json() : [];
+        setBookings(Array.isArray(bData) ? bData : []);
+
+        const pRes = await fetch(`${API}/external/partner-applications/by-phone?phone=${encodeURIComponent(u.phone)}`);
+        if (pRes.ok) {
+          const app = await pRes.json();
+          setPartnerAppStatus(app?.status ?? null);
+        }
       } catch {
         setBookings([]);
       }
@@ -325,7 +332,7 @@ export default function MypagePage() {
             <span className="text-2xl shrink-0">🤝</span>
             <div className="min-w-0">
               <p className="text-white font-black text-sm">제휴 검차 서비스, 회원 전용가로 받아보세요</p>
-              <p className="text-violet-200 text-xs mt-0.5">국산 88,000원 · 수입 110,000원 (VAT 포함)</p>
+              <p className="text-violet-200 text-xs mt-0.5">국산 88,000원 · 수입 121,000원 (VAT 포함)</p>
             </div>
           </div>
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
@@ -345,19 +352,47 @@ export default function MypagePage() {
           <span className="text-white text-xs font-bold shrink-0">탁송 신청 →</span>
         </Link>
 
-        <Link
-          href="/marketing/partner-panel"
-          className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-800 transition-colors"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="text-2xl shrink-0">🔑</span>
-            <div className="min-w-0">
-              <p className="text-white font-black text-sm">자주 이용해주셔서 감사해요, 전용 관리페이지 어떠세요?</p>
-              <p className="text-zinc-400 text-xs mt-0.5">개별 검차 10회 이상 고객 대상 · 무료</p>
+        {partnerAppStatus === 'approved' ? (
+          <a
+            href="https://carvior.store/admin/login"
+            target="_blank" rel="noreferrer"
+            className="flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-5 py-4 mt-3 hover:from-emerald-500 hover:to-teal-500 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">🔑</span>
+              <div className="min-w-0">
+                <p className="text-white font-black text-sm">파트너패널 승인 완료!</p>
+                <p className="text-emerald-100 text-xs mt-0.5">전달받은 계정으로 로그인해서 바로 이용해보세요</p>
+              </div>
             </div>
+            <span className="text-white text-xs font-bold shrink-0">파트너패널 바로가기 →</span>
+          </a>
+        ) : partnerAppStatus === 'pending' ? (
+          <div className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">🔑</span>
+              <div className="min-w-0">
+                <p className="text-white font-black text-sm">파트너패널 제휴신청 접수됨</p>
+                <p className="text-zinc-400 text-xs mt-0.5">담당자 확인 후 전용 계정을 만들어드려요</p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded-full shrink-0">신청완료</span>
           </div>
-          <span className="text-white text-xs font-bold shrink-0">자격 확인 →</span>
-        </Link>
+        ) : (
+          <Link
+            href="/marketing/partner-panel"
+            className="flex items-center justify-between gap-4 bg-zinc-900 rounded-2xl px-5 py-4 mt-3 hover:bg-zinc-800 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">🔑</span>
+              <div className="min-w-0">
+                <p className="text-white font-black text-sm">자주 이용해주셔서 감사해요, 전용 관리페이지 어떠세요?</p>
+                <p className="text-zinc-400 text-xs mt-0.5">개별 검차 10회 이상 고객 대상 · 무료</p>
+              </div>
+            </div>
+            <span className="text-white text-xs font-bold shrink-0">자격 확인 →</span>
+          </Link>
+        )}
       </div>
 
       {/* 내 검차 신청 */}
