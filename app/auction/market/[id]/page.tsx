@@ -676,8 +676,22 @@ function AuctionDetailContent() {
 // ── 하단 탭 컴포넌트 ───────────────────────────────────────────────────────────
 function DetailTabs({ item }: { item: AuctionItem }) {
   const [tab, setTab] = useState<'specs' | 'diagnosis' | 'options'>('specs');
+  const [copied, setCopied] = useState(false);
 
-  const specRows = (item.specs && item.specs.length > 0) ? item.specs : [
+  const handleCopyCarNumber = async () => {
+    if (!item.carNumber) return;
+    try {
+      await navigator.clipboard.writeText(item.carNumber);
+    } catch {
+      window.prompt('아래 차량번호를 복사하세요', item.carNumber);
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const carNumberRow = item.carNumber ? [{ label: '차량번호', value: item.carNumber }] : [];
+  const baseSpecRows = (item.specs && item.specs.length > 0) ? item.specs : [
     { label: '연식',      value: item.year ? String(item.year) : '-' },
     { label: '변속기',    value: item.transmission || '-' },
     { label: '연료',      value: item.fuel || '-' },
@@ -689,6 +703,7 @@ function DetailTabs({ item }: { item: AuctionItem }) {
     { label: '주행거리',  value: `${(item.mileage ?? 0).toLocaleString()} KM` },
     { label: 'Location',  value: item.region ?? '-' },
   ];
+  const specRows = [...carNumberRow, ...baseSpecRows];
 
   const inspected = !!item.hasReport;
 
@@ -740,7 +755,18 @@ function DetailTabs({ item }: { item: AuctionItem }) {
             {specRows.map(s => (
               <div key={s.label} className="flex items-baseline gap-4 py-3.5 border-b border-gray-100 px-1">
                 <span className="w-28 shrink-0 text-sm text-gray-400">{s.label}</span>
-                <span className="text-sm font-bold text-gray-900">{s.value}</span>
+                <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  {s.value}
+                  {s.label === '차량번호' && (
+                    <button
+                      type="button"
+                      onClick={handleCopyCarNumber}
+                      className="text-[11px] font-bold text-gray-400 hover:text-black transition-colors"
+                    >
+                      {copied ? '복사됨' : '복사'}
+                    </button>
+                  )}
+                </span>
               </div>
             ))}
           </div>

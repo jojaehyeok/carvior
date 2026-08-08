@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 // ── 상수 ──────────────────────────────────────────────
@@ -243,8 +243,17 @@ function PhotoCard({
 
 // ── 메인 페이지 ───────────────────────────────────────
 export default function SelfRegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <SelfRegisterForm />
+    </Suspense>
+  );
+}
+
+function SelfRegisterForm() {
   const router = useRouter();
   const { status } = useSession();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -256,8 +265,8 @@ export default function SelfRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
-  // 차량 정보
-  const [carNumber, setCarNumber] = useState('');
+  // 차량 정보 — 이미 진단 완료된(구매완료) 차량이면 마이페이지에서 차량번호를 넘겨받아 미리 채워둠
+  const [carNumber, setCarNumber] = useState(() => searchParams.get('carNumber')?.trim() ?? '');
   const [ownerName, setOwnerName] = useState('');
   const [looking, setLooking] = useState(false);
   const [lookupDone, setLookupDone] = useState(false);

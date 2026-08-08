@@ -776,6 +776,20 @@ export default function MypagePage() {
                             </button>
                           )}
                         </div>
+
+                        {booking.status === 'COMPLETED' && booking.buyerPurchaseCompleted && (
+                          <div className="bg-violet-50 border border-violet-100 rounded-xl px-3 py-2.5 space-y-1.5">
+                            <p className="text-[11px] text-violet-700 font-semibold leading-relaxed">
+                              이미 검차 리포트가 있는 차량이에요.<br />지금 바로 스마트옥션에 출품해보세요.
+                            </p>
+                            <a
+                              href={`/sell/register?carNumber=${encodeURIComponent(booking.carNumber)}`}
+                              className="block text-center text-[11px] font-black px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                            >
+                              🚀 스마트옥션에 출품하기
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
