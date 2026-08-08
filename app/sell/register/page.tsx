@@ -471,7 +471,6 @@ export default function SelfRegisterPage() {
     setSubmitting(true);
     try {
       const body = {
-        bookingId: Date.now(),
         carNumber: carNumber.replace(/\s/g,''),
         titleKo: `${car.maker} ${car.model}${car.trim ? ' ' + car.trim : ''}`.trim() || carNumber,
         titleEn: `${car.maker} ${car.model}`.trim(),
