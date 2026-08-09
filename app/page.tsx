@@ -37,10 +37,10 @@ export default function HomePage() {
                 className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
                 내 차 등록하기 →
               </Link>
-              <a href="#report"
+              <Link href="/inspection"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
-                진단 리포트 예시 보기
-              </a>
+                검차 신청하기
+              </Link>
             </div>
           </div>
 
@@ -157,46 +157,6 @@ export default function HomePage() {
           <div className="text-center mt-10">
             <Link href="/marketing/carvior-inspection" className="text-sm text-gray-400 underline hover:text-gray-600">서비스 자세히 보기</Link>
           </div>
-        </div>
-      </section>
-
-      {/* ── 카비어 진단 리포트 ── */}
-      <section id="report" className="max-w-3xl mx-auto px-6 py-20 text-center scroll-mt-20">
-        <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">CARVIOR REPORT</p>
-        <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-3">
-          근거 없이 깎이던 내 차값,<br />진단 리포트로 시작합니다.
-        </h2>
-        <p className="text-gray-400 text-sm md:text-base mb-10">
-          평가사가 방문해 외관 · 기계 · 사고이력을 정밀 점검하고,<br />
-          감가 사유까지 항목별로 투명하게 공개해드려요.
-        </p>
-
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-sm mx-auto text-left">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold text-gray-400">진단 리포트 미리보기</span>
-            <span className="text-[10px] font-black bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full">✦ 진단완료</span>
-          </div>
-          <p className="text-xs text-gray-400 mb-4">스텔라 · 101,378km</p>
-          <div className="space-y-2.5">
-            {[
-              ['엔진 경고등', '점등'],
-              ['누유', '프런트 케이스·오일팬'],
-              ['옵션 작동', '좌측 후미등 미점등'],
-            ].map(([label, val]) => (
-              <div key={label} className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">{label}</span>
-                <span className="font-bold text-red-500">{val}</span>
-              </div>
-            ))}
-          </div>
-          <a
-            href="https://carvior.store/report/892109a9f31525b3"
-            target="_blank"
-            rel="noreferrer"
-            className="block border-t border-gray-100 mt-4 pt-4 text-center text-xs font-bold text-violet-600 hover:text-violet-700"
-          >
-            실제 리포트 전체 보기 →
-          </a>
         </div>
       </section>
 
