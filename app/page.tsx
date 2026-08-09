@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { clsx } from 'clsx';
 import AppFooter from '@/components/footermodal';
 import HomePromoPopups from '@/components/HomePromoPopups';
 
@@ -56,6 +55,43 @@ export default function HomePage() {
                 <p className="text-2xl mb-2">{c.icon}</p>
                 <p className="text-white font-black text-sm">{c.title}</p>
                 <p className="text-zinc-500 text-xs mt-0.5">{c.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 브랜드 스토리: Cavior = Car + Savior ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-center">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">ABOUT CARVIOR</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-2">
+              Car<span className="text-violet-600">vior</span>
+            </h2>
+            <p className="text-gray-400 text-sm font-bold mb-6">Car + Savior · 중고차 구원자</p>
+            <p className="text-gray-600 text-base leading-relaxed">
+              중고차는 팔 때마다 근거 없이 깎여요. "그냥 시세가 그래요"라는 말 한마디로
+              내 차의 가치가 부당하게 낮아지는 게 지금까지의 중고차 거래였습니다.
+            </p>
+            <p className="text-gray-600 text-base leading-relaxed mt-3">
+              카비어는 이름 그대로 <strong className="text-gray-900">불합리한 감가로부터 차주를 구하는</strong> 회사예요.
+              전문 평가사의 정밀 진단으로 차량 상태를 객관적으로 증명하고,
+              검증된 딜러들의 공개 경쟁입찰로 진짜 가치에 가장 가까운 가격을 찾아드립니다.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { icon: '🛡️', title: '불합리한 감가 방지', desc: '근거 없는 "시세가 그래요"는 그만. 감가 사유를 항목별로 증명해요.' },
+              { icon: '📈', title: '진짜 가치로 판매', desc: '정밀 진단 리포트로 내 차 상태를 객관적으로 입증하고 시작해요.' },
+              { icon: '⚖️', title: '공정한 경쟁입찰', desc: '승인된 딜러들이 공개적으로 가격을 제안, 원하는 만큼 받을 수 있어요.' },
+              { icon: '🔐', title: '안전한 거래', desc: '에스크로 결제·탁송·정산까지 전 과정을 카비어가 관리해요.' },
+            ].map(v => (
+              <div key={v.title} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+                <span className="text-2xl mb-3 block">{v.icon}</span>
+                <h3 className="font-black text-gray-900 text-sm mb-1.5">{v.title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{v.desc}</p>
               </div>
             ))}
           </div>
@@ -311,25 +347,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 어떻게 진행되나요? ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-2xl font-black text-gray-900 mb-2">어떻게 진행되나요?</h2>
-        <p className="text-gray-400 text-sm mb-12">복잡한 거 없어요. 딱 3단계예요.</p>
+      {/* ── 어떻게 진행되나요? (전체 거래 프로세스 개략도) ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-3">HOW IT WORKS</p>
+          <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">내 차가 팔리기까지, 이렇게 진행돼요</h2>
+          <p className="text-gray-400 text-sm mb-12">
+            진단부터 대금 정산까지 — 신청 이후엔 카비어가 각 단계를 직접 확인하며 진행하니 따로 신경 쓸 일이 없어요.
+          </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { step: '01', title: '차량 등록 또는 검색', desc: '사진 몇 장 올리면 바로 등록 완료.\n사는 분은 차종·예산으로 필터링.', color: 'text-violet-600' },
-            { step: '02', title: '진단 & 가격 제안', desc: '평가사 방문 진단.\n바이어가 직접 가격 제안도 가능해요.', color: 'text-violet-600' },
-            { step: '03', title: '탁송 또는 검차 연결', desc: '계약 완료 후 탁송·검차 예약까지\n카비어에서 한 번에 끝내요.', color: 'text-violet-600' },
-          ].map(s => (
-            <div key={s.step} className="flex gap-5">
-              <span className={clsx('text-4xl font-black leading-none shrink-0', s.color)}>{s.step}</span>
-              <div>
-                <h3 className="font-black text-gray-900 mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed whitespace-pre-line">{s.desc}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { step: '01', icon: '✦', title: '검차 신청', desc: '평가사가 방문해 정밀 진단하고 리포트로 남겨요.' },
+              { step: '02', icon: '🤝', title: '판매 동의', desc: '진단 완료 후 판매를 결정하면 매물로 전환돼요.' },
+              { step: '03', icon: '🔨', title: '딜러 경쟁입찰', desc: '승인된 딜러들이 진단 리포트를 보고 공개 입찰해요.' },
+              { step: '04', icon: '🏆', title: '낙찰 확정', desc: '최고 입찰가를 확인하고 판매를 최종 승인해요.' },
+              { step: '05', icon: '🔒', title: '안전결제 확인', desc: '카비어가 대금을 직접 보관하지 않고, 에스크로로 입금을 확인해요.' },
+              { step: '06', icon: '🚚', title: '탁송', desc: '입금 확인 후 차량을 안전하게 인수·배송해요.' },
+              { step: '07', icon: '💰', title: '대금 정산', desc: '탁송료 등 항목을 투명하게 분리해서 정산 금액을 계산해요.' },
+              { step: '08', icon: '🎉', title: '거래 완료', desc: '차주에게 대금이 지급되면 거래가 마무리돼요.' },
+            ].map(s => (
+              <div key={s.step} className="bg-white rounded-2xl border border-gray-100 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xl">{s.icon}</span>
+                  <span className="text-[11px] font-black text-gray-300">{s.step}</span>
+                </div>
+                <h3 className="font-black text-gray-900 text-sm mb-1.5">{s.title}</h3>
+                <p className="text-xs text-gray-400 leading-relaxed">{s.desc}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <p className="text-center mt-10">
+            <Link href="/inspection"
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+              검차 신청부터 시작하기
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </Link>
+          </p>
         </div>
       </section>
 
