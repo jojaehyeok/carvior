@@ -3,9 +3,26 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import { fmtKRW } from '@/components/auction/shared';
+
+const LISTING_STATUS_LABEL: Record<string, string> = {
+  ACTIVE: '입찰중',
+  TARGET_PRICE_MET: '희망가 도달 · 입찰중',
+  AWARDED: '낙찰 완료',
+  CLOSED: '입찰 마감',
+  CANCELLED: '취소됨',
+};
+
+interface DealerBid {
+  id: number;
+  status: string;
+  createdAt: string;
+  isMine: boolean;
+  amount?: number;
+}
 
 interface InspectionPhotos {
   exterior?: string[];
@@ -79,11 +96,28 @@ function SaleListingDetailContent() {
   const embed = searchParams.get('embed') === '1';
   const id = typeof params.id === 'string' ? params.id : '';
 
+  const { data: session } = useSession();
+  const dealerId = (session?.user as any)?.id ? Number((session?.user as any).id) : undefined;
+  const dealerName = (session?.user as any)?.name ?? '딜러';
+
   const [item, setItem] = useState<DealerListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
   const [copied, setCopied] = useState(false);
   const touchStartX = useRef(0);
+  const [bids, setBids] = useState<DealerBid[]>([]);
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidding, setBidding] = useState(false);
+
+  const loadBids = () => {
+    const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+    fetch(`${API}/external/sale-listings/${id}/bids${dealerId ? `?dealerId=${dealerId}` : ''}`, {
+      headers: { 'x-internal-key': process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '' },
+    })
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setBids(Array.isArray(data) ? data : []))
+      .catch(() => setBids([]));
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -95,7 +129,36 @@ function SaleListingDetailContent() {
       .then(setItem)
       .catch(() => setItem(null))
       .finally(() => setLoading(false));
-  }, [id]);
+    loadBids();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, dealerId]);
+
+  const submitBid = async () => {
+    const amount = Number(bidAmount.replace(/,/g, ''));
+    if (!amount || amount <= 0) { alert('입찰가를 입력해주세요.'); return; }
+    setBidding(true);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const res = await fetch(`${API}/external/sale-listings/${id}/bid`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '' },
+        body: JSON.stringify({ dealerId, dealerName, amount }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.message ?? '입찰에 실패했습니다.'); return; }
+      setBidAmount('');
+      loadBids();
+      const API2 = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      fetch(`${API2}/external/sale-listings/${id}`, {
+        headers: { 'x-internal-key': process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '' },
+      }).then(r => r.ok ? r.json() : null).then(d => d && setItem(d)).catch(() => {});
+      alert(`✓ ${fmtKRW(amount)} 입찰 완료!`);
+    } catch {
+      alert('서버와 통신할 수 없습니다.');
+    } finally {
+      setBidding(false);
+    }
+  };
 
   const handleCopyCarNumber = async () => {
     if (!item?.carNumber) return;
@@ -248,11 +311,60 @@ function SaleListingDetailContent() {
           ))}
         </div>
 
-        {/* 입찰 — 5단계(딜러 경쟁입찰)에서 연결 예정 */}
-        <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 text-center">
-          <p className="text-sm font-bold text-gray-500">🔨 입찰 기능은 곧 오픈됩니다</p>
-          <p className="text-xs text-gray-400 mt-1">문의사항은 카비어 채팅으로 연락해주세요.</p>
+        {/* 입찰 */}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-base font-black text-gray-900">입찰</h3>
+          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${
+            item.listingStatus === 'AWARDED' ? 'bg-violet-100 text-violet-700'
+              : item.listingStatus === 'ACTIVE' || item.listingStatus === 'TARGET_PRICE_MET' ? 'bg-green-100 text-green-700'
+              : 'bg-gray-100 text-gray-500'
+          }`}>
+            {LISTING_STATUS_LABEL[item.listingStatus] ?? item.listingStatus}
+          </span>
         </div>
+
+        {(item.listingStatus === 'ACTIVE' || item.listingStatus === 'TARGET_PRICE_MET') ? (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 mb-6 space-y-2.5">
+            <p className="text-xs text-gray-500">입찰 {bids.length}건 {bids.some(b => b.isMine) && '· 내 입찰 있음'}</p>
+            <div className="flex gap-2">
+              <input
+                type="text" inputMode="numeric" placeholder="입찰가 (원)"
+                value={bidAmount} onChange={e => setBidAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <button
+                onClick={submitBid}
+                disabled={bidding || !bidAmount}
+                className="px-6 py-3 rounded-xl bg-black text-white text-sm font-bold disabled:opacity-40 hover:bg-gray-800 transition-colors"
+              >
+                {bidding ? '입찰 중…' : '입찰하기'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 text-center mb-6">
+            <p className="text-sm font-bold text-gray-500">
+              {item.listingStatus === 'AWARDED' ? '🎉 낙찰이 확정된 매물입니다' : '입찰이 종료된 매물입니다'}
+            </p>
+          </div>
+        )}
+
+        {bids.length > 0 && (
+          <div className="border-t border-gray-100">
+            {bids.map(b => (
+              <div key={b.id} className="flex items-center justify-between py-3 border-b border-gray-100">
+                <span className="text-sm text-gray-600">
+                  {b.isMine ? '내 입찰' : '다른 딜러'}
+                  {b.status === 'WINNER' && <span className="ml-1.5 text-[10px] font-black text-violet-600">낙찰</span>}
+                  {b.status === 'LOST' && <span className="ml-1.5 text-[10px] font-black text-gray-400">미낙찰</span>}
+                </span>
+                <span className="text-sm font-bold text-gray-900">
+                  {b.isMine && typeof b.amount === 'number' ? fmtKRW(b.amount) : '비공개'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
