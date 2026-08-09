@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -108,7 +108,6 @@ export default function MypagePage() {
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
   const [togglingBuyerId, setTogglingBuyerId] = useState<number | null>(null);
-  const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
 
@@ -134,12 +133,6 @@ export default function MypagePage() {
         const bRes = await fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(u.phone)}`);
         const bData = bRes.ok ? await bRes.json() : [];
         setBookings(Array.isArray(bData) ? bData : []);
-
-        const pRes = await fetch(`${API}/external/partner-applications/by-phone?phone=${encodeURIComponent(u.phone)}`);
-        if (pRes.ok) {
-          const app = await pRes.json();
-          setPartnerAppStatus(app?.status ?? null);
-        }
       } catch {
         setBookings([]);
       }
@@ -372,43 +365,13 @@ export default function MypagePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-zinc-800 text-white px-6 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {user?.image ? (
-                <img src={user.image} alt="" className="w-14 h-14 rounded-full object-cover ring-2 ring-white/20" />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-violet-500 flex items-center justify-center text-xl font-black">
-                  {user?.name?.[0] ?? '?'}
-                </div>
-              )}
-              <div>
-                <p className="font-bold text-lg">{user?.name}</p>
-                <p className="text-sm text-white/50">{user?.email}</p>
-                {user?.role === 'dealer' && (
-                  <span className="text-[10px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full mt-1 inline-block">딜러</span>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <a href="#my-vehicles" className="text-xs text-white/40 hover:text-white transition-colors">
-                내 차량 관리하기
-              </a>
-              <button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className="text-xs text-white/40 hover:text-white transition-colors"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* 타이틀 — 프로필/로그아웃은 상단 네비 프로필 드롭다운에 이미 있어서 여기선 중복 노출 안 함 */}
+      <div className="max-w-6xl mx-auto px-4 pt-8 pb-2">
+        <h1 className="text-2xl font-black text-gray-900">내 차량 관리하기</h1>
       </div>
 
       {/* 제휴 검차 서비스 유도 배너 */}
-      <div className="max-w-6xl mx-auto px-4 pt-6">
+      <div className="max-w-6xl mx-auto px-4 pt-4">
         <Link
           href="/inspection?promo=member"
           className="flex items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl px-5 py-4 hover:from-violet-500 hover:to-indigo-500 transition-colors"
@@ -422,31 +385,6 @@ export default function MypagePage() {
           </div>
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
         </Link>
-
-        {/* 파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로. 탁송 신청은 매물별로
-            (판매완료된 카드의 "진행상황" 안에서) 받으므로 여기 전역 버튼은 없앰. */}
-        <div className="flex gap-2 mt-3">
-          {partnerAppStatus === 'approved' ? (
-            <a
-              href="https://carvior.store/admin/login"
-              target="_blank" rel="noreferrer"
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 hover:bg-emerald-100 transition-colors"
-            >
-              🔑 파트너패널 바로가기
-            </a>
-          ) : partnerAppStatus === 'pending' ? (
-            <div className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
-              🔑 파트너패널 신청완료
-            </div>
-          ) : (
-            <Link
-              href="/marketing/partner-panel"
-              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors"
-            >
-              🔑 파트너패널
-            </Link>
-          )}
-        </div>
       </div>
 
       {/* 내 매물 */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
@@ -59,6 +59,7 @@ export default function CarReportViewPage() {
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
   const [copied, setCopied] = useState(false);
+  const touchStartX = useRef(0);
 
   useEffect(() => {
     if (!hash) return;
@@ -90,6 +91,14 @@ export default function CarReportViewPage() {
 
   const photos = collectPhotos(data.images);
   const hasPhotos = photos.length > 0;
+  const prevPhoto = () => setActivePhoto(p => (p - 1 + photos.length) % photos.length);
+  const nextPhoto = () => setActivePhoto(p => (p + 1) % photos.length);
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) < 40) return;
+    delta > 0 ? prevPhoto() : nextPhoto();
+  };
 
   const specRows = [
     { label: '차량번호', value: data.car_info.number || '-' },
@@ -118,7 +127,11 @@ export default function CarReportViewPage() {
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
         {/* 메인 사진 */}
-        <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden border border-gray-100 rounded-xl">
+        <div
+          className="relative aspect-[4/3] bg-gray-50 overflow-hidden border border-gray-100 rounded-xl"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {hasPhotos ? (
             <img src={photos[activePhoto]?.url} alt={photos[activePhoto]?.label} className="w-full h-full object-cover" />
           ) : (
@@ -128,6 +141,28 @@ export default function CarReportViewPage() {
             <span className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
               {activePhoto + 1} / {photos.length}
             </span>
+          )}
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow transition-colors"
+              >
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={nextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow transition-colors"
+              >
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </>
           )}
         </div>
 
@@ -169,7 +204,7 @@ export default function CarReportViewPage() {
         </div>
 
         <h3 className="text-base font-black text-gray-900 mb-3">카비어 진단</h3>
-        <div className="border-t border-gray-100">
+        <div className="border-t border-gray-100 mb-8">
           {diagRows.map(d => (
             <div key={d.label} className="flex items-baseline gap-4 py-3 border-b border-gray-100">
               <span className="w-24 shrink-0 text-sm text-gray-400">{d.label}</span>
@@ -177,6 +212,13 @@ export default function CarReportViewPage() {
             </div>
           ))}
         </div>
+
+        <Link
+          href={`/report/${hash}`}
+          className="block w-full text-center py-3 rounded-xl text-sm font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 transition-colors"
+        >
+          전체 진단 리포트 보기 (사고이력·손상부위·PDF) →
+        </Link>
       </div>
     </div>
   );

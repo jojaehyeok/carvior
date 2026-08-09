@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 
@@ -83,6 +83,7 @@ function SaleListingDetailContent() {
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
   const [copied, setCopied] = useState(false);
+  const touchStartX = useRef(0);
 
   useEffect(() => {
     if (!id) return;
@@ -117,6 +118,14 @@ function SaleListingDetailContent() {
 
   const photos = collectPhotos(item.photos);
   const hasPhotos = photos.length > 0;
+  const prevPhoto = () => setActivePhoto(p => (p - 1 + photos.length) % photos.length);
+  const nextPhoto = () => setActivePhoto(p => (p + 1) % photos.length);
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) < 40) return;
+    delta > 0 ? prevPhoto() : nextPhoto();
+  };
 
   const specRows = [
     { label: '차량번호', value: item.carNumber || '-' },
@@ -147,7 +156,11 @@ function SaleListingDetailContent() {
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-4">
         {/* 메인 사진 */}
-        <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden border border-gray-100 rounded-xl">
+        <div
+          className="relative aspect-[4/3] bg-gray-50 overflow-hidden border border-gray-100 rounded-xl"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           {hasPhotos ? (
             <img src={photos[activePhoto]?.url} alt={photos[activePhoto]?.label} className="w-full h-full object-cover" />
           ) : (
@@ -157,6 +170,28 @@ function SaleListingDetailContent() {
             <span className="absolute bottom-3 right-3 bg-black/60 text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
               {activePhoto + 1} / {photos.length}
             </span>
+          )}
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={prevPhoto}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow transition-colors"
+              >
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={nextPhoto}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow transition-colors"
+              >
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </>
           )}
         </div>
 
