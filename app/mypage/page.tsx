@@ -380,9 +380,9 @@ export default function MypagePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/mypage/settings" className="text-xs text-white/40 hover:text-white transition-colors">
-                계정 설정
-              </Link>
+              <a href="#my-vehicles" className="text-xs text-white/40 hover:text-white transition-colors">
+                내 차량 관리하기
+              </a>
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="text-xs text-white/40 hover:text-white transition-colors"
@@ -437,7 +437,7 @@ export default function MypagePage() {
       </div>
 
       {/* 내 매물 */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div id="my-vehicles" className="max-w-6xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-black text-gray-900">내 매물</h2>
           <button

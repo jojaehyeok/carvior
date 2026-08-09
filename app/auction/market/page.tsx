@@ -83,6 +83,12 @@ function AuctionContent() {
               </div>
               <h1 className="text-3xl font-black text-white">진단 완료 차량 경매</h1>
               <p className="text-zinc-400 text-sm mt-1.5">카비어 진단이 완료된 차량을 경매로 직접 낙찰받으세요.</p>
+              <div className="flex items-center gap-2 mt-5 text-xs">
+                <span className="text-white px-3 py-1.5 rounded-full bg-white/10 border border-white/10 font-bold">스마트옥션(경매)</span>
+                <Link href="/auction/sale-listings" className="text-zinc-400 hover:text-white transition-colors px-3 py-1.5 rounded-full border border-white/10">
+                  판매차량 목록
+                </Link>
+              </div>
             </div>
             <div className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-xl px-4 py-2.5">
               <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
