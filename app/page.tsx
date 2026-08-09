@@ -172,15 +172,16 @@ export default function HomePage() {
         </p>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-sm mx-auto text-left">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-1">
             <span className="text-xs font-bold text-gray-400">진단 리포트 미리보기</span>
             <span className="text-[10px] font-black bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full">✦ 진단완료</span>
           </div>
+          <p className="text-xs text-gray-400 mb-4">스텔라 · 101,378km</p>
           <div className="space-y-2.5">
             {[
-              ['외판 도색 흔적', '-15만원'],
-              ['타이어 교체 필요', '-12만원'],
-              ['휠 복원 필요', '-8만원'],
+              ['엔진 경고등', '점등'],
+              ['누유', '프런트 케이스·오일팬'],
+              ['옵션 작동', '좌측 후미등 미점등'],
             ].map(([label, val]) => (
               <div key={label} className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">{label}</span>
@@ -188,10 +189,14 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="border-t border-gray-100 mt-4 pt-4 flex justify-between items-center">
-            <span className="text-xs font-bold text-gray-400">진단 기반 예상가</span>
-            <span className="font-black text-gray-900">협의 가능</span>
-          </div>
+          <a
+            href="https://carvior.store/report/892109a9f31525b3"
+            target="_blank"
+            rel="noreferrer"
+            className="block border-t border-gray-100 mt-4 pt-4 text-center text-xs font-bold text-violet-600 hover:text-violet-700"
+          >
+            실제 리포트 전체 보기 →
+          </a>
         </div>
       </section>
 
