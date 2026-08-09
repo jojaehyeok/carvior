@@ -644,7 +644,7 @@ export default function MypagePage() {
             </aside>
 
             {/* 우측 그리드 */}
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 min-w-0 items-start">
               {filteredItems.length === 0 && filteredBookings.length === 0 && (
                 <div className="col-span-full bg-white rounded-2xl p-10 text-center border border-gray-100 text-sm text-gray-400">
                   선택한 조건에 맞는 항목이 없습니다
@@ -791,14 +791,24 @@ export default function MypagePage() {
                           </div>
                         )}
 
-                        {(item.status === 'active' || item.status === 'sold') && item.ownerAccessToken && (
-                          <button
-                            onClick={() => openMyListingPopup(item.ownerAccessToken!)}
-                            className="block w-full text-center mt-4 text-xs font-bold text-violet-600 underline hover:text-violet-700"
-                          >
-                            입찰 내역 상세보기 →
-                          </button>
-                        )}
+                        <div className="flex items-center justify-center gap-4 mt-4">
+                          {(item.status === 'active' || item.status === 'sold') && item.ownerAccessToken && (
+                            <button
+                              onClick={() => openMyListingPopup(item.ownerAccessToken!)}
+                              className="text-xs font-bold text-violet-600 underline hover:text-violet-700"
+                            >
+                              입찰 내역 상세보기 →
+                            </button>
+                          )}
+                          {item.carHash && (
+                            <button
+                              onClick={() => openCarReportPopup(item.carHash!)}
+                              className="text-xs font-bold text-gray-500 underline hover:text-gray-700"
+                            >
+                              검차 리포트 보기 →
+                            </button>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
