@@ -113,7 +113,7 @@ export default function MypagePage() {
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
   const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
   const [listingModal, setListingModal] = useState<InspectionBooking | null>(null);
-  const [listingForm, setListingForm] = useState({ price: '', year: '', contact: '' });
+  const [listingForm, setListingForm] = useState({ price: '', contact: '' });
   const [listingSubmitting, setListingSubmitting] = useState(false);
 
   const user = session?.user as any;
@@ -220,11 +220,13 @@ export default function MypagePage() {
     }
   };
 
-  // 이미 카비어 검차리포트가 있는 차량이라 /sell/register(관리자 승인 대기)를 다시 거치지 않고,
-  // 판매가만 받아서 바로 판매중(active) 매물로 등록함 — 사진/차종/주행거리는 검차리포트에서 그대로 가져옴.
+  // 이미 카비어 검차리포트가 있는 차량이라 판매가만 받아서 바로 차량판매중개 시스템
+  // (Vehicle → SaleListing)으로 즉시 출품 — 차종/주행거리/사진은 검차리포트를 그대로 참조
+  // (복사 안 함). 기존 스마트옥션(StoreItem)으로 출품하던 걸 이 시스템으로 대체(2026-08-09 결정,
+  // 스마트옥션 쪽 실사용 데이터가 없어서 안전하게 전환).
   const openListingModal = async (booking: InspectionBooking) => {
     setListingModal(booking);
-    setListingForm({ price: '', year: '', contact: '' });
+    setListingForm({ price: '', contact: '' });
     try {
       const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
       const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
@@ -234,51 +236,42 @@ export default function MypagePage() {
   };
 
   const submitListing = async () => {
-    if (!listingModal?.carHash) return;
+    if (!listingModal) return;
     const price = Number(listingForm.price);
-    const year = Number(listingForm.year);
     if (!price || price <= 0) { alert('판매가를 입력해주세요.'); return; }
-    if (!year || year < 1990) { alert('연식을 입력해주세요.'); return; }
     if (!listingForm.contact.trim()) { alert('연락처를 입력해주세요.'); return; }
 
     setListingSubmitting(true);
     try {
-      const reportRes = await fetch(`https://carvior.store/api/v1/external/inspection/report/by-hash/${listingModal.carHash}`);
-      if (!reportRes.ok) throw new Error();
-      const report = await reportRes.json();
-
-      const res = await fetch('/api/admin/store-items', {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const res = await fetch(`${API}/external/sale-listings/self-list`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '' },
         body: JSON.stringify({
           carNumber: listingModal.carNumber,
-          titleKo: listingModal.carModel || report.car_info?.type || listingModal.carNumber,
-          titleEn: listingModal.carModel || report.car_info?.type || listingModal.carNumber,
-          year,
-          mileage: report.car_info?.mileage ?? 0,
-          color: report.car_info?.color,
-          colorKo: report.car_info?.color,
-          accident: false,
-          priceKRW: price * 10000,
-          priceUSD: Math.round(price * 10000 / 1350),
-          category: 'SUV',
-          region: '서울',
-          hasReport: true,
-          location: 'Korea',
-          doors: 5, seats: 5,
-          inspectedAt: new Date().toISOString().split('T')[0],
-          registeredAt: new Date().toISOString(),
-          status: 'active',
-          photos: report.images,
-          adminMemo: `[검차신청 전환출품] bookingId:${listingModal.id} 연락처:${listingForm.contact}`,
-          selfRegistered: true,
-          sellerContact: listingForm.contact,
+          ownerName: user?.name ?? listingModal.carModel ?? '',
+          ownerContact: listingForm.contact,
+          askingPrice: price * 10000,
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message ?? '출품 중 오류가 발생했습니다.');
+        return;
+      }
+      // 출품 완료된 건은 더 이상 "내 검차 신청" 목록에 남겨둘 필요가 없어서 숨김 처리(기존 숨기기 기능 재사용)
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (u?.phone) {
+        await fetch(`${API}/external/request/${listingModal.id}/buyer-hidden`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact: u.phone, hidden: true }),
+        }).catch(() => {});
+      }
+      setBookings(prev => prev.filter(b => b.id !== listingModal.id));
       setListingModal(null);
-      refreshItems();
-      alert('스마트옥션에 바로 출품됐어요!');
+      alert('스마트옥션에 바로 출품됐어요! 딜러 입찰이 시작되면 거래관리에서 진행상황을 확인할 수 있어요.');
     } catch {
       alert('출품 중 오류가 발생했습니다.');
     } finally {
@@ -983,8 +976,8 @@ export default function MypagePage() {
         </div>
       )}
 
-      {/* 스마트옥션 즉시 출품 모달 — 이미 검차리포트가 있어서 사진/차종/주행거리는 자동으로
-          가져오고 판매가·연식·연락처만 받아서 바로 판매중(active)으로 등록 */}
+      {/* 차량판매중개 즉시 출품 모달 — 검차리포트가 이미 연결돼있어서 판매가·연락처만 받고
+          Vehicle→SaleListing으로 바로 전환(관리자 승인 없이 즉시 딜러 입찰 가능) */}
       {listingModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
@@ -997,11 +990,6 @@ export default function MypagePage() {
               <input
                 type="number" placeholder="판매가 (만원)"
                 value={listingForm.price} onChange={e => setListingForm(f => ({ ...f, price: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
-              />
-              <input
-                type="number" placeholder="연식 (예: 2020)"
-                value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
               />
               <input
@@ -1020,7 +1008,7 @@ export default function MypagePage() {
               </button>
               <button
                 onClick={submitListing}
-                disabled={listingSubmitting || !listingForm.price || !listingForm.year || !listingForm.contact}
+                disabled={listingSubmitting || !listingForm.price || !listingForm.contact}
                 className="flex-1 py-3 rounded-xl bg-violet-600 text-white text-sm font-bold disabled:opacity-50 hover:bg-violet-700 transition-colors"
               >
                 {listingSubmitting ? '출품 중…' : '바로 출품하기'}
