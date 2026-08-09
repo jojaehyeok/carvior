@@ -103,24 +103,7 @@ export default function HomePage() {
         <h2 className="text-2xl font-black text-gray-900 mb-2">무엇을 도와드릴까요?</h2>
         <p className="text-gray-400 text-sm mb-10">원하는 서비스를 선택하면 바로 시작할 수 있어요.</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* 검차 신청 */}
-          <Link href="/inspection"
-            className="group relative overflow-hidden rounded-2xl bg-zinc-900 p-7 hover:bg-violet-700 transition-colors duration-200">
-            <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">✦</div>
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/40 mb-4">INSPECTION</p>
-            <h3 className="text-xl font-black text-white mb-2">내 차 진단받고 싶어요</h3>
-            <p className="text-white/50 text-sm leading-relaxed mb-6">
-              평가사가 직접 방문해 정밀 진단.<br />근거 있는 시세로 증명하세요.
-            </p>
-            <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
-              검차 신청하기
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </span>
-          </Link>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* 내차팔기 */}
           <Link href="/sell"
             className="group relative overflow-hidden rounded-2xl bg-violet-600 p-7 hover:bg-violet-500 transition-colors duration-200">
@@ -191,14 +174,6 @@ export default function HomePage() {
               <span className="font-black text-gray-900">협의 가능</span>
             </div>
           </div>
-
-          <Link href="/inspection"
-            className="inline-flex items-center gap-2 mt-10 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-검차 신청하기
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </Link>
         </div>
       </section>
 
@@ -334,16 +309,7 @@ export default function HomePage() {
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/inspection"
-            className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-amber-900 font-black px-8 py-4 rounded-xl text-sm transition-colors">
-            ✦ 검차 신청하기
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </Link>
-          <p className="text-xs text-gray-400 mt-2">
-            <Link href="/marketing/carvior-inspection" className="underline hover:text-gray-600">서비스 자세히 보기</Link>
-          </p>
+          <Link href="/marketing/carvior-inspection" className="text-sm text-gray-400 underline hover:text-gray-600">서비스 자세히 보기</Link>
         </div>
       </section>
 
