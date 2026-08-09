@@ -76,6 +76,7 @@ interface InspectionBooking {
   paymentMethod?: string;
   createdAt: string;
   buyerPurchaseCompleted?: boolean;
+  buyerHidden?: boolean;
   refundPreview?: { tier: 'FULL' | 'FEE' | 'NONE'; refundAmount: number; cancelFee: number };
   thumbnailUrl?: string;
   carHash?: string;
@@ -188,6 +189,30 @@ export default function MypagePage() {
       });
       if (!res.ok) throw new Error();
       setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, buyerPurchaseCompleted: next } : b));
+    } catch {
+      alert('처리 중 오류가 발생했습니다.');
+    } finally {
+      setTogglingBuyerId(null);
+    }
+  };
+
+  // 완전히 구매해서 본인 상사(딜러)에서 따로 팔 예정이라 카비어에 낼 의사가 없는 건 —
+  // 마이페이지 목록에서 아예 숨김(되돌리기 UI 없는 단방향 동작).
+  const hideBooking = async (booking: InspectionBooking) => {
+    if (!window.confirm('이 차량을 목록에서 숨길까요? 다시 표시할 수 없어요.')) return;
+    setTogglingBuyerId(booking.id);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (!u?.phone) throw new Error();
+      const res = await fetch(`${API}/external/request/${booking.id}/buyer-hidden`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: u.phone, hidden: true }),
+      });
+      if (!res.ok) throw new Error();
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
     } catch {
       alert('처리 중 오류가 발생했습니다.');
     } finally {
@@ -782,6 +807,11 @@ export default function MypagePage() {
               {filteredBookings.map(booking => {
                 const bs = BOOKING_STATUS_MAP[booking.status] ?? BOOKING_STATUS_MAP.PENDING;
                 const cancellable = booking.status === 'PENDING' || booking.status === 'ASSIGNED';
+                // 진단완료 후 구매완료 표시 없이 2주가 지나면 목록에서 자동 제외되므로,
+                // 며칠 안 남았을 때 미리 구매완료 표시를 유도
+                const daysLeft = booking.status === 'COMPLETED' && !booking.buyerPurchaseCompleted
+                  ? 14 - Math.floor((Date.now() - new Date(booking.createdAt).getTime()) / (24 * 60 * 60 * 1000))
+                  : null;
                 return (
                   <div key={`booking-${booking.id}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
                     {/* 썸네일 — 진단완료 건은 검차사진 첫 장, 아니면 카비어 로고. 누르면 상세 리포트 팝업 */}
@@ -821,6 +851,11 @@ export default function MypagePage() {
                       </div>
 
                       <div className="space-y-2">
+                        {daysLeft !== null && daysLeft <= 5 && (
+                          <p className="text-[10px] text-amber-600 font-semibold bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5">
+                            ⏳ {daysLeft > 0 ? `${daysLeft}일 후` : '곧'} 목록에서 자동으로 제외돼요. 구매하셨다면 지금 표시해주세요.
+                          </p>
+                        )}
                         <div className="flex flex-wrap gap-1.5">
                           <button
                             onClick={() => toggleBuyerPurchaseCompleted(booking)}
@@ -831,6 +866,16 @@ export default function MypagePage() {
                               ? '처리 중...'
                               : booking.buyerPurchaseCompleted ? '구매중으로 되돌리기' : '구매완료로 표시'}
                           </button>
+                          {booking.buyerPurchaseCompleted && (
+                            <button
+                              onClick={() => hideBooking(booking)}
+                              disabled={togglingBuyerId === booking.id}
+                              title="본인 상사에서 따로 팔 예정이라 카비어에 낼 의사 없는 차량"
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                            >
+                              숨기기
+                            </button>
+                          )}
                           {cancellable && (
                             <button
                               onClick={() => cancelBooking(booking)}
