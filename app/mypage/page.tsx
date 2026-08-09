@@ -110,6 +110,7 @@ export default function MypagePage() {
   const [togglingBuyerId, setTogglingBuyerId] = useState<number | null>(null);
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
+  const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
 
   const user = session?.user as any;
 
@@ -133,6 +134,12 @@ export default function MypagePage() {
         const bRes = await fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(u.phone)}`);
         const bData = bRes.ok ? await bRes.json() : [];
         setBookings(Array.isArray(bData) ? bData : []);
+
+        const pRes = await fetch(`${API}/external/partner-applications/by-phone?phone=${encodeURIComponent(u.phone)}`);
+        if (pRes.ok) {
+          const app = await pRes.json();
+          setPartnerAppStatus(app?.status ?? null);
+        }
       } catch {
         setBookings([]);
       }
@@ -385,6 +392,30 @@ export default function MypagePage() {
           </div>
           <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
         </Link>
+
+        {/* 파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로 */}
+        <div className="flex gap-2 mt-3">
+          {partnerAppStatus === 'approved' ? (
+            <a
+              href="https://carvior.store/admin/login"
+              target="_blank" rel="noreferrer"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 hover:bg-emerald-100 transition-colors"
+            >
+              🔑 파트너패널 바로가기
+            </a>
+          ) : partnerAppStatus === 'pending' ? (
+            <div className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-400 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+              🔑 파트너패널 신청완료
+            </div>
+          ) : (
+            <Link
+              href="/marketing/partner-panel"
+              className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+              🔑 파트너패널
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* 내 매물 */}
