@@ -468,21 +468,23 @@ export default function MypagePage() {
         <h1 className="text-2xl font-black text-gray-900">내 차량 관리하기</h1>
       </div>
 
-      {/* 제휴 검차 서비스 유도 배너 */}
+      {/* 제휴 검차 서비스 유도 배너 — 딜러 전용(매입 전 검차 수요가 잦은 건 딜러라서) */}
       <div className="max-w-6xl mx-auto px-4 pt-4">
-        <Link
-          href="/inspection?promo=member"
-          className="flex items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl px-5 py-4 hover:from-violet-500 hover:to-indigo-500 transition-colors"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="text-2xl shrink-0">🤝</span>
-            <div className="min-w-0">
-              <p className="text-white font-black text-sm">제휴 검차 서비스, 회원 전용가로 받아보세요</p>
-              <p className="text-violet-200 text-xs mt-0.5">국산 88,000원 · 수입 121,000원 (VAT 포함)</p>
+        {user?.role === 'dealer' && (
+          <Link
+            href="/inspection?promo=member"
+            className="flex items-center justify-between gap-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-2xl px-5 py-4 hover:from-violet-500 hover:to-indigo-500 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-2xl shrink-0">🤝</span>
+              <div className="min-w-0">
+                <p className="text-white font-black text-sm">제휴 검차 서비스, 딜러 전용가로 받아보세요</p>
+                <p className="text-violet-200 text-xs mt-0.5">국산 88,000원 · 수입 121,000원 (VAT 포함)</p>
+              </div>
             </div>
-          </div>
-          <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
-        </Link>
+            <span className="text-white text-xs font-bold shrink-0">신청하기 →</span>
+          </Link>
+        )}
 
         {/* 파트너패널 — 보조 기능이라 큰 배너 대신 작은 버튼으로 */}
         <div className="flex gap-2 mt-3">
