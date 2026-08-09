@@ -111,6 +111,9 @@ export default function MypagePage() {
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
   const [partnerAppStatus, setPartnerAppStatus] = useState<'pending' | 'approved' | 'rejected' | null>(null);
+  const [listingModal, setListingModal] = useState<InspectionBooking | null>(null);
+  const [listingForm, setListingForm] = useState({ price: '', year: '', contact: '' });
+  const [listingSubmitting, setListingSubmitting] = useState(false);
 
   const user = session?.user as any;
 
@@ -192,12 +195,82 @@ export default function MypagePage() {
     }
   };
 
-  useEffect(() => {
-    if (status !== 'authenticated') return;
+  // 이미 카비어 검차리포트가 있는 차량이라 /sell/register(관리자 승인 대기)를 다시 거치지 않고,
+  // 판매가만 받아서 바로 판매중(active) 매물로 등록함 — 사진/차종/주행거리는 검차리포트에서 그대로 가져옴.
+  const openListingModal = async (booking: InspectionBooking) => {
+    setListingModal(booking);
+    setListingForm({ price: '', year: '', contact: '' });
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (u?.phone) setListingForm(f => ({ ...f, contact: u.phone }));
+    } catch {}
+  };
+
+  const submitListing = async () => {
+    if (!listingModal?.carHash) return;
+    const price = Number(listingForm.price);
+    const year = Number(listingForm.year);
+    if (!price || price <= 0) { alert('판매가를 입력해주세요.'); return; }
+    if (!year || year < 1990) { alert('연식을 입력해주세요.'); return; }
+    if (!listingForm.contact.trim()) { alert('연락처를 입력해주세요.'); return; }
+
+    setListingSubmitting(true);
+    try {
+      const reportRes = await fetch(`https://carvior.store/api/v1/external/inspection/report/by-hash/${listingModal.carHash}`);
+      if (!reportRes.ok) throw new Error();
+      const report = await reportRes.json();
+
+      const res = await fetch('/api/admin/store-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          carNumber: listingModal.carNumber,
+          titleKo: listingModal.carModel || report.car_info?.type || listingModal.carNumber,
+          titleEn: listingModal.carModel || report.car_info?.type || listingModal.carNumber,
+          year,
+          mileage: report.car_info?.mileage ?? 0,
+          color: report.car_info?.color,
+          colorKo: report.car_info?.color,
+          accident: false,
+          priceKRW: price * 10000,
+          priceUSD: Math.round(price * 10000 / 1350),
+          category: 'SUV',
+          region: '서울',
+          hasReport: true,
+          location: 'Korea',
+          doors: 5, seats: 5,
+          inspectedAt: new Date().toISOString().split('T')[0],
+          registeredAt: new Date().toISOString(),
+          status: 'active',
+          photos: report.images,
+          adminMemo: `[검차신청 전환출품] bookingId:${listingModal.id} 연락처:${listingForm.contact}`,
+          selfRegistered: true,
+          sellerContact: listingForm.contact,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setListingModal(null);
+      refreshItems();
+      alert('스마트옥션에 바로 출품됐어요!');
+    } catch {
+      alert('출품 중 오류가 발생했습니다.');
+    } finally {
+      setListingSubmitting(false);
+    }
+  };
+
+  const refreshItems = () => {
     fetch('/api/mypage/store-items')
       .then(r => r.json())
       .then(data => { setItems(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    refreshItems();
   }, [status]);
 
   const markSold = async (item: StoreItem) => {
@@ -770,17 +843,12 @@ export default function MypagePage() {
                         </div>
 
                         {booking.status === 'COMPLETED' && booking.buyerPurchaseCompleted && (
-                          <div className="bg-violet-50 border border-violet-100 rounded-xl px-3 py-2.5 space-y-1.5">
-                            <p className="text-[11px] text-violet-700 font-semibold leading-relaxed">
-                              이미 검차 리포트가 있는 차량이에요.<br />지금 바로 스마트옥션에 출품해보세요.
-                            </p>
-                            <a
-                              href={`/sell/register?carNumber=${encodeURIComponent(booking.carNumber)}`}
-                              className="block text-center text-[11px] font-black px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-                            >
-                              🚀 스마트옥션에 출품하기
-                            </a>
-                          </div>
+                          <button
+                            onClick={() => openListingModal(booking)}
+                            className="block w-full text-center text-[11px] font-black px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                          >
+                            🚀 스마트옥션에 출품하기
+                          </button>
                         )}
                       </div>
                     </div>
@@ -837,6 +905,53 @@ export default function MypagePage() {
                 className="flex-1 py-3 rounded-xl bg-violet-600 text-white text-sm font-bold disabled:opacity-50 hover:bg-violet-700 transition-colors"
               >
                 {submitting ? '신청 중…' : '신청하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 스마트옥션 즉시 출품 모달 — 이미 검차리포트가 있어서 사진/차종/주행거리는 자동으로
+          가져오고 판매가·연식·연락처만 받아서 바로 판매중(active)으로 등록 */}
+      {listingModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
+            <div>
+              <h3 className="font-black text-gray-900 text-lg">스마트옥션에 출품하기</h3>
+              <p className="text-xs text-gray-400 mt-1">{listingModal.carModel} ({listingModal.carNumber}) · 검차사진 자동 반영</p>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="number" placeholder="판매가 (만원)"
+                value={listingForm.price} onChange={e => setListingForm(f => ({ ...f, price: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <input
+                type="number" placeholder="연식 (예: 2020)"
+                value={listingForm.year} onChange={e => setListingForm(f => ({ ...f, year: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+              />
+              <input
+                type="tel" placeholder="연락처"
+                value={listingForm.contact} onChange={e => setListingForm(f => ({ ...f, contact: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setListingModal(null)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-600"
+              >
+                취소
+              </button>
+              <button
+                onClick={submitListing}
+                disabled={listingSubmitting || !listingForm.price || !listingForm.year || !listingForm.contact}
+                className="flex-1 py-3 rounded-xl bg-violet-600 text-white text-sm font-bold disabled:opacity-50 hover:bg-violet-700 transition-colors"
+              >
+                {listingSubmitting ? '출품 중…' : '바로 출품하기'}
               </button>
             </div>
           </div>
