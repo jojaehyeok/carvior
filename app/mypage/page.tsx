@@ -77,6 +77,8 @@ interface InspectionBooking {
   createdAt: string;
   buyerPurchaseCompleted?: boolean;
   refundPreview?: { tier: 'FULL' | 'FEE' | 'NONE'; refundAmount: number; cancelFee: number };
+  thumbnailUrl?: string;
+  carHash?: string;
 }
 
 const BOOKING_STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -281,6 +283,17 @@ export default function MypagePage() {
     window.open(
       `/my-listing/${token}`,
       'my-listing',
+      `width=${w},height=${h},left=0,top=0,scrollbars=yes,resizable=yes`
+    );
+  };
+
+  // 검차 신청 카드 — /auction/market 스타일(사진+정보 상세)로 검차리포트를 보여줌
+  const openCarReportPopup = (hash: string) => {
+    const w = Math.round(window.screen.availWidth / 3);
+    const h = window.screen.availHeight;
+    window.open(
+      `/car-report/${hash}`,
+      'car-report',
       `width=${w},height=${h},left=0,top=0,scrollbars=yes,resizable=yes`
     );
   };
@@ -729,13 +742,23 @@ export default function MypagePage() {
                 const cancellable = booking.status === 'PENDING' || booking.status === 'ASSIGNED';
                 return (
                   <div key={`booking-${booking.id}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
-                    <div className="aspect-[4/3] bg-gray-50 relative flex items-center justify-center">
-                      <img src="/logo-icon.svg" alt="" className="w-16 h-16 opacity-20" />
+                    {/* 썸네일 — 진단완료 건은 검차사진 첫 장, 아니면 카비어 로고. 누르면 상세 리포트 팝업 */}
+                    <button
+                      type="button"
+                      onClick={() => booking.carHash && openCarReportPopup(booking.carHash)}
+                      disabled={!booking.carHash}
+                      className="aspect-[4/3] bg-gray-50 relative flex items-center justify-center w-full text-left disabled:cursor-default"
+                    >
+                      {booking.thumbnailUrl ? (
+                        <img src={booking.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <img src="/logo-icon.svg" alt="" className="w-16 h-16 opacity-20" />
+                      )}
                       <span className={`absolute top-2 right-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${bs.color}`}>{bs.label}</span>
                       <span className={`absolute top-2 left-2 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${booking.buyerPurchaseCompleted ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700'}`}>
                         {booking.buyerPurchaseCompleted ? '구매완료' : '구매중'}
                       </span>
-                    </div>
+                    </button>
 
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
                       <div className="min-w-0">
