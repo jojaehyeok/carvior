@@ -857,16 +857,19 @@ export default function MypagePage() {
                           </p>
                         )}
                         <div className="flex flex-wrap gap-1.5">
-                          <button
-                            onClick={() => toggleBuyerPurchaseCompleted(booking)}
-                            disabled={togglingBuyerId === booking.id}
-                            className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50 transition-colors"
-                          >
-                            {togglingBuyerId === booking.id
-                              ? '처리 중...'
-                              : booking.buyerPurchaseCompleted ? '구매중으로 되돌리기' : '구매완료로 표시'}
-                          </button>
-                          {booking.buyerPurchaseCompleted && (
+                          {/* 구매완료 표시는 진단이 실제로 끝난 건에만 의미가 있음(취소/대기중은 진단 자체를 못 봄) */}
+                          {booking.status === 'COMPLETED' && (
+                            <button
+                              onClick={() => toggleBuyerPurchaseCompleted(booking)}
+                              disabled={togglingBuyerId === booking.id}
+                              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                            >
+                              {togglingBuyerId === booking.id
+                                ? '처리 중...'
+                                : booking.buyerPurchaseCompleted ? '구매중으로 되돌리기' : '구매완료로 표시'}
+                            </button>
+                          )}
+                          {booking.status === 'COMPLETED' && booking.buyerPurchaseCompleted && (
                             <button
                               onClick={() => hideBooking(booking)}
                               disabled={togglingBuyerId === booking.id}
@@ -885,7 +888,21 @@ export default function MypagePage() {
                               {cancellingBookingId === booking.id ? '취소 중...' : '신청 취소'}
                             </button>
                           )}
+                          {booking.status === 'CANCELLED' && (
+                            <a
+                              href="/inspection"
+                              className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                            >
+                              ✦ 날짜 바꿔서 재신청하기
+                            </a>
+                          )}
                         </div>
+
+                        {booking.status === 'CANCELLED' && (
+                          <p className="text-[10px] text-gray-400 leading-relaxed">
+                            취소된 신청은 1주일 후 목록에서 자동으로 제외돼요.
+                          </p>
+                        )}
 
                         {booking.status === 'COMPLETED' && booking.buyerPurchaseCompleted && (
                           <button
