@@ -672,7 +672,7 @@ export default function MypagePage() {
 
                     {/* 정보 */}
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
-                      <div className="min-w-0">
+                      <div className="min-w-0 min-h-[74px]">
                         <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{item.titleKo}</p>
                         <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
                           {item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km
@@ -843,7 +843,7 @@ export default function MypagePage() {
                     </button>
 
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
-                      <div className="min-w-0">
+                      <div className="min-w-0 min-h-[74px]">
                         <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{booking.carModel || '검차 신청 차량'}</p>
                         <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
                           {booking.carNumber} · {booking.address}
