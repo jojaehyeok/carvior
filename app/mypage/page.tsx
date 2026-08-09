@@ -647,7 +647,7 @@ export default function MypagePage() {
                 const s = STATUS_MAP[item.status] ?? STATUS_MAP.hidden;
                 const img = thumb(item);
                 return (
-                  <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
+                  <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col min-h-[392px]">
                     {/* 썸네일 — 누르면 입찰 내역 상세보기로 이동 */}
                     <button
                       type="button"
@@ -816,7 +816,7 @@ export default function MypagePage() {
                   ? 14 - Math.floor((Date.now() - new Date(booking.createdAt).getTime()) / (24 * 60 * 60 * 1000))
                   : null;
                 return (
-                  <div key={`booking-${booking.id}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col">
+                  <div key={`booking-${booking.id}`} className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col min-h-[392px]">
                     {/* 썸네일 — 진단완료 건은 검차사진 첫 장, 아니면 카비어 로고. 누르면 상세 리포트 팝업 */}
                     <button
                       type="button"
