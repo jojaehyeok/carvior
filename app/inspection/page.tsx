@@ -107,9 +107,12 @@ export default function InspectionCheckoutPage() {
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
   const [isMemberPromo, setIsMemberPromo] = useState(false);
+  // 딜러 전용가라 URL을 안다고 해도 승인된 딜러 계정이 아니면 적용 안 되게 막음
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('promo') === 'member') setIsMemberPromo(true);
-  }, []);
+    if (new URLSearchParams(window.location.search).get('promo') === 'member' && sessionUser?.role === 'dealer') {
+      setIsMemberPromo(true);
+    }
+  }, [sessionUser?.role]);
   const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
   const pricing = pricingTable[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
