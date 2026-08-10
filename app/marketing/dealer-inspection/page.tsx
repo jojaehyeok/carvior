@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import AuctionAccessGate from '@/components/AuctionAccessGate';
 
 function openChannelTalk() {
   (window as any).ChannelIO?.('show');
@@ -13,7 +14,8 @@ const FEATURES = [
   { icon: '🚗', title: '고객 요청 차량 / 매입 전 차량 확인', desc: '매입을 결정하기 전, 원하는 차량만 골라 확인할 수 있어요.' },
 ];
 
-export default function DealerInspectionMarketingPage() {
+// 딜러 전용가(88,000/110,000원)를 노출하는 페이지라 일반 고객은 못 보게 승인된 딜러 계정만 통과
+function DealerInspectionContent() {
   return (
     <div className="min-h-screen bg-white">
       {/* 히어로 */}
@@ -114,5 +116,13 @@ export default function DealerInspectionMarketingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DealerInspectionMarketingPage() {
+  return (
+    <AuctionAccessGate>
+      <DealerInspectionContent />
+    </AuctionAccessGate>
   );
 }
