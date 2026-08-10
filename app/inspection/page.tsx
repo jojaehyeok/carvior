@@ -24,7 +24,7 @@ const CAR_TYPE_PRICING: Record<CarOrigin, { label: string; original: number; amo
 // 마이페이지 "제휴 검차 서비스" 배너(?promo=member)로 들어왔을 때 적용되는 회원 전용가
 const MEMBER_PRICING: Record<CarOrigin, { label: string; original: number; amount: number }> = {
   DOMESTIC: { label: '국산차', original: 99_000, amount: 88_000 },
-  IMPORTED: { label: '수입차', original: 132_000, amount: 121_000 },
+  IMPORTED: { label: '수입차', original: 132_000, amount: 110_000 },
 };
 
 const TIME_SLOTS = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
