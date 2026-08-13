@@ -121,7 +121,7 @@ export default function HomePage() {
             우리는 자동차를 팔기 위해 진단하지 않습니다.
           </h2>
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-12">
-            진단하기 위해 진단합니다.
+            차량 상태를 정확히 알기 위해 진단합니다.
           </h2>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-4">
