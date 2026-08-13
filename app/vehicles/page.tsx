@@ -11,7 +11,9 @@ export default function VehiclesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/vehicles')
+    const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+    const KEY = process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '';
+    fetch(`${API}/external/store-items`, { headers: { 'x-internal-key': KEY } })
       .then(res => res.json())
       .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data : []))
       .catch(() => setItems([]))
