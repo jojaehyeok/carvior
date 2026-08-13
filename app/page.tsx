@@ -4,6 +4,35 @@ import Link from 'next/link';
 import AppFooter from '@/components/footermodal';
 import HomePromoPopups from '@/components/HomePromoPopups';
 
+const VEHICLE_DATA_POINTS = [
+  '외관 8방향', '엔진룸', '하부', '휠·타이어', '계기판',
+  'VIN', '고장코드', '도막 측정', '옵션 작동', '누유', '사고·교환·판금',
+];
+
+const PRINCIPLES = [
+  { no: '01', title: '판매와 진단의 분리', desc: '차량 판매를 위해 진단 결과를 바꾸지 않습니다.' },
+  { no: '02', title: '차량 상태의 기록', desc: '사진·진단결과·주요 확인사항을 데이터로 남깁니다.' },
+  { no: '03', title: '가격의 투명성', desc: '거래 전 소비자가 부담하는 비용을 명확하게 보여줍니다.' },
+  { no: '04', title: '공정한 딜러 경쟁', desc: '누구에게나 동일한 차량 정보를 제공합니다.' },
+  { no: '05', title: '거래 기록의 보존', desc: '입찰·진단·거래 과정을 기록하여 분쟁을 줄입니다.' },
+];
+
+const DEALER_PROTECTIONS = [
+  '차량 상태를 보고 입찰',
+  '진단 사진과 기록 확인',
+  '매입 후 예상치 못한 손실 최소화',
+  '이의제기 기록 관리',
+  '거래 과정 투명하게 보존',
+];
+
+const AUCTION_FLOW = [
+  { icon: '🚗', title: '판매자', desc: '한 명의 딜러 가격이 아닌,\n시장의 가격을 확인하세요.' },
+  { icon: '✦', title: 'CARVIOR INSPECTION', desc: '독립 평가사가\n차량 상태를 기록해요.' },
+  { icon: '🔨', title: '전국 딜러 경쟁입찰', desc: '승인된 딜러들이\n공개적으로 가격을 제안해요.' },
+  { icon: '🏆', title: '최고가 제안 확인', desc: '가장 높은 제안가를\n바로 확인해요.' },
+  { icon: '⚖️', title: '판매 / 보류 선택', desc: '판매자가 직접\n최종 결정해요.' },
+];
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -11,198 +40,201 @@ export default function HomePage() {
 
       {/* ── 히어로 ── */}
       <section className="relative bg-zinc-900 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/30 via-zinc-900 to-zinc-900 pointer-events-none" />
+        <img
+          src="/images/diagnostic-1.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/60 via-zinc-900/80 to-zinc-900 pointer-events-none" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4" />
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-20">
+        <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-24">
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-8">
               <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
-              전문 평가사 진단 기반 · 신뢰 거래
+              독립 진단 기반 · 투명한 거래
             </span>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.1] mb-6">
-              복잡하고 불투명하던<br />
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.15] mb-6">
               중고차 거래,<br />
-              <span className="text-violet-400">카비어가 정리합니다.</span>
+              이제 <span className="text-violet-400">차량 상태부터</span><br />
+              투명하게.
             </h1>
 
-            <p className="text-zinc-400 text-base md:text-lg leading-relaxed mb-10">
-              전문 평가사의 진단 리포트로 내 차값을 증명하고,<br />
-              검증된 딜러 네트워크에 가장 먼저 전달하세요.
+            <p className="text-zinc-300 text-base md:text-lg leading-relaxed mb-10">
+              카비어는 차량을 직접 판매하지 않습니다.<br />
+              독립된 진단평가와 투명한 거래 정보로<br />
+              사는 사람과 파는 사람이 안심할 수 있는 시장을 만듭니다.
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/sell/register"
-                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-                내 차 등록하기 →
-              </Link>
               <Link href="/inspection"
+                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+                내 차 진단하기 →
+              </Link>
+              <Link href="/vehicles"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
-                검차 신청하기
+                검차 차량 보기
               </Link>
             </div>
           </div>
-
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { icon: '🚗', title: '간편 등록', sub: '지금 바로 올려보세요' },
-              { icon: '📝', title: '진단 기반 시세', sub: '평가사 정밀 진단' },
-              { icon: '🌏', title: '딜러 네트워크', sub: '수출업자까지 연결' },
-              { icon: '📋', title: '투명한 이력', sub: '사고·침수 전수 공개' },
-            ].map(c => (
-              <div key={c.title} className="bg-white/5 border border-white/10 rounded-2xl px-4 py-4">
-                <p className="text-2xl mb-2">{c.icon}</p>
-                <p className="text-white font-black text-sm">{c.title}</p>
-                <p className="text-zinc-500 text-xs mt-0.5">{c.sub}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ── 브랜드 스토리: Cavior = Car + Savior ── */}
+      {/* ── CARVIOR VEHICLE DATA ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-center">
-          <div>
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">ABOUT CARVIOR</p>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-2">
-              Car<span className="text-violet-600">vior</span>
-            </h2>
-            <p className="text-gray-400 text-sm font-bold mb-6">Car + Savior · 중고차 구원자</p>
-            <p className="text-gray-600 text-base leading-relaxed">
-              중고차는 팔 때마다 근거 없이 깎여요. "그냥 시세가 그래요"라는 말 한마디로
-              내 차의 가치가 부당하게 낮아지는 게 지금까지의 중고차 거래였습니다.
-            </p>
-            <p className="text-gray-600 text-base leading-relaxed mt-3">
-              카비어는 이름 그대로 <strong className="text-gray-900">불합리한 감가로부터 차주를 구하는</strong> 회사예요.
-              전문 평가사의 정밀 진단으로 차량 상태를 객관적으로 증명하고,
-              검증된 딜러들의 공개 경쟁입찰로 진짜 가치에 가장 가까운 가격을 찾아드립니다.
-            </p>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-12 items-center">
+          <div className="grid grid-cols-2 gap-4">
+            <img src="/images/diagnostic-2.jpg" alt="도막 측정" className="rounded-2xl object-cover w-full h-56 col-span-1" />
+            <img src="/images/diagnostic-3.jpg" alt="하부 점검" className="rounded-2xl object-cover w-full h-56 col-span-1" />
+            <img src="/images/diagnostic-1.jpg" alt="진단 데이터 확인" className="rounded-2xl object-cover w-full h-40 col-span-2" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { icon: '🛡️', title: '불합리한 감가 방지', desc: '근거 없는 "시세가 그래요"는 그만. 감가 사유를 항목별로 증명해요.' },
-              { icon: '📈', title: '진짜 가치로 판매', desc: '정밀 진단 리포트로 내 차 상태를 객관적으로 입증하고 시작해요.' },
-              { icon: '⚖️', title: '공정한 경쟁입찰', desc: '승인된 딜러들이 공개적으로 가격을 제안, 원하는 만큼 받을 수 있어요.' },
-              { icon: '🔐', title: '안전한 거래', desc: '에스크로 결제·탁송·정산까지 전 과정을 카비어가 관리해요.' },
-            ].map(v => (
-              <div key={v.title} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
-                <span className="text-2xl mb-3 block">{v.icon}</span>
-                <h3 className="font-black text-gray-900 text-sm mb-1.5">{v.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{v.desc}</p>
-              </div>
-            ))}
+          <div>
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">CARVIOR VEHICLE DATA</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-5">
+              사진 몇 장이 아니라,<br />차량의 기록을 남깁니다.
+            </h2>
+            <p className="text-gray-600 text-base leading-relaxed mb-8">
+              번호판 사진 두 장으로는 차량 상태를 증명할 수 없습니다.
+              카비어는 진단 한 건마다 30장 이상의 사진과 항목별 기록을 남깁니다.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-8">
+              {VEHICLE_DATA_POINTS.map(tag => (
+                <span key={tag} className="text-xs font-bold text-gray-600 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <p className="text-sm font-black text-violet-600">한 번의 진단이 차량의 디지털 기록이 됩니다.</p>
           </div>
         </div>
       </section>
 
-      {/* ── 진단이 만드는 차이 (예시) ── */}
+      {/* ── 판매와 진단의 분리 ── */}
+      <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-4">CARVIOR PHILOSOPHY</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-500 mb-2">
+            우리는 자동차를 팔기 위해 진단하지 않습니다.
+          </h2>
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-12">
+            진단하기 위해 진단합니다.
+          </h2>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-4">
+            <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 text-sm font-bold text-gray-600 w-full sm:w-auto">
+              판매자
+            </div>
+            <span className="text-gray-300 text-xl rotate-90 sm:rotate-0">⇄</span>
+            <div className="bg-violet-600 rounded-2xl px-8 py-5 text-sm font-black text-white shadow-lg shadow-violet-200 w-full sm:w-auto">
+              CARVIOR 진단 데이터
+            </div>
+            <span className="text-gray-300 text-xl rotate-90 sm:rotate-0">⇄</span>
+            <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 text-sm font-bold text-gray-600 w-full sm:w-auto">
+              구매자
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mb-12">카비어는 어느 한쪽 편이 아니라, 차량 상태의 편입니다.</p>
+
+          <div className="grid grid-cols-3 gap-4 max-w-md mx-auto border-t border-gray-200 pt-8">
+            {[
+              ['판매까지 평균', '13일'],
+              ['구매자 신뢰도', '높음'],
+              ['허위정보 리스크', '없음'],
+            ].map(([label, val]) => (
+              <div key={label}>
+                <p className="text-lg font-black text-gray-900">{val}</p>
+                <p className="text-[11px] text-gray-400 mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          <Link href="/marketing/carvior-inspection" className="inline-block text-sm text-gray-400 underline hover:text-gray-600 mt-10">
+            서비스 자세히 보기
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 가격 투명성 ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">PRICE TRANSPARENCY</p>
+            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-5">
+              가격도,<br />투명하게 보여드립니다.
+            </h2>
+            <p className="text-gray-600 text-base leading-relaxed">
+              관리비용·수수료를 나중에 더하지 않습니다.
+              거래 전 화면에서 실제 부담 금액을 그대로 보여드려요.
+            </p>
+            <p className="text-lg font-black text-violet-600 mt-6">
+              마지막 화면에서 가격이 달라지지 않습니다.
+            </p>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-7">
+            <p className="text-xs font-bold text-gray-400 mb-5">가격표 (예시)</p>
+            <div className="space-y-3">
+              {[
+                ['차량가격', '15,000,000원'],
+                ['관리비용', '330,000원'],
+                ['플랫폼 이용료', '0원'],
+                ['기타 비용', '0원'],
+              ].map(([label, val]) => (
+                <div key={label} className="flex justify-between text-sm">
+                  <span className="text-gray-400">{label}</span>
+                  <span className="font-bold text-gray-600">{val}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between items-center border-t border-gray-200 mt-5 pt-5">
+              <span className="text-sm font-bold text-gray-900">내가 실제 내는 금액</span>
+              <span className="text-xl font-black text-violet-600">15,330,000원</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 공정한 경매 ── */}
       <section className="bg-gray-50 border-y border-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">WHY INSPECTION</p>
-            <h2 className="text-3xl font-black text-gray-900 mb-3">근거 없이 깎이던 감가, 이렇게 달라져요</h2>
-            <p className="text-gray-400 text-sm max-w-md mx-auto">예시로 보여드릴게요 — 같은 차라도 진단 유무에 따라 거래 과정이 달라집니다</p>
+          <div className="text-center mb-14">
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-3">FAIR AUCTION</p>
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">전국 딜러가 경쟁하고, 판매자가 결정합니다</h2>
+            <p className="text-gray-400 text-sm">카비어가 싸게 사서 비싸게 파는 게 아니라, 정보와 연결을 제공합니다.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="rounded-2xl border-2 border-gray-200 p-6 bg-white">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-black px-2.5 py-1 rounded-full bg-gray-200 text-gray-500">개인직거래</span>
+          <div className="flex flex-col md:flex-row items-stretch justify-center gap-3">
+            {AUCTION_FLOW.map((s, i) => (
+              <div key={s.title} className="flex items-center gap-3">
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 w-full md:w-40 text-center">
+                  <span className="text-2xl mb-2 block">{s.icon}</span>
+                  <h3 className="font-black text-gray-900 text-xs mb-1.5 whitespace-pre-line">{s.title}</h3>
+                  <p className="text-[11px] text-gray-400 leading-relaxed whitespace-pre-line">{s.desc}</p>
+                </div>
+                {i < AUCTION_FLOW.length - 1 && (
+                  <span className="hidden md:block text-gray-300 text-xl shrink-0">→</span>
+                )}
               </div>
-              <p className="text-sm text-gray-500 leading-relaxed mb-5">
-                "사고 이력을 모르니 못 믿겠어요" — 구매자가 근거 없이 가격을 낮게 부르고,
-                판매자는 증명할 방법이 없어 그대로 깎여요.
-              </p>
-              <div className="space-y-3 border-t border-gray-100 pt-4">
-                {[
-                  ['판매까지 평균', '47일'],
-                  ['구매자 신뢰도', '낮음'],
-                  ['허위정보 리스크', '있음'],
-                ].map(([label, val]) => (
-                  <div key={label} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-400">{label}</span>
-                    <span className="font-bold text-gray-500">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border-2 border-amber-400 p-6 bg-amber-50/30 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs font-black px-2.5 py-1 rounded-full bg-amber-400 text-amber-900">✦ 카비어 진단</span>
-              </div>
-              <p className="text-sm text-gray-600 leading-relaxed mb-5">
-                무사고·정비이력을 리포트로 증명하고, 승인된 딜러들이 그 리포트를 보고
-                공개 경쟁입찰에 참여해요. 근거는 카비어가, 가격은 시장이 정합니다.
-              </p>
-              <div className="space-y-3 border-t border-amber-200/50 pt-4">
-                {[
-                  ['판매까지 평균', '13일'],
-                  ['구매자 신뢰도', '높음'],
-                  ['허위정보 리스크', '없음'],
-                ].map(([label, val]) => (
-                  <div key={label} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">{label}</span>
-                    <span className="font-black text-amber-700">{val}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            ))}
           </div>
 
-          <div className="text-center mt-10">
-            <Link href="/marketing/carvior-inspection" className="text-sm text-gray-400 underline hover:text-gray-600">서비스 자세히 보기</Link>
-          </div>
+          <p className="text-center mt-12">
+            <Link href="/inspection"
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+              검차 신청부터 시작하기
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </p>
         </div>
       </section>
 
-      {/* ── 뭘 하고 싶으세요? ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-2xl font-black text-gray-900 mb-2">무엇을 도와드릴까요?</h2>
-        <p className="text-gray-400 text-sm mb-10">원하는 서비스를 선택하면 바로 시작할 수 있어요.</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* 내차팔기 */}
-          <Link href="/sell"
-            className="group relative overflow-hidden rounded-2xl bg-violet-600 p-7 hover:bg-violet-500 transition-colors duration-200">
-            <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">💵</div>
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60 mb-4">SELL</p>
-            <h3 className="text-xl font-black text-white mb-2">차 팔고 싶어요</h3>
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
-              진단만 받으면<br />딜러 네트워크에 바로 노출.
-            </p>
-            <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
-              등록하기
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </span>
-          </Link>
-
-          {/* 딜러/바이어 */}
-          <Link href="/auction"
-            className="group relative overflow-hidden rounded-2xl bg-gray-50 border border-gray-200 p-7 hover:border-violet-400 hover:bg-violet-50 transition-colors duration-200">
-            <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">🔨</div>
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-4">DEALER</p>
-            <h3 className="text-xl font-black text-gray-900 mb-2">딜러 · 바이어예요</h3>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              진단 완료 차량에 직접 가격 제안.<br />빠른 매입, 대량 거래도 OK.
-            </p>
-            <span className="inline-flex items-center gap-1 text-gray-500 group-hover:text-violet-600 font-bold text-sm transition-colors">
-              스마트옥션 가기
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ── 딜러/수출업자/폐차업자 모집 소개 ── */}
+      {/* ── 딜러 보호 ── */}
       <section className="bg-zinc-900 relative overflow-hidden py-20">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/4" />
         <div className="relative max-w-7xl mx-auto px-6">
@@ -213,11 +245,20 @@ export default function HomePage() {
                 딜러 · 수출업자 · 폐차업자 파트너 모집
               </span>
               <h2 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4">
-                진단 완료 차량을<br />가장 먼저 만나보세요.
+                좋은 딜러도<br />보호합니다.
               </h2>
-              <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-                카비어 스마트옥션은 딜러 · 수출업자 · 폐차업자만 참여하는 공개 경쟁 입찰 플랫폼입니다.<br />
-                검증된 진단 데이터로 투명하게, 원하는 가격에 직접 입찰하세요.
+              <p className="text-zinc-400 text-sm md:text-base leading-relaxed mb-6">
+                정확한 정보가 좋은 딜러를 보호합니다.
+              </p>
+              <ul className="space-y-2 mb-2">
+                {DEALER_PROTECTIONS.map(p => (
+                  <li key={p} className="flex items-center gap-2 text-zinc-300 text-sm">
+                    <span className="text-purple-400">✓</span>{p}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-purple-300 font-bold text-sm mt-6">
+                클레임을 많이 한다고 불이익 받는 플랫폼을 만들지 않겠습니다.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
@@ -247,91 +288,89 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 어떻게 진행되나요? (전체 거래 프로세스 개략도) ── */}
+      {/* ── CARVIOR 5 PRINCIPLES ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">CARVIOR 5 PRINCIPLES</p>
+          <h2 className="text-3xl font-black text-gray-900">카비어가 지키는 5가지 원칙</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {PRINCIPLES.map(p => (
+            <div key={p.no} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+              <p className="text-[11px] font-black text-violet-400 mb-3">{p.no}</p>
+              <h3 className="font-black text-gray-900 text-sm mb-1.5">{p.title}</h3>
+              <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 뭘 하고 싶으세요? ── */}
       <section className="bg-gray-50 border-y border-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-3">HOW IT WORKS</p>
-          <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2">내 차가 팔리기까지, 이렇게 진행돼요</h2>
-          <p className="text-gray-400 text-sm mb-12">
-            진단부터 대금 정산까지 — 신청 이후엔 카비어가 각 단계를 직접 확인하며 진행하니 따로 신경 쓸 일이 없어요.
-          </p>
+          <h2 className="text-2xl font-black text-gray-900 mb-2">무엇을 도와드릴까요?</h2>
+          <p className="text-gray-400 text-sm mb-10">원하는 서비스를 선택하면 바로 시작할 수 있어요.</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { step: '01', icon: '✦', title: '검차 신청', desc: '평가사가 방문해 정밀 진단하고 리포트로 남겨요.' },
-              { step: '02', icon: '🤝', title: '판매 동의', desc: '진단 완료 후 판매를 결정하면 매물로 전환돼요.' },
-              { step: '03', icon: '🔨', title: '딜러 경쟁입찰', desc: '승인된 딜러들이 진단 리포트를 보고 공개 입찰해요.' },
-              { step: '04', icon: '🏆', title: '낙찰 확정', desc: '최고 입찰가를 확인하고 판매를 최종 승인해요.' },
-              { step: '05', icon: '🔒', title: '안전결제 확인', desc: '카비어가 대금을 직접 보관하지 않고, 에스크로로 입금을 확인해요.' },
-              { step: '06', icon: '🚚', title: '탁송', desc: '입금 확인 후 차량을 안전하게 인수·배송해요.' },
-              { step: '07', icon: '💰', title: '대금 정산', desc: '탁송료 등 항목을 투명하게 분리해서 정산 금액을 계산해요.' },
-              { step: '08', icon: '🎉', title: '거래 완료', desc: '차주에게 대금이 지급되면 거래가 마무리돼요.' },
-            ].map(s => (
-              <div key={s.step} className="bg-white rounded-2xl border border-gray-100 p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xl">{s.icon}</span>
-                  <span className="text-[11px] font-black text-gray-300">{s.step}</span>
-                </div>
-                <h3 className="font-black text-gray-900 text-sm mb-1.5">{s.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center mt-10">
-            <Link href="/inspection"
-              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-              검차 신청부터 시작하기
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link href="/sell"
+              className="group relative overflow-hidden rounded-2xl bg-violet-600 p-7 hover:bg-violet-500 transition-colors duration-200">
+              <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">💵</div>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/60 mb-4">SELL</p>
+              <h3 className="text-xl font-black text-white mb-2">차 팔고 싶어요</h3>
+              <p className="text-white/70 text-sm leading-relaxed mb-6">
+                진단만 받으면<br />딜러 네트워크에 바로 노출.
+              </p>
+              <span className="inline-flex items-center gap-1 text-white font-bold text-sm">
+                등록하기
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </span>
             </Link>
-          </p>
-        </div>
-      </section>
 
-      {/* ── 안심거래 ── */}
-      <section className="bg-gray-50 border-y border-gray-100 py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-gray-400 mb-3">TRUST</p>
-            <h2 className="text-3xl font-black text-gray-900">안심하고 거래할 수 있는 이유</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            {[
-              { icon: '✦', title: '투명한 진단 리포트', desc: '전문 평가사의 정밀 진단으로 감가 사유까지 근거 있게 공개합니다.' },
-              { icon: '🔒', title: '승인제 딜러 네트워크', desc: '서류 심사를 통과한 딜러 · 매매업자만 매매정보에 접근할 수 있어요.' },
-              { icon: '💬', title: '전담 상담 지원', desc: '궁금한 점은 언제든 010-2285-6017로 편하게 문의해주세요.' },
-            ].map(t => (
-              <div key={t.title} className="bg-white rounded-2xl border border-gray-100 p-6">
-                <span className="text-2xl mb-3 block">{t.icon}</span>
-                <h3 className="font-black text-gray-900 mb-1.5">{t.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{t.desc}</p>
-              </div>
-            ))}
+            <Link href="/auction"
+              className="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-7 hover:border-violet-400 hover:bg-violet-50 transition-colors duration-200">
+              <div className="absolute bottom-0 right-0 text-[100px] leading-none opacity-10 select-none group-hover:opacity-20 transition-opacity">🔨</div>
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400 mb-4">DEALER</p>
+              <h3 className="text-xl font-black text-gray-900 mb-2">딜러 · 바이어예요</h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                진단 완료 차량에 직접 가격 제안.<br />빠른 매입, 대량 거래도 OK.
+              </p>
+              <span className="inline-flex items-center gap-1 text-gray-500 group-hover:text-violet-600 font-bold text-sm transition-colors">
+                스마트옥션 가기
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </span>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ── 차 팔기 CTA ── */}
+      {/* ── 마무리 CTA ── */}
       <section className="bg-violet-600 py-20">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <p className="text-violet-300 text-xs font-bold tracking-widest uppercase mb-3">지금 시작하세요</p>
-            <h2 className="text-3xl font-black text-white leading-tight mb-2">
-              내 차, 지금 바로<br />등록해보세요.
-            </h2>
-            <p className="text-violet-200 text-sm">진단만 받으면 딜러 네트워크 자동 연결</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link href="/sell/register"
-              className="bg-white text-violet-700 font-black px-8 py-4 rounded-xl text-sm hover:bg-violet-50 transition-colors text-center">
-              지금 등록하기
-            </Link>
-            <Link href="/inspection"
-              className="border border-white/30 text-white font-bold px-8 py-4 rounded-xl text-sm hover:bg-white/10 transition-colors text-center">
-              검차 신청하기
-            </Link>
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-center text-violet-200 text-sm font-bold mb-10">
+            CARVIOR — 차를 거래하기 전에, 정보를 먼저 거래합니다.
+          </p>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <p className="text-violet-300 text-xs font-bold tracking-widest uppercase mb-3">지금 시작하세요</p>
+              <h2 className="text-3xl font-black text-white leading-tight mb-2">
+                내 차, 지금 바로<br />등록해보세요.
+              </h2>
+              <p className="text-violet-200 text-sm">진단만 받으면 딜러 네트워크 자동 연결</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <Link href="/sell/register"
+                className="bg-white text-violet-700 font-black px-8 py-4 rounded-xl text-sm hover:bg-violet-50 transition-colors text-center">
+                지금 등록하기
+              </Link>
+              <Link href="/inspection"
+                className="border border-white/30 text-white font-bold px-8 py-4 rounded-xl text-sm hover:bg-white/10 transition-colors text-center">
+                검차 신청하기
+              </Link>
+            </div>
           </div>
         </div>
       </section>
