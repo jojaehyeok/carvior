@@ -44,7 +44,7 @@ export default function AppFooter() {
                 {/* 🌟 통신판매업 신고번호는 심사 필수 항목입니다. */}
                 <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0474</p>
                 <p><span className="text-gray-400">대표번호 :</span> 070-4138-2017</p>
-                <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
+                <p><span className="text-gray-400">주소 :</span> 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)</p>
               </div>
 
               <div className="space-y-2">
@@ -153,7 +153,7 @@ export default function AppFooter() {
                     <p>① 개인위치정보를 이용하는 카비어의 정보는 아래와 같습니다.</p>
                     <p>가. 상호 : 카비어</p>
                     <p>나. 대표자: 조재혁</p>
-                    <p>다. 주소 : 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
+                    <p>다. 주소 : 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)</p>
                     <p>라. 대표전화: 010-2285-6017</p>
                   </div>
 
@@ -173,7 +173,7 @@ export default function AppFooter() {
                   </div>
 
                   <div className="pt-4 text-gray-500 border-t border-gray-200">
-                    <p>주소: 경기도 안산시 단원구 원포공원1로 59 신명트윈타워 A동, 502호</p>
+                    <p>주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)</p>
                     <p>이메일: cs@carvior.com</p>
                     <p>회사: 카비어 / 사업자등록번호: 783-24-02190</p>
                     <p>대표: 조재혁</p>
