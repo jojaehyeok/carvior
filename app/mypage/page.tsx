@@ -108,6 +108,9 @@ export default function MypagePage() {
   const [brandFilter, setBrandFilter] = useState<Set<string>>(new Set());
   const [bookings, setBookings] = useState<InspectionBooking[]>([]);
   const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null);
+  const [rescheduleOpenId, setRescheduleOpenId] = useState<number | null>(null);
+  const [rescheduleDateTime, setRescheduleDateTime] = useState('');
+  const [reschedulingId, setReschedulingId] = useState<number | null>(null);
   const [togglingBuyerId, setTogglingBuyerId] = useState<number | null>(null);
   const [transportDateTime, setTransportDateTime] = useState<Record<number, string>>({});
   const [requestingTransportId, setRequestingTransportId] = useState<number | null>(null);
@@ -193,6 +196,32 @@ export default function MypagePage() {
       alert('처리 중 오류가 발생했습니다.');
     } finally {
       setTogglingBuyerId(null);
+    }
+  };
+
+  // 취소 후 1시간 이내(=환불정책상 전액환불 구간)엔 재결제 없이 날짜만 바꿔 같은 건을 되살림
+  const submitReschedule = async (booking: InspectionBooking) => {
+    if (!rescheduleDateTime) { alert('희망일시를 선택해주세요.'); return; }
+    setReschedulingId(booking.id);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+      const uRes = await fetch(`${API}/users/by-email?email=${encodeURIComponent(user.email)}`);
+      const u = await uRes.json();
+      if (!u?.phone) throw new Error();
+      const res = await fetch(`${API}/external/request/${booking.id}/reschedule`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact: u.phone, preferredDateTime: rescheduleDateTime }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.message || '');
+      setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'PENDING', preferredDateTime: rescheduleDateTime } : b));
+      setRescheduleOpenId(null);
+      setRescheduleDateTime('');
+    } catch (e: any) {
+      alert(e?.message || '날짜 변경 중 오류가 발생했습니다.');
+    } finally {
+      setReschedulingId(null);
     }
   };
 
@@ -812,6 +841,8 @@ export default function MypagePage() {
               {filteredBookings.map(booking => {
                 const bs = BOOKING_STATUS_MAP[booking.status] ?? BOOKING_STATUS_MAP.PENDING;
                 const cancellable = booking.status === 'PENDING' || booking.status === 'ASSIGNED';
+                const reschedulableWithinHour = booking.status === 'CANCELLED'
+                  && Date.now() - new Date(booking.createdAt).getTime() < 60 * 60 * 1000;
                 // 진단완료 후 구매완료 표시 없이 2주가 지나면 목록에서 자동 제외되므로,
                 // 며칠 안 남았을 때 미리 구매완료 표시를 유도
                 const daysLeft = booking.status === 'COMPLETED' && !booking.buyerPurchaseCompleted
@@ -893,7 +924,15 @@ export default function MypagePage() {
                               {cancellingBookingId === booking.id ? '취소 중...' : '신청 취소'}
                             </button>
                           )}
-                          {booking.status === 'CANCELLED' && (
+                          {booking.status === 'CANCELLED' && reschedulableWithinHour && rescheduleOpenId !== booking.id && (
+                            <button
+                              onClick={() => { setRescheduleOpenId(booking.id); setRescheduleDateTime(''); }}
+                              className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                            >
+                              ✦ 날짜만 바꿔서 재신청하기
+                            </button>
+                          )}
+                          {booking.status === 'CANCELLED' && !reschedulableWithinHour && (
                             <a
                               href="/inspection"
                               className="text-[11px] font-black px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
@@ -902,6 +941,35 @@ export default function MypagePage() {
                             </a>
                           )}
                         </div>
+
+                        {booking.status === 'CANCELLED' && reschedulableWithinHour && rescheduleOpenId === booking.id && (
+                          <div className="flex flex-col gap-2 bg-violet-50 border border-violet-100 rounded-xl p-3">
+                            <p className="text-[10px] text-violet-600 font-semibold">
+                              신청 후 1시간 이내라 재결제 없이 날짜만 바꿔 다시 신청할 수 있어요.
+                            </p>
+                            <input
+                              type="datetime-local"
+                              value={rescheduleDateTime}
+                              onChange={e => setRescheduleDateTime(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-violet-500"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setRescheduleOpenId(null)}
+                                className="flex-1 py-2 rounded-lg border border-gray-200 text-xs font-bold text-gray-500"
+                              >
+                                취소
+                              </button>
+                              <button
+                                onClick={() => submitReschedule(booking)}
+                                disabled={reschedulingId === booking.id || !rescheduleDateTime}
+                                className="flex-1 py-2 rounded-lg bg-violet-600 text-white text-xs font-bold disabled:opacity-50 hover:bg-violet-700 transition-colors"
+                              >
+                                {reschedulingId === booking.id ? '처리 중...' : '이 날짜로 재신청'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
 
                         {booking.status === 'CANCELLED' && (
                           <p className="text-[10px] text-gray-400 leading-relaxed">
