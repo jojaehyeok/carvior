@@ -177,7 +177,10 @@ function AuctionContent() {
                       </svg>
                     )}
                     <div className="absolute top-3 left-3 flex gap-1.5">
-                      <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded-full">진단완료</span>
+                      {item.hasReport
+                        ? <span className="bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded-full">진단완료</span>
+                        : <span className="bg-gray-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">개인매물</span>
+                      }
                       {closed
                         ? <span className="bg-red-500/80 text-white text-[10px] font-bold px-2 py-1 rounded-full">{item.status === 'sold' ? '낙찰완료' : '마감'}</span>
                         : urgent
