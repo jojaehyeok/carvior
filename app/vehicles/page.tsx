@@ -15,7 +15,9 @@ export default function VehiclesPage() {
     const KEY = process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '';
     fetch(`${API}/external/store-items`, { headers: { 'x-internal-key': KEY } })
       .then(res => res.json())
-      .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data : []))
+      // "검차 완료 차량" 갤러리라 실제 진단 리포트가 있는 매물만 노출 — 리포트 없는
+      // 셀프등록 매물(개인매물)은 여기 취지와 안 맞아서 제외
+      .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data.filter(i => i.hasReport && i.carHash) : []))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);
@@ -64,8 +66,8 @@ export default function VehiclesPage() {
                         <circle cx="370" cy="220" r="40" fill="#333" />
                       </svg>
                     )}
-                    <span className={`absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded-full text-white ${item.hasReport ? 'bg-black/70' : 'bg-gray-500/80'}`}>
-                      {item.hasReport ? '진단완료' : '개인매물'}
+                    <span className="absolute top-3 left-3 text-[10px] font-bold px-2 py-1 rounded-full text-white bg-black/70">
+                      진단완료
                     </span>
                   </div>
                   <div className="p-4">
@@ -75,16 +77,12 @@ export default function VehiclesPage() {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="font-black text-gray-900">{fmtKRW(item.priceKRW)}</span>
-                      {item.hasReport && item.carHash ? (
-                        <button
-                          onClick={() => openCarReportPopup(item.carHash!)}
-                          className="text-xs font-bold text-violet-600 underline hover:text-violet-700"
-                        >
-                          리포트 보기 →
-                        </button>
-                      ) : (
-                        <span className="text-xs text-gray-300">리포트 없음</span>
-                      )}
+                      <button
+                        onClick={() => openCarReportPopup(item.carHash!)}
+                        className="text-xs font-bold text-violet-600 underline hover:text-violet-700"
+                      >
+                        리포트 보기 →
+                      </button>
                     </div>
                   </div>
                 </div>
