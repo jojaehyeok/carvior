@@ -214,7 +214,7 @@ export default function CarReportViewPage() {
         </div>
 
         <Link
-          href={`/report/${hash}`}
+          href={`/report/${hash}?public=1`}
           className="block w-full text-center py-3 rounded-xl text-sm font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 transition-colors"
         >
           전체 진단 리포트 보기 (사고이력·손상부위·PDF) →

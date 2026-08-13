@@ -198,6 +198,53 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── CARVIOR CARE (준비 중) ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="rounded-3xl border-2 border-dashed border-gray-200 p-8 md:p-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-500 text-[10px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full mb-5">
+                COMING SOON · CARVIOR CARE
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-4">
+                중고차의 문제는 하자가 아니라,<br />숨겨진 정보입니다.
+              </h2>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                하자를 알고 선택하는 것과, 모르고 사는 것은 완전히 다릅니다.
+                카비어는 협력 정비소와 연결해 예상 정비비까지 비교할 수 있는 서비스를 준비하고 있어요.
+              </p>
+              <p className="text-xs text-gray-400 border-t border-gray-100 pt-4">
+                협력 정비소 연결·견적 비교는 준비 중입니다. 다만 예상 정비비 자체는 이미 진단 리포트와{' '}
+                <Link href="/vehicles" className="text-violet-500 underline hover:text-violet-600">검차 차량 보기</Link>
+                에서 실제로 확인할 수 있어요.
+              </p>
+            </div>
+
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 opacity-90">
+              <p className="text-[10px] font-bold text-gray-300 mb-4">예상 정비비 (예시)</p>
+              <div className="space-y-2.5">
+                {[
+                  ['프론트 로어암 부싱 균열', '18~25만원'],
+                  ['엔진오일 미세누유', '15~40만원'],
+                  ['앞 브레이크 패드 잔량 부족', '12~18만원'],
+                  ['타이어 2본 교체 권장', '28~40만원'],
+                  ['운전석 도어 판금', '20~30만원'],
+                ].map(([label, val]) => (
+                  <div key={label} className="flex justify-between text-xs">
+                    <span className="text-gray-400">{label}</span>
+                    <span className="font-bold text-gray-400">{val}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between items-center border-t border-gray-100 mt-4 pt-4">
+                <span className="text-xs font-bold text-gray-400">예상 정비 총액</span>
+                <span className="text-lg font-black text-gray-300">93~153만원</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── 공정한 경매 ── */}
       <section className="bg-gray-50 border-y border-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-6">

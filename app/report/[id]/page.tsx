@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LightGallery from "lightgallery/react";
 import lgZoom from "lightgallery/plugins/zoom";
@@ -170,6 +170,8 @@ const STR = {
   dealer: { ko: "딜러", en: "Dealer", ru: "Дилер", ar: "الوكيل" },
   inspector: { ko: "담당 진단평가사", en: "Inspector", ru: "Инспектор", ar: "الفاحص" },
   vehicleInfo: { ko: "차량 기본 정보", en: "Vehicle Information", ru: "Основная информация", ar: "معلومات السيارة" },
+  estimatedRepairCost: { ko: "예상 정비비", en: "Estimated Repair Cost", ru: "Ориентировочная стоимость ремонта", ar: "تكلفة الإصلاح المتوقعة" },
+  estimatedRepairCostNote: { ko: "평가사가 진단 시 산정한 예상 복구 비용이에요.", en: "Estimated by the inspector at the time of diagnosis.", ru: "Оценено инспектором на момент диагностики.", ar: "قدّرها الفاحص وقت التشخيص." },
   mileage: { ko: "주행거리", en: "Mileage", ru: "Пробег", ar: "المسافة المقطوعة" },
   keys: { ko: "열쇠", en: "Keys", ru: "Ключи", ar: "المفاتيح" },
   smartKey: { ko: "스마트키", en: "Smart", ru: "Смарт", ar: "ذكي" },
@@ -445,6 +447,9 @@ function calcGrade(data: ReportData) {
 // ─── 메인 페이지 ───────────────────────────────────────────────────────────────
 export default function PublicReportPage() {
   const { id } = useParams();
+  // 검차 차량 보기(/vehicles) 공개 갤러리에서 넘어온 경우 딜러명·보험이력(헤이딜러 등으로
+  // 개별 조회한 스크린샷이라 매물마다 신뢰도가 다름)은 노출하지 않는다.
+  const isPublicGallery = useSearchParams().get("public") === "1";
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -596,7 +601,7 @@ export default function PublicReportPage() {
         <h1 className="mt-1 text-3xl font-bold text-gray-900">
           {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
         </h1>
-        {dealerName && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
+        {dealerName && !isPublicGallery && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
         {driverName && (
           <div className="mt-3 inline-flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -654,12 +659,20 @@ export default function PublicReportPage() {
           </div>
         </div>
 
-        {/* 계기판 / 등록증 / 보험이력 */}
-        {DOC_IMAGES.some((d) => images[d.key]?.length) && (
+        {!!car_info.repairCost && car_info.repairCost > 0 && (
+          <div className="p-4 mt-4 bg-violet-50 border border-violet-100 rounded-xl">
+            <p className="mb-1 text-xs text-violet-500 font-bold">{t("estimatedRepairCost", lang)}</p>
+            <p className="text-xl font-black text-violet-700">{car_info.repairCost.toLocaleString()}{lang === "ko" ? "원" : ""}</p>
+            <p className="text-[11px] text-violet-400 mt-1">{t("estimatedRepairCostNote", lang)}</p>
+          </div>
+        )}
+
+        {/* 계기판 / 등록증 / 보험이력 — 보험이력(vin)은 검차 차량 보기 갤러리에서는 숨김 */}
+        {(() => { const visibleDocImages = isPublicGallery ? DOC_IMAGES.filter((d) => d.key !== "vin") : DOC_IMAGES; return visibleDocImages.some((d) => images[d.key]?.length) && (
           <div className="mt-4">
             <p className="mb-2 text-xs text-gray-400">{t("docs", lang)}</p>
             <LightGallery plugins={[lgZoom]} speed={400} selector="a" controls={false} elementClassNames="flex gap-3 flex-wrap">
-              {DOC_IMAGES.flatMap((d) =>
+              {visibleDocImages.flatMap((d) =>
                 (images[d.key] ?? []).map((url, i) => (
                   <div key={`${d.key}-${i}`} className="flex flex-col items-center gap-1">
                     <a href={url} data-src={url} className="block">
@@ -677,7 +690,7 @@ export default function PublicReportPage() {
               )}
             </LightGallery>
           </div>
-        )}
+        ); })()}
       </div>
 
       {/* 진단 결과 */}

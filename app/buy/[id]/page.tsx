@@ -19,6 +19,7 @@ interface UnifiedCar {
   accident: boolean;
   priceKRW: number;
   priceUSD: number;
+  repairCost?: number;
   hidePrice?: boolean;
   status?: string;
   hasReport: boolean;
@@ -278,6 +279,7 @@ export default function CarDetailPage() {
             accident: found.accident || false,
             priceKRW: found.priceKRW || 0,
             priceUSD: Number(found.priceUSD) || Math.round((Number(found.priceKRW) || 0) / 1350),
+            repairCost: Number(found.repairCost) || 0,
             hasReport: found.hasReport ?? true,
             carHash: found.carHash ?? undefined,
             location: found.location || 'Korea',
@@ -522,6 +524,22 @@ export default function CarDetailPage() {
               )}
               {car.priceKRW === 0 && (
                 <p className="text-sm text-gray-400 mt-1">판매가 미설정 · 카비어에 문의하세요</p>
+              )}
+              {!!car.repairCost && car.repairCost > 0 && car.priceKRW > 0 && (
+                <div className="mt-3 bg-violet-50 border border-violet-100 rounded-xl px-4 py-3">
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>차량가격</span>
+                    <span>{car.priceKRW.toLocaleString()}원</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>예상 정비비</span>
+                    <span>{car.repairCost.toLocaleString()}원</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-violet-200">
+                    <span className="text-xs font-bold text-violet-600">CARVIOR 실질 구매가격</span>
+                    <span className="text-base font-black text-violet-700">{(car.priceKRW + car.repairCost).toLocaleString()}원</span>
+                  </div>
+                </div>
               )}
               {offerCount > 0 && (
                 <p className="text-xs text-violet-600 font-bold mt-2">💬 제안 {offerCount}건 접수됨</p>
