@@ -62,8 +62,11 @@ export default function VehiclesPage() {
           <p className="text-xs text-gray-400 mb-3">
             {item.carNumber} · {item.region?.split(' ')[0] ?? '지역 미상'} · {item.mileage ? `${item.mileage.toLocaleString()}km` : '주행거리 미상'}
           </p>
-          <div className="flex items-center justify-between">
-            <span className="font-black text-gray-900">{fmtKRW(item.priceKRW)}</span>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-[10px] text-gray-300 mb-0.5">희망 판매가</p>
+              <span className="font-black text-gray-900">{fmtKRW(item.priceKRW)}</span>
+            </div>
             {item.hasReport && item.carHash ? (
               <button
                 onClick={() => openCarReportPopup(item.carHash!)}
