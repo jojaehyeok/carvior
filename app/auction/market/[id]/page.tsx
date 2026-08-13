@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
-import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, getUSD, loadBids, saveBid, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
+import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
 
 // ── 사진 수집 (buy/[id]와 동일 패턴, registration은 개인정보 보호로 제외) ──────────
 interface PhotoItem { url?: string; label: string }
@@ -60,6 +60,7 @@ function AuctionDetailContent() {
   const id = typeof params.id === 'string' ? params.id : '';
   const { data: session } = useSession();
   const dealerName = (session?.user as any)?.name ?? '딜러';
+  const dealerId = (session?.user as any)?.id ? Number((session?.user as any).id) : null;
 
   const [item, setItem] = useState<AuctionItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -78,8 +79,9 @@ function AuctionDetailContent() {
   const [lbRot, setLbRot] = useState(0);
 
   useEffect(() => {
-    setBids(loadBids());
-  }, []);
+    if (!id) return;
+    fetchItemBids(id).then(all => setBids(dealerId != null ? all.filter(b => b.dealerId === dealerId) : []));
+  }, [id, dealerId]);
 
   // 조회수/좋아요 fetch + 조회수 increment
   useEffect(() => {
@@ -155,8 +157,8 @@ function AuctionDetailContent() {
       alert('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    const updated = saveBid(bids, itemId, amount, dealerName);
-    setBids(updated);
+    const fresh = await fetchItemBids(itemId);
+    setBids(dealerId != null ? fresh.filter(b => b.dealerId === dealerId) : []);
     alert(`✓ ${fmtKRW(amount)} 입찰 완료!\n최종 낙찰은 어드민에서 확인됩니다.`);
   };
 
@@ -192,7 +194,7 @@ function AuctionDetailContent() {
     item.transmission || null,
   ].filter(Boolean) as string[];
 
-  const myBids = bids.filter(b => b.itemId === item.id);
+  const myBids = bids;
   const myTopBid = myBids.reduce((max, b) => Math.max(max, b.amount), 0);
   const closed = item.status !== 'active';
   const usd = getUSD(item);

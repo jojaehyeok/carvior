@@ -10,12 +10,13 @@ export default function BidModal({
   onClose,
 }: {
   item: AuctionItem;
+  /** 이 매물에 대한 "내"(현재 로그인 딜러) 입찰 내역 — 호출부에서 dealerId로 필터링해서 전달 */
   bids: Bid[];
   onBid: (itemId: string, amount: number) => void;
   onClose: () => void;
 }) {
   const [amount, setAmount] = useState('');
-  const myBids = bids.filter(b => b.itemId === item.id);
+  const myBids = bids;
   const topBid = myBids.reduce((max, b) => Math.max(max, b.amount), 0);
   const estWin = item.priceKRW ?? 0;
   const estExportUSD = getUSD(item);
@@ -105,7 +106,7 @@ export default function BidModal({
             입찰하기
           </button>
           <p className="text-center text-gray-400 text-xs mt-3">
-            데모 버전 · 실제 거래는 어드민을 통해 진행됩니다.
+            입찰은 즉시 반영되며, 낙찰 확정은 카비어 어드민을 통해 진행됩니다.
           </p>
         </div>
 
@@ -114,8 +115,8 @@ export default function BidModal({
             <p className="text-xs font-semibold text-gray-400 mt-4 mb-2">내 입찰 내역</p>
             <div className="space-y-1.5 max-h-28 overflow-y-auto">
               {[...myBids].reverse().map((b, i) => (
-                <div key={i} className="flex justify-between text-xs text-gray-500">
-                  <span>{fmtDate(b.timestamp)}</span>
+                <div key={b.id ?? i} className="flex justify-between text-xs text-gray-500">
+                  <span>{fmtDate(b.createdAt)}</span>
                   <span className="font-semibold text-gray-900">{fmtKRW(b.amount)}</span>
                 </div>
               ))}

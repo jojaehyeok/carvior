@@ -40,11 +40,30 @@ export interface AuctionItem {
   };
 }
 
+// 백엔드 bids 테이블(carvior-back/src/bids/entities/bid.entity.ts)과 동일한 필드
 export interface Bid {
-  itemId: string;
-  amount: number;
+  id?: number;
+  storeItemId: number;
+  dealerId?: number | null;
   dealerName: string;
-  timestamp: string;
+  amount: number;
+  createdAt: string;
+}
+
+// 매물 하나의 실제 입찰 목록 — /external/store-items/:id/bids 그대로 반환
+export async function fetchItemBids(itemId: string | number): Promise<Bid[]> {
+  const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+  const KEY = process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '';
+  try {
+    const res = await fetch(`${API}/external/store-items/${itemId}/bids`, {
+      headers: { 'x-internal-key': KEY },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
 export function fmtDate(s?: string) {
@@ -60,19 +79,6 @@ export function fmtKRW(n: number) {
 export function getUSD(item: AuctionItem) {
   if (item.priceUSD && item.priceUSD > 0) return item.priceUSD;
   return item.priceKRW ? Math.round(item.priceKRW / USD_RATE) : 0;
-}
-
-export function loadBids(): Bid[] {
-  try {
-    const saved = localStorage.getItem('carvior_bids');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
-}
-
-export function saveBid(bids: Bid[], itemId: string, amount: number, dealerName: string): Bid[] {
-  const updated = [...bids, { itemId, amount, dealerName, timestamp: new Date().toISOString() }];
-  localStorage.setItem('carvior_bids', JSON.stringify(updated));
-  return updated;
 }
 
 export function getTimeLeftMs(endAt?: string): number | null {

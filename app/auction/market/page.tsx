@@ -7,25 +7,39 @@ import { useSession } from 'next-auth/react';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
 import CountdownTimer from '@/components/auction/CountdownTimer';
-import { AuctionItem, Bid, fmtKRW, getTimeLeftMs, loadBids, NEW_MS, saveBid, URGENT_MS } from '@/components/auction/shared';
+import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, NEW_MS, URGENT_MS } from '@/components/auction/shared';
 
 type FilterKey = 'all' | 'urgent' | 'new';
 
+// 마감(active가 아닌) 매물은 마감 후 7일이 지나면 목록에서 자동 제외 — 레코드 자체는 지우지 않고
+// 화면에서만 숨김(다른 곳의 7일/14일 stale 필터와 동일한 패턴, bookings.service.ts 참고)
+const CLOSED_STALE_MS = 7 * 24 * 60 * 60 * 1000;
+function isVisible(item: AuctionItem): boolean {
+  if (item.status === 'active') return true;
+  if (!item.auctionEndAt) return true;
+  return Date.now() - new Date(item.auctionEndAt).getTime() <= CLOSED_STALE_MS;
+}
+
 function AuctionContent() {
   const { data: session } = useSession();
+  const dealerId = (session?.user as any)?.id ? Number((session?.user as any).id) : null;
   const [items, setItems] = useState<AuctionItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bids, setBids] = useState<Bid[]>([]);
+  const [bidsByItem, setBidsByItem] = useState<Record<string, Bid[]>>({});
   const [bidTarget, setBidTarget] = useState<AuctionItem | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
   const dealerName = (session?.user as any)?.name ?? '딜러';
 
   useEffect(() => {
-    setBids(loadBids());
-
     fetch('/api/admin/store-items')
       .then(r => r.json())
-      .then((data: AuctionItem[]) => setItems(Array.isArray(data) ? data.filter(i => ['active', 'sold', 'closed'].includes(i.status)) : []))
+      .then(async (data: AuctionItem[]) => {
+        const filtered = Array.isArray(data) ? data.filter(i => ['active', 'sold', 'closed'].includes(i.status) && isVisible(i)) : [];
+        setItems(filtered);
+        // 매물마다 실제 입찰 목록을 병렬로 가져와 입찰 건수를 정확히 표시
+        const entries = await Promise.all(filtered.map(async item => [item.id, await fetchItemBids(item.id)] as const));
+        setBidsByItem(Object.fromEntries(entries));
+      })
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);
@@ -43,12 +57,13 @@ function AuctionContent() {
       alert('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    const updated = saveBid(bids, itemId, amount, dealerName);
-    setBids(updated);
+    const fresh = await fetchItemBids(itemId);
+    setBidsByItem(prev => ({ ...prev, [itemId]: fresh }));
     alert(`✓ ${fmtKRW(amount)} 입찰 완료!\n최종 낙찰은 어드민에서 확인됩니다.`);
   };
 
-  const getBidCount = (id: string) => bids.filter(b => b.itemId === id).length;
+  const getBidCount = (id: string) => (bidsByItem[id] ?? []).length;
+  const getMyBids = (id: string) => (bidsByItem[id] ?? []).filter(b => dealerId != null && b.dealerId === dealerId);
 
   const activeItems = items.filter(i => i.status === 'active');
   const urgentItems = activeItems.filter(i => {
@@ -99,7 +114,7 @@ function AuctionContent() {
           <div className="grid grid-cols-3 gap-4 mt-8">
             {[
               { label: '경매 진행중', value: loading ? '…' : String(items.filter(i => i.status === 'active').length) },
-              { label: '내 입찰 건수', value: String(new Set(bids.map(b => b.itemId)).size) },
+              { label: '내 입찰 건수', value: String(items.filter(i => getMyBids(i.id).length > 0).length) },
               { label: '낙찰 예정', value: '어드민 확인' },
             ].map(s => (
               <div key={s.label} className="bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-center">
@@ -113,7 +128,7 @@ function AuctionContent() {
 
       <div className="bg-amber-50 border-b border-amber-200 px-6 py-3">
         <p className="text-amber-700 text-xs font-semibold text-center max-w-7xl mx-auto">
-          ⚡ 데모 버전 · 입찰 내역은 로컬에 저장됩니다. 실제 낙찰 처리는 카비어 어드민을 통해 확인해주세요.
+          ⚡ 입찰은 즉시 저장되며 다른 딜러도 동일하게 볼 수 있습니다. 최종 낙찰 확정은 카비어 어드민을 통해 진행됩니다.
         </p>
       </div>
 
@@ -237,7 +252,7 @@ function AuctionContent() {
       {bidTarget && (
         <BidModal
           item={bidTarget}
-          bids={bids}
+          bids={getMyBids(bidTarget.id)}
           onBid={handleBid}
           onClose={() => setBidTarget(null)}
         />
