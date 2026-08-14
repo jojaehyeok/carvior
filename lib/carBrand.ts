@@ -17,10 +17,10 @@ export const BRAND_RULES: BrandRule[] = [
   { pattern: /\bbmw\b|\b[1-8]\s?시리즈|\bx[1-7]\b|\bm[2-8]\b|\bi[347]\b|\bix\b/i, slug: 'bmw', label: 'BMW' },
   { pattern: /아우디|audi|\ba[1-8]\b|\bq[2-8]\b|\btt\b|\br8\b|e-?tron/i, slug: 'audi', label: '아우디' },
   { pattern: /제네시스|genesis|\bg[789]0\b|\bgv(60|70|80)\b/i, slug: 'genesis', label: '제네시스' },
-  { pattern: /쉐보레|쉐비|chevrolet|스파크|말리부|트랙스|트레일블레이저|이쿼녹스|콜로라도|카마로/i, slug: 'chevrolet', label: '쉐보레' },
-  { pattern: /르노|renault|\bsm[3-6]\b|\bqm[3-6]\b|\bxm3\b|클리오|아르카나|트위지/i, slug: 'renault', label: '르노코리아' },
+  { pattern: /쉐보레|쉐비|chevrolet|스파크|말리부|트랙스|트레일블레이저|이쿼녹스|콜로라도|카마로/i, slug: 'chevrolet', label: '쉐보레(GM대우)' },
+  { pattern: /르노|renault|\bsm[3-6]\b|\bqm[3-6]\b|\bxm3\b|클리오|아르카나|트위지/i, slug: 'renault', label: '르노코리아(삼성)' },
   // 쌍용차 → KGM(KG모빌리티)로 사명 변경돼서 신형 문서엔 KGM으로 적히는 경우가 많음
-  { pattern: /쌍용|ssangyong|kg\s?모빌리티|\bkgm\b|렉스턴|티볼리|코란도|무쏘|액티언|카이런|체어맨|토레스/i, slug: 'ssangyong', label: 'KGM' },
+  { pattern: /쌍용|ssangyong|kg\s?모빌리티|\bkgm\b|렉스턴|티볼리|코란도|무쏘|액티언|카이런|체어맨|토레스/i, slug: 'ssangyong', label: 'KGM(쌍용)' },
   { pattern: /폭스바겐|volkswagen|\bvw\b|골프|제타|파사트|티구안|투아렉|아테온|폴로/i, slug: 'volkswagen', label: '폭스바겐' },
   { pattern: /토요타|도요타|toyota|캠리|코롤라|프리우스|라브4|시에나|아발론|하이랜더/i, slug: 'toyota', label: '토요타' },
   { pattern: /렉서스|lexus|\bes\d{3}\b|\bis\d{3}\b|\brx\d{3}\b|\bnx\d{3}\b|\bls\d{3}\b|\block?x\d{3}\b/i, slug: 'lexus', label: '렉서스' },
@@ -32,6 +32,8 @@ export const BRAND_RULES: BrandRule[] = [
   { pattern: /혼다|honda|시빅|어코드|cr-?v|파일럿|오딧세이/i, slug: 'honda', label: '혼다' },
   { pattern: /닛산|nissan|알티마|맥시마|로그|무라노|패스파인더|리프/i, slug: 'nissan', label: '닛산' },
   { pattern: /미니쿠퍼|\bmini\b|컨트리맨|클럽맨/i, slug: 'mini', label: '미니' },
+  { pattern: /인피니티|infiniti/i, slug: 'infiniti', label: '인피니티' },
+  { pattern: /폴스타|polestar/i, slug: 'polestar', label: '폴스타' },
 ];
 
 export function detectBrand(text: string | null | undefined): BrandRule | null {

@@ -650,27 +650,34 @@ export default function MypagePage() {
                     </button>
                   ))}
                 </div>
-                <div className="space-y-1.5 max-h-52 overflow-y-auto">
+                <div className="space-y-0.5 max-h-52 overflow-y-auto">
                   {Object.entries(brandCounts)
                     .filter(([brand]) => originFilter === 'all' || isDomestic(brand) === (originFilter === 'domestic'))
                     .sort((a, b) => b[1] - a[1])
-                    .map(([brand, count]) => (
-                      <label key={brand} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
-                        <span className="flex items-center gap-2 min-w-0">
-                          <input
-                            type="checkbox"
-                            checked={brandFilter.has(brand)}
-                            onChange={() => toggleInSet(brandFilter, brand, setBrandFilter)}
-                            className="accent-violet-600 shrink-0"
-                          />
-                          {slugFromBrandLabel(brand) && (
-                            <img src={`/brand-logos/${slugFromBrandLabel(brand)}.png`} alt="" className="h-3 w-auto object-contain shrink-0" />
-                          )}
-                          <span className="text-gray-700 truncate">{brand}</span>
-                        </span>
-                        <span className="text-gray-300 text-xs shrink-0">{count}</span>
-                      </label>
-                    ))}
+                    .map(([brand, count]) => {
+                      const selected = brandFilter.has(brand);
+                      const slug = slugFromBrandLabel(brand);
+                      return (
+                        <button
+                          key={brand}
+                          type="button"
+                          onClick={() => toggleInSet(brandFilter, brand, setBrandFilter)}
+                          className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${selected ? 'bg-violet-50 text-violet-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                        >
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                              {slug ? (
+                                <img src={`/brand-logos/${slug}.png`} alt="" className="max-h-4 max-w-4 object-contain" />
+                              ) : (
+                                <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
+                              )}
+                            </span>
+                            <span className="truncate">{brand}</span>
+                          </span>
+                          <span className={`text-xs shrink-0 ${selected ? 'text-violet-400' : 'text-gray-300'}`}>{count}</span>
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             </aside>
