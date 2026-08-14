@@ -15,6 +15,38 @@ interface Review {
   createdAt: string;
 }
 
+// 브랜드 로고는 매번 외부 API를 부르지 않고 public/brand-logos에 고정으로 박아둔 파일만 사용
+// (filippofilip95/car-logos-dataset, MIT). 차종 텍스트에서 브랜드명을 찾아 슬러그로 매핑.
+const BRAND_LOGO_MAP: [RegExp, string][] = [
+  [/테슬라|tesla/i, 'tesla'],
+  [/벤츠|벤즈|mercedes|메르세데스/i, 'mercedes-benz'],
+  [/현대|hyundai/i, 'hyundai'],
+  [/기아|\bkia\b/i, 'kia'],
+  [/\bbmw\b/i, 'bmw'],
+  [/아우디|audi/i, 'audi'],
+  [/제네시스|genesis/i, 'genesis'],
+  [/쉐보레|쉐비|chevrolet/i, 'chevrolet'],
+  [/르노|renault/i, 'renault'],
+  [/쌍용|ssangyong|kg모빌리티/i, 'ssangyong'],
+  [/폭스바겐|volkswagen|\bvw\b/i, 'volkswagen'],
+  [/토요타|도요타|toyota/i, 'toyota'],
+  [/렉서스|lexus/i, 'lexus'],
+  [/포르쉐|porsche/i, 'porsche'],
+  [/볼보|volvo/i, 'volvo'],
+  [/랜드로버|land.?rover/i, 'land-rover'],
+  [/지프|\bjeep\b/i, 'jeep'],
+  [/포드|\bford\b/i, 'ford'],
+  [/혼다|honda/i, 'honda'],
+  [/닛산|nissan/i, 'nissan'],
+  [/미니쿠퍼|\bmini\b/i, 'mini'],
+];
+
+function brandLogoSlug(carModel: string | null): string | null {
+  if (!carModel) return null;
+  const hit = BRAND_LOGO_MAP.find(([re]) => re.test(carModel));
+  return hit ? hit[1] : null;
+}
+
 const VEHICLE_DATA_POINTS = [
   '외관 8방향', '엔진룸', '하부', '휠·타이어', '계기판',
   'VIN', '고장코드', '도막 측정', '옵션 작동', '누유', '사고·교환·판금',
@@ -235,7 +267,12 @@ export default function HomePage() {
                     onClick={() => setExpandedReviewId(expanded ? null : r.id)}
                     className="shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-100 p-5 text-left hover:border-gray-300 transition-colors"
                   >
-                    <p className="text-xs font-bold text-violet-600 mb-1">{r.carModel ?? '차종 미상'}</p>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {brandLogoSlug(r.carModel) && (
+                        <img src={`/brand-logos/${brandLogoSlug(r.carModel)}.png`} alt="" className="h-4 w-auto object-contain" />
+                      )}
+                      <p className="text-xs font-bold text-violet-600">{r.carModel ?? '차종 미상'}</p>
+                    </div>
                     <div className="text-amber-400 text-sm mb-3">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
                     <p className={`text-sm text-gray-700 leading-relaxed mb-4 ${expanded ? '' : 'line-clamp-5'}`}>{r.comment}</p>
                     {!expanded && (r.comment?.length ?? 0) > 90 && (
