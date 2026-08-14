@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SaleStageTimeline from '@/components/SaleStageTimeline';
+import { detectBrand, brandLogoSlug, slugFromBrandLabel } from '@/lib/carBrand';
 
 type Status = 'pending' | 'active' | 'sold' | 'hidden';
 
@@ -40,9 +41,13 @@ const STAGE_FILTER_MAP: { key: string; label: string; stage: string }[] = [
   { key: 'done',         label: '거래완료',   stage: 'completed' },
 ];
 
-const DOMESTIC_BRANDS = ['현대', '기아', '쉐보레', '제네시스', '르노코리아', '르노삼성', 'KG모빌리티', '쌍용', '대우'];
+const DOMESTIC_BRANDS = ['현대', '기아', '쉐보레', '제네시스', '르노코리아', '르노삼성', 'KG모빌리티', 'KGM', '쌍용', '대우'];
 
+// 제목이 "기아 카니발"처럼 브랜드로 안 시작해도 모델명으로 브랜드를 추정(lib/carBrand 공용 로직).
+// 추정이 안 되는 브랜드(대우 등 목록 밖)는 기존처럼 제목 첫 단어로 폴백.
 function getBrand(titleKo: string): string {
+  const detected = detectBrand(titleKo);
+  if (detected) return detected.label;
   return (titleKo || '').split(' ')[0]?.replace(/\(.*\)/, '').trim() || '기타';
 }
 
@@ -658,6 +663,9 @@ export default function MypagePage() {
                             onChange={() => toggleInSet(brandFilter, brand, setBrandFilter)}
                             className="accent-violet-600 shrink-0"
                           />
+                          {slugFromBrandLabel(brand) && (
+                            <img src={`/brand-logos/${slugFromBrandLabel(brand)}.png`} alt="" className="h-3 w-auto object-contain shrink-0" />
+                          )}
                           <span className="text-gray-700 truncate">{brand}</span>
                         </span>
                         <span className="text-gray-300 text-xs shrink-0">{count}</span>
@@ -697,7 +705,12 @@ export default function MypagePage() {
                     {/* 정보 */}
                     <div className="flex-1 px-4 py-3 min-w-0 flex flex-col gap-2">
                       <div className="min-w-0 min-h-[74px]">
-                        <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">{item.titleKo}</p>
+                        <p className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug flex items-center gap-1.5">
+                          {brandLogoSlug(item.titleKo) && (
+                            <img src={`/brand-logos/${brandLogoSlug(item.titleKo)}.png`} alt="" className="h-3.5 w-auto object-contain shrink-0" />
+                          )}
+                          <span className="truncate">{item.titleKo}</span>
+                        </p>
                         <p className="text-[11px] text-gray-400 mt-0.5 leading-relaxed">
                           {item.carNumber} · {item.year}년 · {item.mileage?.toLocaleString()}km
                         </p>
