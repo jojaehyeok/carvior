@@ -21,14 +21,15 @@ const BRAND_LOGO_MAP: [RegExp, string][] = [
   [/테슬라|tesla/i, 'tesla'],
   // "벤츠" 표기가 없어도 C220처럼 벤츠 모델코드(C/E/S클래스, GLA~GLS, CLA, CLS)만 적혀있는 경우도 매칭
   [/벤츠|벤즈|mercedes|메르세데스|\b(?:[CES]\s?\d{3}|GL[ABCES]|CLA|CLS)\b/i, 'mercedes-benz'],
-  [/현대|hyundai/i, 'hyundai'],
-  [/기아|\bkia\b/i, 'kia'],
+  // 브랜드명 없이 모델명만 적힌 경우도 추정: 현대/기아/쌍용은 국내 매물 특성상 자주 그렇게 씀
+  [/현대|hyundai|아반떼|소나타|그랜저|투싼|싼타페|팰리세이드|코나|캐스퍼|베뉴|아이오닉|스타렉스|포터|넥쏘|벨로스터/i, 'hyundai'],
+  [/기아|\bkia\b|\bk[3-9]\b|모닝|레이|셀토스|스포티지|쏘렌토|카니발|모하비|스팅어|니로|\bev[369]\b/i, 'kia'],
   [/\bbmw\b/i, 'bmw'],
   [/아우디|audi/i, 'audi'],
   [/제네시스|genesis/i, 'genesis'],
   [/쉐보레|쉐비|chevrolet/i, 'chevrolet'],
   [/르노|renault/i, 'renault'],
-  [/쌍용|ssangyong|kg모빌리티/i, 'ssangyong'],
+  [/쌍용|ssangyong|kg모빌리티|렉스턴|티볼리|코란도|무쏘|액티언|카이런|체어맨|토레스/i, 'ssangyong'],
   [/폭스바겐|volkswagen|\bvw\b/i, 'volkswagen'],
   [/토요타|도요타|toyota/i, 'toyota'],
   [/렉서스|lexus/i, 'lexus'],
