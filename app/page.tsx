@@ -19,7 +19,8 @@ interface Review {
 // (filippofilip95/car-logos-dataset, MIT). 차종 텍스트에서 브랜드명을 찾아 슬러그로 매핑.
 const BRAND_LOGO_MAP: [RegExp, string][] = [
   [/테슬라|tesla/i, 'tesla'],
-  [/벤츠|벤즈|mercedes|메르세데스/i, 'mercedes-benz'],
+  // "벤츠" 표기가 없어도 C220처럼 벤츠 모델코드(C/E/S클래스, GLA~GLS, CLA, CLS)만 적혀있는 경우도 매칭
+  [/벤츠|벤즈|mercedes|메르세데스|\b(?:[CES]\s?\d{3}|GL[ABCES]|CLA|CLS)\b/i, 'mercedes-benz'],
   [/현대|hyundai/i, 'hyundai'],
   [/기아|\bkia\b/i, 'kia'],
   [/\bbmw\b/i, 'bmw'],
