@@ -235,7 +235,7 @@ export default function HomePage() {
                     onClick={() => setExpandedReviewId(expanded ? null : r.id)}
                     className="shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-100 p-5 text-left hover:border-gray-300 transition-colors"
                   >
-                    <p className="text-xs font-bold text-gray-400 mb-1">{r.carModel ?? '차종 미상'}</p>
+                    <p className="text-xs font-bold text-violet-600 mb-1">{r.carModel ?? '차종 미상'}</p>
                     <div className="text-amber-400 text-sm mb-3">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
                     <p className={`text-sm text-gray-700 leading-relaxed mb-4 ${expanded ? '' : 'line-clamp-5'}`}>{r.comment}</p>
                     {!expanded && (r.comment?.length ?? 0) > 90 && (
