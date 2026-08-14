@@ -29,7 +29,8 @@ const BRAND_LOGO_MAP: [RegExp, string][] = [
   [/제네시스|genesis/i, 'genesis'],
   [/쉐보레|쉐비|chevrolet/i, 'chevrolet'],
   [/르노|renault/i, 'renault'],
-  [/쌍용|ssangyong|kg모빌리티|렉스턴|티볼리|코란도|무쏘|액티언|카이런|체어맨|토레스/i, 'ssangyong'],
+  // 쌍용차 → KGM(KG모빌리티)로 사명 변경돼서 신형 문서엔 KGM으로 적히는 경우가 많음
+  [/쌍용|ssangyong|kg\s?모빌리티|\bkgm\b|렉스턴|티볼리|코란도|무쏘|액티언|카이런|체어맨|토레스/i, 'ssangyong'],
   [/폭스바겐|volkswagen|\bvw\b/i, 'volkswagen'],
   [/토요타|도요타|toyota/i, 'toyota'],
   [/렉서스|lexus/i, 'lexus'],
