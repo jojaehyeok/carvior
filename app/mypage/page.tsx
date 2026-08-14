@@ -665,9 +665,9 @@ export default function MypagePage() {
                           className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${selected ? 'bg-violet-50 text-violet-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
                         >
                           <span className="flex items-center gap-2 min-w-0">
-                            <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                            <span className="w-16 h-8 flex items-center justify-center shrink-0">
                               {slug ? (
-                                <img src={`/brand-logos/${slug}.png`} alt="" className="max-h-4 max-w-4 object-contain" />
+                                <img src={`/brand-logos/${slug}.png`} alt="" className="h-8 w-16 object-contain" />
                               ) : (
                                 <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
                               )}
