@@ -9,8 +9,9 @@ interface Review {
   id: number;
   rating: number;
   comment: string | null;
-  carNumber: string | null;
   driverName: string | null;
+  driverPhotoUrl: string | null;
+  carModel: string | null;
   createdAt: string;
 }
 
@@ -45,6 +46,7 @@ const AUCTION_FLOW = [
 
 export default function HomePage() {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [expandedReviewId, setExpandedReviewId] = useState<number | null>(null);
 
   useEffect(() => {
     fetch('https://carvior.store/api/v1/reviews')
@@ -217,6 +219,44 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
+      {reviews.length > 0 && (
+        <section className="bg-gray-50 border-y border-gray-100 py-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">REAL REVIEWS</p>
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">진단 받아보신 분들의 후기</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory">
+              {reviews.map(r => {
+                const expanded = expandedReviewId === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setExpandedReviewId(expanded ? null : r.id)}
+                    className="shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-100 p-5 text-left hover:border-gray-300 transition-colors"
+                  >
+                    <p className="text-xs font-bold text-gray-400 mb-1">{r.carModel ?? '차종 미상'}</p>
+                    <div className="text-amber-400 text-sm mb-3">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
+                    <p className={`text-sm text-gray-700 leading-relaxed mb-4 ${expanded ? '' : 'line-clamp-5'}`}>{r.comment}</p>
+                    {!expanded && (r.comment?.length ?? 0) > 90 && (
+                      <p className="text-[11px] text-violet-400 font-bold mb-3">더보기</p>
+                    )}
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                      {r.driverPhotoUrl ? (
+                        <img src={r.driverPhotoUrl} alt="" className="w-7 h-7 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-gray-100" />
+                      )}
+                      <p className="text-xs text-gray-400">{r.driverName ? `${r.driverName} 평가사` : '카비어 평가사'}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── CARVIOR CARE (준비 중) ── */}
       <section className="max-w-7xl mx-auto px-6 py-20">
         <div className="rounded-3xl border-2 border-dashed border-gray-200 p-8 md:p-12">
@@ -370,27 +410,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
-      {reviews.length > 0 && (
-        <section className="bg-gray-50 border-y border-gray-100 py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">REAL REVIEWS</p>
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">진단 받아보신 분들의 후기</h2>
-            <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory">
-              {reviews.map(r => (
-                <div key={r.id} className="shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-100 p-5">
-                  <div className="text-amber-400 text-sm mb-3">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4 line-clamp-5">{r.comment}</p>
-                  <p className="text-xs text-gray-400">
-                    {r.driverName ? `${r.driverName} 평가사` : '카비어 평가사'} · {r.carNumber ?? ''}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── 뭘 하고 싶으세요? ── */}
       <section className="bg-gray-50 border-y border-gray-100 py-20">
