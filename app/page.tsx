@@ -1,8 +1,18 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppFooter from '@/components/footermodal';
 import HomePromoPopups from '@/components/HomePromoPopups';
+
+interface Review {
+  id: number;
+  rating: number;
+  comment: string | null;
+  carNumber: string | null;
+  driverName: string | null;
+  createdAt: string;
+}
 
 const VEHICLE_DATA_POINTS = [
   '외관 8방향', '엔진룸', '하부', '휠·타이어', '계기판',
@@ -34,6 +44,15 @@ const AUCTION_FLOW = [
 ];
 
 export default function HomePage() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    fetch('https://carvior.store/api/v1/reviews')
+      .then(r => r.json())
+      .then((data: Review[]) => setReviews(Array.isArray(data) ? data.filter(r => r.rating >= 4) : []))
+      .catch(() => setReviews([]));
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <HomePromoPopups />
@@ -351,6 +370,27 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
+      {reviews.length > 0 && (
+        <section className="bg-gray-50 border-y border-gray-100 py-20">
+          <div className="max-w-7xl mx-auto px-6">
+            <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">REAL REVIEWS</p>
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">진단 받아보신 분들의 후기</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 snap-x snap-mandatory">
+              {reviews.map(r => (
+                <div key={r.id} className="shrink-0 w-72 snap-start bg-white rounded-2xl border border-gray-100 p-5">
+                  <div className="text-amber-400 text-sm mb-3">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</div>
+                  <p className="text-sm text-gray-700 leading-relaxed mb-4 line-clamp-5">{r.comment}</p>
+                  <p className="text-xs text-gray-400">
+                    {r.driverName ? `${r.driverName} 평가사` : '카비어 평가사'} · {r.carNumber ?? ''}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── 뭘 하고 싶으세요? ── */}
       <section className="bg-gray-50 border-y border-gray-100 py-20">
