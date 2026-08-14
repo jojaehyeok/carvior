@@ -34,11 +34,16 @@ interface StoreItem {
 
 // 낙찰 이후 세부단계(winner_selected/in_transit/transit_done/completed)를
 // 사용자 친화적인 4단계 라벨로 매핑 — DB의 saleStage 값 자체는 안 바꾸고 필터 UI에서만 재해석
-const STAGE_FILTER_MAP: { key: string; label: string; stage: string }[] = [
-  { key: 'need_payment', label: '입력필요',   stage: 'winner_selected' },
-  { key: 'paid',         label: '입력완료',   stage: 'in_transit' },
-  { key: 'transit',      label: '탁송예정',   stage: 'transit_done' },
-  { key: 'done',         label: '거래완료',   stage: 'completed' },
+const STAGE_FILTER_MAP: { key: string; label: string; stage: string; icon: string }[] = [
+  { key: 'need_payment', label: '입력필요',   stage: 'winner_selected', icon: '💳' },
+  { key: 'paid',         label: '입력완료',   stage: 'in_transit',      icon: '✅' },
+  { key: 'transit',      label: '탁송예정',   stage: 'transit_done',    icon: '🚚' },
+  { key: 'done',         label: '거래완료',   stage: 'completed',       icon: '🏁' },
+];
+
+const SERVICE_FILTER_MAP = [
+  { key: 'inspection' as const, label: '진단', icon: '🩺' },
+  { key: 'self' as const,       label: '셀프', icon: '✍️' },
 ];
 
 const DOMESTIC_BRANDS = ['현대', '기아', '쉐보레', '제네시스', '르노코리아', '르노삼성', 'KG모빌리티', 'KGM', '쌍용', '대우'];
@@ -595,41 +600,47 @@ export default function MypagePage() {
             <aside className="w-52 shrink-0 hidden md:block space-y-6 sticky top-6">
               <div>
                 <p className="text-xs font-black text-gray-900 mb-2.5">카비어 서비스</p>
-                <div className="space-y-1.5">
-                  {[{ key: 'inspection' as const, label: '진단' }, { key: 'self' as const, label: '셀프' }].map(o => (
-                    <label key={o.key} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
-                      <span className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={serviceFilter.has(o.key)}
-                          onChange={() => toggleInSet(serviceFilter, o.key, setServiceFilter)}
-                          className="accent-violet-600"
-                        />
-                        <span className="text-gray-700">{o.label}</span>
-                      </span>
-                      <span className="text-gray-300 text-xs">{serviceCounts[o.key]}</span>
-                    </label>
-                  ))}
+                <div className="space-y-1">
+                  {SERVICE_FILTER_MAP.map(o => {
+                    const selected = serviceFilter.has(o.key);
+                    return (
+                      <button
+                        key={o.key}
+                        type="button"
+                        onClick={() => toggleInSet(serviceFilter, o.key, setServiceFilter)}
+                        className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${selected ? 'bg-violet-50 text-violet-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="text-base leading-none">{o.icon}</span>
+                          <span className="truncate">{o.label}</span>
+                        </span>
+                        <span className={`text-xs shrink-0 ${selected ? 'text-violet-400' : 'text-gray-300'}`}>{serviceCounts[o.key]}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-5">
                 <p className="text-xs font-black text-gray-900 mb-2.5">진행상태</p>
-                <div className="space-y-1.5">
-                  {STAGE_FILTER_MAP.map(o => (
-                    <label key={o.key} className="flex items-center justify-between gap-2 cursor-pointer select-none text-sm">
-                      <span className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={stageFilter.has(o.key)}
-                          onChange={() => toggleInSet(stageFilter, o.key, setStageFilter)}
-                          className="accent-violet-600"
-                        />
-                        <span className="text-gray-700">{o.label}</span>
-                      </span>
-                      <span className="text-gray-300 text-xs">{stageCounts[o.key] ?? 0}</span>
-                    </label>
-                  ))}
+                <div className="space-y-1">
+                  {STAGE_FILTER_MAP.map(o => {
+                    const selected = stageFilter.has(o.key);
+                    return (
+                      <button
+                        key={o.key}
+                        type="button"
+                        onClick={() => toggleInSet(stageFilter, o.key, setStageFilter)}
+                        className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${selected ? 'bg-violet-50 text-violet-700 font-bold' : 'text-gray-700 hover:bg-gray-50'}`}
+                      >
+                        <span className="flex items-center gap-2 min-w-0">
+                          <span className="text-base leading-none">{o.icon}</span>
+                          <span className="truncate">{o.label}</span>
+                        </span>
+                        <span className={`text-xs shrink-0 ${selected ? 'text-violet-400' : 'text-gray-300'}`}>{stageCounts[o.key] ?? 0}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

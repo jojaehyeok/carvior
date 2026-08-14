@@ -238,7 +238,7 @@ export default function HomePage() {
                   >
                     <div className="flex items-center gap-1.5 mb-1">
                       {brandLogoSlug(r.carModel) && (
-                        <img src={`/brand-logos/${brandLogoSlug(r.carModel)}.png`} alt="" className="h-4 w-auto object-contain" />
+                        <img src={`/brand-logos/${brandLogoSlug(r.carModel)}.png`} alt="" className="h-6 w-auto object-contain" />
                       )}
                       <p className="text-xs font-bold text-violet-600">{r.carModel ?? '차종 미상'}</p>
                     </div>
