@@ -114,7 +114,12 @@ export default function InspectionCheckoutPage() {
     }
   }, [sessionUser?.role]);
   const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
-  const pricing = pricingTable[carOrigin];
+  // 네이버페이 실결제 흐름을 처음부터 끝까지 검증할 전용 테스트 계정 — 이 계정으로 로그인했을 때만
+  // 결제 금액을 1원으로 낮춰서, 실제 결제 승인/DB 반영까지 돈을 아끼며 반복 테스트할 수 있게 함.
+  const isNaverPayTestAccount = sessionUser?.email === 'naverpay.test@carvior.store';
+  const pricing = isNaverPayTestAccount
+    ? { ...pricingTable[carOrigin], amount: 1 }
+    : pricingTable[carOrigin];
   const [payMethod, setPayMethod]       = useState<PayMethod>('widget');
   const [loading, setLoading]           = useState(false);
   const [widgetReady, setWidgetReady]   = useState(false);

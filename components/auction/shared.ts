@@ -51,18 +51,21 @@ export interface Bid {
 }
 
 // 매물 하나의 실제 입찰 목록 — /external/store-items/:id/bids 그대로 반환
-export async function fetchItemBids(itemId: string | number): Promise<Bid[]> {
+// 다른 딜러의 입찰 금액/이름은 절대 내려주지 않음(경쟁입찰 담합 방지) — 서버가 이미
+// dealerId 기준으로 걸러서 myBids만 주고, 전체는 count(인원수)로만 알려준다.
+export async function fetchItemBids(itemId: string | number, dealerId?: number | null): Promise<{ count: number; myBids: Bid[] }> {
   const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
   const KEY = process.env.NEXT_PUBLIC_STORE_ITEMS_INTERNAL_KEY ?? '';
   try {
-    const res = await fetch(`${API}/external/store-items/${itemId}/bids`, {
+    const qs = dealerId != null ? `?dealerId=${dealerId}` : '';
+    const res = await fetch(`${API}/external/store-items/${itemId}/bids${qs}`, {
       headers: { 'x-internal-key': KEY },
     });
-    if (!res.ok) return [];
+    if (!res.ok) return { count: 0, myBids: [] };
     const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    return { count: data?.count ?? 0, myBids: Array.isArray(data?.myBids) ? data.myBids : [] };
   } catch {
-    return [];
+    return { count: 0, myBids: [] };
   }
 }
 

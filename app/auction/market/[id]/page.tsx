@@ -73,6 +73,7 @@ function AuctionDetailContent() {
   const [inquiryMsg, setInquiryMsg] = useState('');
   const [bidOpen, setBidOpen] = useState(false);
   const [bids, setBids] = useState<Bid[]>([]);
+  const [bidCount, setBidCount] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [lbIdx, setLbIdx] = useState(0);
   const [lbZoom, setLbZoom] = useState(1);
@@ -80,7 +81,7 @@ function AuctionDetailContent() {
 
   useEffect(() => {
     if (!id) return;
-    fetchItemBids(id).then(all => setBids(dealerId != null ? all.filter(b => b.dealerId === dealerId) : []));
+    fetchItemBids(id, dealerId ?? undefined).then(({ count, myBids }) => { setBidCount(count); setBids(myBids); });
   }, [id, dealerId]);
 
   // 조회수/좋아요 fetch + 조회수 increment
@@ -157,8 +158,9 @@ function AuctionDetailContent() {
       alert('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    const fresh = await fetchItemBids(itemId);
-    setBids(dealerId != null ? fresh.filter(b => b.dealerId === dealerId) : []);
+    const fresh = await fetchItemBids(itemId, dealerId ?? undefined);
+    setBidCount(fresh.count);
+    setBids(fresh.myBids);
     alert(`✓ ${fmtKRW(amount)} 입찰 완료!\n최종 낙찰은 어드민에서 확인됩니다.`);
   };
 
@@ -404,6 +406,9 @@ function AuctionDetailContent() {
                 <p className="text-sm text-gray-400 mt-1">
                   예상 수출가 ≈ ${usd.toLocaleString()}
                 </p>
+              )}
+              {bidCount > 0 && (
+                <p className="text-xs text-gray-400 mt-2">🔨 총 {bidCount}명 입찰 중 (다른 딜러의 입찰가는 공개되지 않습니다)</p>
               )}
               {myBids.length > 0 && (
                 <p className="text-xs text-violet-600 font-bold mt-2">💬 내 입찰 {myBids.length}건 · 최고 {fmtKRW(myTopBid)}</p>

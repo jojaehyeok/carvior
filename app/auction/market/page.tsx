@@ -25,7 +25,7 @@ function AuctionContent() {
   const dealerId = (session?.user as any)?.id ? Number((session?.user as any).id) : null;
   const [items, setItems] = useState<AuctionItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bidsByItem, setBidsByItem] = useState<Record<string, Bid[]>>({});
+  const [bidsByItem, setBidsByItem] = useState<Record<string, { count: number; myBids: Bid[] }>>({});
   const [bidTarget, setBidTarget] = useState<AuctionItem | null>(null);
   const [filter, setFilter] = useState<FilterKey>('all');
   const dealerName = (session?.user as any)?.name ?? '딜러';
@@ -36,13 +36,13 @@ function AuctionContent() {
       .then(async (data: AuctionItem[]) => {
         const filtered = Array.isArray(data) ? data.filter(i => ['active', 'sold', 'closed'].includes(i.status) && isVisible(i)) : [];
         setItems(filtered);
-        // 매물마다 실제 입찰 목록을 병렬로 가져와 입찰 건수를 정확히 표시
-        const entries = await Promise.all(filtered.map(async item => [item.id, await fetchItemBids(item.id)] as const));
+        // 매물마다 입찰 건수(+내 입찰)를 병렬로 가져옴 — 다른 딜러 입찰은 서버가 애초에 안 내려줌
+        const entries = await Promise.all(filtered.map(async item => [item.id, await fetchItemBids(item.id, dealerId ?? undefined)] as const));
         setBidsByItem(Object.fromEntries(entries));
       })
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [dealerId]);
 
   const handleBid = async (itemId: string, amount: number) => {
     try {
@@ -57,13 +57,13 @@ function AuctionContent() {
       alert('서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    const fresh = await fetchItemBids(itemId);
+    const fresh = await fetchItemBids(itemId, dealerId ?? undefined);
     setBidsByItem(prev => ({ ...prev, [itemId]: fresh }));
     alert(`✓ ${fmtKRW(amount)} 입찰 완료!\n최종 낙찰은 어드민에서 확인됩니다.`);
   };
 
-  const getBidCount = (id: string) => (bidsByItem[id] ?? []).length;
-  const getMyBids = (id: string) => (bidsByItem[id] ?? []).filter(b => dealerId != null && b.dealerId === dealerId);
+  const getBidCount = (id: string) => bidsByItem[id]?.count ?? 0;
+  const getMyBids = (id: string) => bidsByItem[id]?.myBids ?? [];
 
   const activeItems = items.filter(i => i.status === 'active');
   const urgentItems = activeItems.filter(i => {
