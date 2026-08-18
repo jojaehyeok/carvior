@@ -54,7 +54,9 @@ export default function PriceChart({
 
   const W = 640, H = 300, PAD_L = 64, PAD_B = 30, PAD_T = 16, PAD_R = 16;
   const xs = points.map((p) => p.x);
-  const maxX = Math.max(...xs, (targetMileage ?? 0) / 10000) * 1.08 || 1;
+  const rawMaxX = Math.max(...xs, (targetMileage ?? 0) / 10000) * 1.08 || 1;
+  const xAxis = niceAxis(rawMaxX, 5);
+  const maxX = xAxis.max;
   const minX = 0;
   const ys = points.map((p) => p.y);
   const yAxis = niceAxis(Math.max(...ys) * 1.08, 4);
@@ -85,8 +87,12 @@ export default function PriceChart({
 
   const yGrid = Array.from({ length: Math.round(maxY / yAxis.step) + 1 }, (_, i) => yAxis.step * i);
   const targetX = targetMileage != null ? targetMileage / 10000 : null;
-  // 내 차 라벨은 x축 눈금(0/최대)과 같은 줄에 두면 서로 겹치니, 점 위에 알약 배지로 따로 띄운다.
-  const targetLabelY = targetY != null ? Math.max(PAD_T + 12, sy(targetY) - 16) : 0;
+  // x축은 0/5만/10만... 처럼 일정 간격 눈금으로 쭉 나열하고, 내 차 위치와 겹치는 눈금만 그
+  // 칸을 "내차 N만km"로 대체한다 — 내 차 라벨이 별도로 떠서 다른 눈금과 겹치는 일이 없게.
+  const xTicks = Array.from({ length: Math.round(maxX / xAxis.step) + 1 }, (_, i) => xAxis.step * i);
+  const nearTargetTick =
+    targetX != null ? xTicks.reduce((best, t) => (Math.abs(t - targetX) < Math.abs(best - targetX) ? t : best), xTicks[0]) : null;
+  const targetMergedWithTick = targetX != null && nearTargetTick != null && Math.abs(nearTargetTick - targetX) < xAxis.step * 0.3;
 
   return (
     <div className="mb-8">
@@ -128,12 +134,15 @@ export default function PriceChart({
 
           <path d={curvePath} fill="none" stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" />
 
-          <text x={sx(minX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="start">
-            {Math.round(minX)}만km
-          </text>
-          <text x={sx(maxX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="end">
-            {Math.round(maxX)}만km
-          </text>
+          {xTicks.map((t, i) => {
+            if (targetMergedWithTick && t === nearTargetTick) return null;
+            const anchor = i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle';
+            return (
+              <text key={i} x={sx(t)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor={anchor}>
+                {Math.round(t)}만km
+              </text>
+            );
+          })}
 
           {targetX != null && targetY != null && (
             <>
@@ -143,13 +152,8 @@ export default function PriceChart({
                 stroke="#2563eb" strokeWidth={1} strokeDasharray="3,3"
               />
               <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
-              <rect
-                x={sx(targetX) - 28} y={targetLabelY - 12}
-                width={56} height={20} rx={10}
-                fill="#2563eb"
-              />
-              <text x={sx(targetX)} y={targetLabelY + 3} fontSize={11} fontWeight={700} fill="#fff" textAnchor="middle">
-                {Math.round(targetX)}만km
+              <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={11} fontWeight={700} fill="#2563eb" textAnchor="middle">
+                내차 {Math.round(targetX)}만km
               </text>
             </>
           )}
