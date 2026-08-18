@@ -85,9 +85,8 @@ export default function PriceChart({
 
   const yGrid = Array.from({ length: Math.round(maxY / yAxis.step) + 1 }, (_, i) => yAxis.step * i);
   const targetX = targetMileage != null ? targetMileage / 10000 : null;
-  const targetSx = targetX != null ? sx(targetX) : null;
-  const showMinLabel = targetSx == null || Math.abs(sx(minX) - targetSx) > 36;
-  const showMaxLabel = targetSx == null || Math.abs(sx(maxX) - targetSx) > 36;
+  // 내 차 라벨은 x축 눈금(0/최대)과 같은 줄에 두면 서로 겹치니, 점 위에 알약 배지로 따로 띄운다.
+  const targetLabelY = targetY != null ? Math.max(PAD_T + 12, sy(targetY) - 16) : 0;
 
   return (
     <div className="mb-8">
@@ -129,6 +128,13 @@ export default function PriceChart({
 
           <path d={curvePath} fill="none" stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" />
 
+          <text x={sx(minX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="start">
+            {Math.round(minX)}만km
+          </text>
+          <text x={sx(maxX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="end">
+            {Math.round(maxX)}만km
+          </text>
+
           {targetX != null && targetY != null && (
             <>
               <line
@@ -136,21 +142,16 @@ export default function PriceChart({
                 y1={sy(targetY)} y2={H - PAD_B}
                 stroke="#2563eb" strokeWidth={1} strokeDasharray="3,3"
               />
-              <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={12} fontWeight={700} fill="#2563eb" textAnchor="middle">
+              <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
+              <rect
+                x={sx(targetX) - 28} y={targetLabelY - 12}
+                width={56} height={20} rx={10}
+                fill="#2563eb"
+              />
+              <text x={sx(targetX)} y={targetLabelY + 3} fontSize={11} fontWeight={700} fill="#fff" textAnchor="middle">
                 {Math.round(targetX)}만km
               </text>
-              <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
             </>
-          )}
-          {showMinLabel && (
-            <text x={sx(minX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="start">
-              {Math.round(minX)}만km
-            </text>
-          )}
-          {showMaxLabel && (
-            <text x={sx(maxX)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor="end">
-              {Math.round(maxX)}만km
-            </text>
           )}
         </svg>
       </div>
