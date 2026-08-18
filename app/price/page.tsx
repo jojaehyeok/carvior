@@ -12,7 +12,7 @@ type Listing = {
   mileage: number;
   fuel: string;
   priceManwon: number;
-  thumbnailPath: string | null;
+  thumbnailUrl: string | null;
 };
 
 export default function PricePage() {
@@ -156,8 +156,20 @@ export default function PricePage() {
             ) : (
               <div className="border border-gray-100 rounded-2xl divide-y divide-gray-100 overflow-hidden">
                 {listings.map((l) => (
-                  <div key={l.id} className="flex items-center justify-between gap-4 px-5 py-4">
-                    <div>
+                  <div key={l.id} className="flex items-center gap-3 px-5 py-4">
+                    {l.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={l.thumbnailUrl}
+                        alt=""
+                        className="w-16 h-12 rounded-lg object-cover shrink-0 bg-gray-100"
+                        loading="lazy"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="w-16 h-12 rounded-lg bg-gray-100 shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900">{l.badge}</p>
                       <p className="text-xs text-gray-400 mt-1">
                         {l.year}년식 · {l.mileage?.toLocaleString()}km · {l.fuel}
