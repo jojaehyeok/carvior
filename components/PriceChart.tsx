@@ -55,7 +55,8 @@ export default function PriceChart({
   const W = 640, H = 300, PAD_L = 64, PAD_B = 30, PAD_T = 16, PAD_R = 16;
   const xs = points.map((p) => p.x);
   const rawMaxX = Math.max(...xs, (targetMileage ?? 0) / 10000) * 1.08 || 1;
-  const xAxis = niceAxis(rawMaxX, 5);
+  // 눈금 3개 기준(0/5만/10만처럼)으로 성기게 잡아야 라벨끼리 겹칠 여지가 줄어든다.
+  const xAxis = niceAxis(rawMaxX, 3);
   const maxX = xAxis.max;
   const minX = 0;
   const ys = points.map((p) => p.y);
@@ -87,12 +88,12 @@ export default function PriceChart({
 
   const yGrid = Array.from({ length: Math.round(maxY / yAxis.step) + 1 }, (_, i) => yAxis.step * i);
   const targetX = targetMileage != null ? targetMileage / 10000 : null;
-  // x축은 0/5만/10만... 처럼 일정 간격 눈금으로 쭉 나열하고, 내 차 위치와 겹치는 눈금만 그
-  // 칸을 "내차 N만km"로 대체한다 — 내 차 라벨이 별도로 떠서 다른 눈금과 겹치는 일이 없게.
+  const targetSxVal = targetX != null ? sx(targetX) : null;
+  // x축은 0/5만/10만처럼 성긴 눈금으로 나열하고, 내 차 라벨과 화면상 가까운(픽셀 기준) 눈금은
+  // 글자가 겹치니 숨긴다 — 데이터값 비율이 아니라 실제 렌더 거리(px)로 판단해야 화면 크기와
+  // 무관하게 안전하다.
   const xTicks = Array.from({ length: Math.round(maxX / xAxis.step) + 1 }, (_, i) => xAxis.step * i);
-  const nearTargetTick =
-    targetX != null ? xTicks.reduce((best, t) => (Math.abs(t - targetX) < Math.abs(best - targetX) ? t : best), xTicks[0]) : null;
-  const targetMergedWithTick = targetX != null && nearTargetTick != null && Math.abs(nearTargetTick - targetX) < xAxis.step * 0.3;
+  const HIDE_PX = 45;
 
   return (
     <div className="mb-8">
@@ -135,7 +136,7 @@ export default function PriceChart({
           <path d={curvePath} fill="none" stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" />
 
           {xTicks.map((t, i) => {
-            if (targetMergedWithTick && t === nearTargetTick) return null;
+            if (targetSxVal != null && Math.abs(sx(t) - targetSxVal) < HIDE_PX) return null;
             const anchor = i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle';
             return (
               <text key={i} x={sx(t)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor={anchor}>
