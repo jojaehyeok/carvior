@@ -111,7 +111,7 @@ export default function PriceChart({
           </p>
           {subtitle && (
             <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#63489a] inline-block" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7c3aed] inline-block" />
               {subtitle}
             </div>
           )}
@@ -130,10 +130,10 @@ export default function PriceChart({
           <line x1={PAD_L} x2={W - PAD_R} y1={H - PAD_B} y2={H - PAD_B} stroke="#e5e7eb" strokeWidth={1} />
 
           {points.map((p, i) => (
-            <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={3} fill="#c9bcdd" />
+            <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={3} fill="#c4b5fd" />
           ))}
 
-          <path d={curvePath} fill="none" stroke="#63489a" strokeWidth={2.5} strokeLinecap="round" />
+          <path d={curvePath} fill="none" stroke="#7c3aed" strokeWidth={2.5} strokeLinecap="round" />
 
           {xTicks.map((t, i) => {
             if (targetSxVal != null && Math.abs(sx(t) - targetSxVal) < HIDE_PX) return null;
@@ -150,10 +150,10 @@ export default function PriceChart({
               <line
                 x1={sx(targetX)} x2={sx(targetX)}
                 y1={sy(targetY)} y2={H - PAD_B}
-                stroke="#63489a" strokeWidth={1} strokeDasharray="3,3"
+                stroke="#7c3aed" strokeWidth={1} strokeDasharray="3,3"
               />
-              <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#63489a" stroke="#fff" strokeWidth={2} />
-              <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={11} fontWeight={700} fill="#63489a" textAnchor="middle">
+              <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#7c3aed" stroke="#fff" strokeWidth={2} />
+              <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={11} fontWeight={700} fill="#7c3aed" textAnchor="middle">
                 내차 {(() => {
                   const r = Math.round(targetX * 10) / 10;
                   return Number.isInteger(r) ? r : r.toFixed(1);
