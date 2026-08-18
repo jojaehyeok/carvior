@@ -99,9 +99,9 @@ export default function PriceChart({
       {targetY != null && (
         <div className="mb-5">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="text-base font-black text-gray-900">내 차 예상시세</h3>
+            <h3 className="text-base font-black text-gray-900">실거래 판매시세</h3>
             <span className="text-[11px] font-bold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
-              무사고 기준
+              호가 기준
             </span>
           </div>
           <p className="text-3xl font-black text-gray-900 mb-2">
