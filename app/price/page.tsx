@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import PriceChart from '@/components/PriceChart';
 
 type SpecMatch = { manufacturer: string; model: string; badge: string; count: number };
 type Listing = {
@@ -25,6 +26,7 @@ export default function PricePage() {
   const [selected, setSelected] = useState<SpecMatch | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [searched, setSearched] = useState(false);
+  const [mileageInput, setMileageInput] = useState('');
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -130,6 +132,25 @@ export default function PricePage() {
             </button>
             <p className="text-sm font-bold text-gray-900 mb-1">{selected?.manufacturer} {selected?.model}</p>
             <p className="text-xs text-gray-400 mb-5">{selected?.badge} · 실거래 비교매물</p>
+
+            {listings.length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <input
+                    value={mileageInput}
+                    onChange={(e) => setMileageInput(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="내 차 주행거리(km)를 입력하면 예상시세를 볼 수 있어요"
+                    inputMode="numeric"
+                    className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400"
+                  />
+                </div>
+                <PriceChart
+                  listings={listings}
+                  targetMileage={mileageInput ? parseInt(mileageInput, 10) : undefined}
+                />
+              </div>
+            )}
+
             {listings.length === 0 ? (
               <div className="text-center text-gray-400 py-10">비교할 매물을 찾지 못했어요.</div>
             ) : (
