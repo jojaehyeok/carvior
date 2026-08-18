@@ -22,7 +22,15 @@ function quadFit(points: { x: number; y: number }[]) {
   return (x: number) => a + b * x + c * x * x;
 }
 
-export default function PriceChart({ listings, targetMileage }: { listings: Listing[]; targetMileage?: number }) {
+export default function PriceChart({
+  listings,
+  targetMileage,
+  subtitle,
+}: {
+  listings: Listing[];
+  targetMileage?: number;
+  subtitle?: string;
+}) {
   const points = listings
     .filter((l) => l.mileage > 0 && l.priceManwon > 0)
     .map((l) => ({ x: l.mileage / 10000, y: l.priceManwon }));
@@ -32,7 +40,7 @@ export default function PriceChart({ listings, targetMileage }: { listings: List
   const predict = quadFit(points);
   if (!predict) return null;
 
-  const W = 640, H = 300, PAD_L = 60, PAD_B = 30, PAD_T = 16, PAD_R = 16;
+  const W = 640, H = 300, PAD_L = 64, PAD_B = 30, PAD_T = 16, PAD_R = 16;
   const xs = points.map((p) => p.x);
   const maxX = Math.max(...xs, (targetMileage ?? 0) / 10000) * 1.08 || 1;
   const minX = 0;
@@ -62,53 +70,68 @@ export default function PriceChart({ listings, targetMileage }: { listings: List
     rangeHigh = Math.round((targetY + margin) / 10) * 10;
   }
 
-  const yTicks = 5;
+  const yTicks = 4;
   const yGrid = Array.from({ length: yTicks + 1 }, (_, i) => (maxY / yTicks) * i);
+  const targetX = targetMileage != null ? targetMileage / 10000 : null;
 
   return (
     <div className="mb-8">
       {targetY != null && (
-        <div className="mb-4">
-          <p className="text-xs font-bold text-gray-400 mb-1">내 차 예상시세 (무사고 기준)</p>
-          <p className="text-3xl font-black text-gray-900">
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-base font-black text-gray-900">내 차 예상시세</h3>
+            <span className="text-[11px] font-bold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+              무사고 기준
+            </span>
+          </div>
+          <p className="text-3xl font-black text-gray-900 mb-2">
             {rangeLow.toLocaleString()} ~ {rangeHigh.toLocaleString()}
             <span className="text-lg font-bold text-gray-400 ml-1">만원</span>
           </p>
+          {subtitle && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />
+              {subtitle}
+            </div>
+          )}
         </div>
       )}
       <div className="overflow-x-auto">
         <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ minWidth: W }}>
           {yGrid.map((y, i) => (
             <g key={i}>
-              <line x1={PAD_L} x2={W - PAD_R} y1={sy(y)} y2={sy(y)} stroke="#f1f1f1" strokeWidth={1} />
-              <text x={PAD_L - 8} y={sy(y) + 4} fontSize={11} fill="#9ca3af" textAnchor="end">
-                {y >= 10000 ? `${(y / 10000).toFixed(1)}억` : `${Math.round(y).toLocaleString()}`}
+              <line x1={PAD_L} x2={W - PAD_R} y1={sy(y)} y2={sy(y)} stroke="#f3f4f6" strokeWidth={1} />
+              <text x={PAD_L - 10} y={sy(y) + 4} fontSize={11} fill="#9ca3af" textAnchor="end">
+                {Math.round(y).toLocaleString()}만원
               </text>
             </g>
           ))}
           <line x1={PAD_L} x2={W - PAD_R} y1={H - PAD_B} y2={H - PAD_B} stroke="#e5e7eb" strokeWidth={1} />
-          {[0, maxX / 2, maxX].map((x, i) => (
-            <text key={i} x={sx(x)} y={H - PAD_B + 18} fontSize={11} fill="#9ca3af" textAnchor="middle">
-              {Math.round(x * 10) / 10}만km
-            </text>
-          ))}
 
           {points.map((p, i) => (
-            <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={3.5} fill="#bfdbfe" />
+            <circle key={i} cx={sx(p.x)} cy={sy(p.y)} r={3} fill="#dbeafe" />
           ))}
 
-          <path d={curvePath} fill="none" stroke="#2563eb" strokeWidth={2.5} />
+          <path d={curvePath} fill="none" stroke="#2563eb" strokeWidth={2.5} strokeLinecap="round" />
 
-          {targetY != null && (
+          {targetX != null && targetY != null && (
             <>
               <line
-                x1={sx(targetMileage! / 10000)} x2={sx(targetMileage! / 10000)}
+                x1={sx(targetX)} x2={sx(targetX)}
                 y1={sy(targetY)} y2={H - PAD_B}
                 stroke="#2563eb" strokeWidth={1} strokeDasharray="3,3"
               />
-              <circle cx={sx(targetMileage! / 10000)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
+              <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={12} fontWeight={700} fill="#2563eb" textAnchor="middle">
+                {Math.round(targetX * 10) / 10}만km
+              </text>
+              <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
             </>
           )}
+          {[0, maxX].map((x, i) => (
+            <text key={i} x={sx(x)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor={i === 0 ? 'start' : 'end'}>
+              {Math.round(x * 10) / 10}만km
+            </text>
+          ))}
         </svg>
       </div>
     </div>

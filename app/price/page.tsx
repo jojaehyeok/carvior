@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import PriceChart from '@/components/PriceChart';
 
 type SpecMatch = { manufacturer: string; model: string; badge: string; count: number };
@@ -147,6 +146,7 @@ export default function PricePage() {
                 <PriceChart
                   listings={listings}
                   targetMileage={mileageInput ? parseInt(mileageInput, 10) : undefined}
+                  subtitle={selected ? `${selected.manufacturer} ${selected.model} · ${selected.badge}` : undefined}
                 />
               </div>
             )}
@@ -172,22 +172,6 @@ export default function PricePage() {
             )}
           </div>
         )}
-
-        {/* 임시 대안 — 실사 신청 유도는 계속 유지 */}
-        <div className="bg-black text-white rounded-2xl p-6 text-left mt-10">
-          <p className="text-xs font-black tracking-widest uppercase text-white/40 mb-2">더 정확한 시세를 원하신다면</p>
-          <h2 className="text-lg font-black mb-1.5">무료 시세 산정 받기</h2>
-          <p className="text-white/50 text-sm mb-5">
-            진단사가 직접 방문해 차량을 확인하고<br />
-            정확한 시세를 알려드립니다.
-          </p>
-          <Link
-            href="/marketing/carvior-inspection"
-            className="inline-block bg-white text-black font-black px-6 py-3 rounded-xl text-sm hover:bg-white/90 transition-colors"
-          >
-            무료 시세 산정 신청 →
-          </Link>
-        </div>
       </div>
     </div>
   );
