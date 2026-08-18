@@ -172,6 +172,9 @@ function PricePageInner() {
                   listings={listings}
                   targetMileage={mileageInput ? parseInt(mileageInput, 10) : undefined}
                   subtitle={selected ? `${selected.manufacturer} ${selected.model} · ${selected.badge}` : undefined}
+                  depRangeLow={searchParams.get('depLow') ? Number(searchParams.get('depLow')) : undefined}
+                  depRangeHigh={searchParams.get('depHigh') ? Number(searchParams.get('depHigh')) : undefined}
+                  depLabel={searchParams.get('depLabel') || undefined}
                 />
               </div>
             )}

@@ -38,10 +38,17 @@ export default function PriceChart({
   listings,
   targetMileage,
   subtitle,
+  depRangeLow,
+  depRangeHigh,
+  depLabel,
 }: {
   listings: Listing[];
   targetMileage?: number;
   subtitle?: string;
+  // 진단사 앱에서 이미 계산해둔 사고감가+실비 반영 범위를 그대로 보여줄 때 씀(여기서 재계산 안 함).
+  depRangeLow?: number;
+  depRangeHigh?: number;
+  depLabel?: string;
 }) {
   const points = listings
     .filter((l) => l.mileage > 0 && l.priceManwon > 0)
@@ -109,6 +116,15 @@ export default function PriceChart({
             {rangeLow.toLocaleString()} ~ {rangeHigh.toLocaleString()}
             <span className="text-lg font-bold text-gray-400 ml-1">만원</span>
           </p>
+          {depRangeLow != null && depRangeHigh != null && (
+            <div className="mb-3 p-3 rounded-xl bg-[#f5f1fc] border border-[#7c3aed33]">
+              <p className="text-[11px] font-bold text-[#7c3aed] mb-1">{depLabel || '사고감가+실비 반영'} · 참고용</p>
+              <p className="text-xl font-black text-gray-900">
+                {depRangeLow.toLocaleString()} ~ {depRangeHigh.toLocaleString()}
+                <span className="text-sm font-bold text-gray-400 ml-1">만원</span>
+              </p>
+            </div>
+          )}
           {subtitle && (
             <div className="flex items-center gap-1.5 text-xs text-gray-400">
               <span className="w-1.5 h-1.5 rounded-full bg-[#7c3aed] inline-block" />
