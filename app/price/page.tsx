@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PriceChart from '@/components/PriceChart';
 
 type SpecMatch = { manufacturer: string; model: string; badge: string; count: number };
@@ -16,7 +17,16 @@ type Listing = {
 };
 
 export default function PricePage() {
+  return (
+    <Suspense fallback={null}>
+      <PricePageInner />
+    </Suspense>
+  );
+}
+
+function PricePageInner() {
   const API = process.env.NEXT_PUBLIC_API_ENDPOINT;
+  const searchParams = useSearchParams();
 
   const [query, setQuery] = useState('');
   const [step, setStep] = useState<'search' | 'listings'>('search');
@@ -26,6 +36,21 @@ export default function PricePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [searched, setSearched] = useState(false);
   const [mileageInput, setMileageInput] = useState('');
+
+  // 대시보드 등에서 ?manufacturer=&model=&badge=&mileage= 로 딥링크하면 검색 단계를 건너뛰고
+  // 바로 그 등급의 그래프를 보여준다.
+  useEffect(() => {
+    const manufacturer = searchParams.get('manufacturer');
+    const model = searchParams.get('model');
+    if (!manufacturer || !model) return;
+    const badge = searchParams.get('badge') || '';
+    const mileageParam = searchParams.get('mileage');
+    if (mileageParam) setMileageInput(mileageParam);
+    setQuery(`${manufacturer} ${model}`);
+    setSearched(true);
+    handleSelect({ manufacturer, model, badge, count: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = async () => {
     if (!query.trim()) return;
