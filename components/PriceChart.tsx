@@ -140,7 +140,7 @@ export default function PriceChart({
             const anchor = i === 0 ? 'start' : i === xTicks.length - 1 ? 'end' : 'middle';
             return (
               <text key={i} x={sx(t)} y={H - PAD_B + 19} fontSize={11} fill="#c1c5cc" textAnchor={anchor}>
-                {Math.round(t)}만km
+                {t === 0 ? '0km' : `${Math.round(t)}만km`}
               </text>
             );
           })}
@@ -154,7 +154,10 @@ export default function PriceChart({
               />
               <circle cx={sx(targetX)} cy={sy(targetY)} r={6} fill="#2563eb" stroke="#fff" strokeWidth={2} />
               <text x={sx(targetX)} y={H - PAD_B + 19} fontSize={11} fontWeight={700} fill="#2563eb" textAnchor="middle">
-                내차 {Math.round(targetX)}만km
+                내차 {(() => {
+                  const r = Math.round(targetX * 10) / 10;
+                  return Number.isInteger(r) ? r : r.toFixed(1);
+                })()}만km
               </text>
             </>
           )}
