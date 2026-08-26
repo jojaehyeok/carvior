@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { CHANNEL_BUTTON_VISIBILITY_EVENT } from '@/components/ChannelTalk';
+import { isApprovedDealer } from '@/lib/dealerAccess';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
 const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder: '(주)카비어' };
@@ -107,12 +108,15 @@ export default function InspectionCheckoutPage() {
   const [selectedTime, setSelectedTime] = useState('');
   const [carOrigin, setCarOrigin]       = useState<CarOrigin>('DOMESTIC');
   const [isMemberPromo, setIsMemberPromo] = useState(false);
-  // 딜러 전용가라 URL을 안다고 해도 승인된 딜러 계정이 아니면 적용 안 되게 막음
+  // 딜러 전용가라 URL을 안다고 해도 승인된 딜러 계정이 아니면 적용 안 되게 막음 —
+  // 딜러 소개페이지(AuctionAccessGate)와 동일한 기준(isApprovedDealer)을 써야 함.
+  // 예전엔 role==='dealer'만 봐서 dealerStatus 승인 전 계정/운영자 테스트 계정에서
+  // 소개페이지는 통과되는데 정작 할인가는 적용 안 되는 불일치가 있었음.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('promo') === 'member' && sessionUser?.role === 'dealer') {
+    if (new URLSearchParams(window.location.search).get('promo') === 'member' && isApprovedDealer(session)) {
       setIsMemberPromo(true);
     }
-  }, [sessionUser?.role]);
+  }, [session]);
   const pricingTable = isMemberPromo ? MEMBER_PRICING : CAR_TYPE_PRICING;
   // 네이버페이 실결제 흐름을 처음부터 끝까지 검증할 전용 테스트 계정 — 이 계정으로 로그인했을 때만
   // 결제 금액을 1원으로 낮춰서, 실제 결제 승인/DB 반영까지 돈을 아끼며 반복 테스트할 수 있게 함.

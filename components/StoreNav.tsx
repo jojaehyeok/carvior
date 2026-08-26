@@ -156,13 +156,30 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
             );
           })}
           {session ? (
-            <div className="px-6 py-4 flex items-center justify-between border-b border-white/5">
-              <div>
+            <>
+              <div className="px-6 py-4 border-b border-gray-100">
                 <p className="text-sm text-gray-900 font-semibold">{user?.name}</p>
                 <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
-              <button onClick={() => signOut({ callbackUrl: '/' })} className="text-xs text-red-400 font-semibold">로그아웃</button>
-            </div>
+              <button
+                onClick={() => { setOpen(false); router.push('/mypage'); }}
+                className="w-full flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
+              >
+                마이페이지
+              </button>
+              <button
+                onClick={() => { setOpen(false); router.push('/mypage/settings'); }}
+                className="w-full flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
+              >
+                계정 설정
+              </button>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="w-full flex items-center px-6 py-4 text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors"
+              >
+                로그아웃
+              </button>
+            </>
           ) : (
             <Link href="/login" onClick={() => setOpen(false)}
               className="flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50">
