@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import AuctionAccessGate from '@/components/AuctionAccessGate';
 
 function openChannelTalk() {
   (window as any).ChannelIO?.('show');
@@ -119,10 +118,11 @@ function DealerInspectionContent() {
   );
 }
 
+// 이 페이지는 "제휴 검차 서비스"를 알리는 마케팅 소개 페이지다 — 예전엔 AuctionAccessGate로
+// 감싸져 있어서, 승인 전(dealerStatus=pending) 딜러가 마이페이지 배너를 누르면 소개 내용은
+// 못 보고 딜러 승인 신청 화면으로 넘어갔다. 정작 서비스를 알려야 할 대상이 막히는 구조라
+// 게이트를 뗀다. 다른 /marketing/* 페이지들도 전부 게이트 없이 공개돼 있어 그 기준과 맞춘다.
+// 실제 신청은 CTA의 /inspection 결제 흐름에서 처리되므로 여기서 막을 이유가 없다.
 export default function DealerInspectionMarketingPage() {
-  return (
-    <AuctionAccessGate>
-      <DealerInspectionContent />
-    </AuctionAccessGate>
-  );
+  return <DealerInspectionContent />;
 }
