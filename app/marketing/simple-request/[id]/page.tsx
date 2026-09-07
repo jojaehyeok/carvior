@@ -112,12 +112,38 @@ export default function SimpleRequestByCompanyPage() {
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // 타이핑할 때마다 서버를 때리지 않도록 300ms 쉬었을 때만 조회한다.
+    const fetchDealerSuggests = useCallback((keyword: string) => {
+        if (!keyword.trim() || !companyId) {
+            setDealerSuggests([]);
+            return;
+        }
+        fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/request/dealer-suggest?source=${encodeURIComponent(companyId)}&q=${encodeURIComponent(keyword)}`)
+            .then(r => (r.ok ? r.json() : []))
+            .then(list => {
+                setDealerSuggests(Array.isArray(list) ? list : []);
+                setShowDealerSuggests(true);
+            })
+            .catch(() => setDealerSuggests([]));
+    }, [companyId]);
+
+    useEffect(() => {
+        const t = setTimeout(() => fetchDealerSuggests(formData.dealerName), 300);
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formData.dealerName]);
     const [carError, setCarError] = useState<string | null>(null);
     const [privacyAgreed, setPrivacyAgreed] = useState(false);
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
     // 다음 우편번호 검색은 도로명주소만 색인돼 있어 "벤츠강남전시장" 같은 전시장/상호명으로는
     // 검색이 안 됨 — 카카오 로컬 키워드검색(대시보드 지도 화면과 동일 REST 키)으로 교체
+    // 딜러 자동완성 — 같은 딜러가 반복해서 접수하는데 매번 연락처를 찾아 입력해야 해서,
+    // 지난 접수 기록에서 이름으로 찾아 연락처까지 한 번에 채워준다.
+    const [dealerSuggests, setDealerSuggests] = useState<{ dealerName: string; contact: string; count: number }[]>([]);
+    const [showDealerSuggests, setShowDealerSuggests] = useState(false);
+
     const [placeQuery, setPlaceQuery] = useState('');
     const [placeResults, setPlaceResults] = useState<{ name: string; address: string }[]>([]);
     const [showPlaceResults, setShowPlaceResults] = useState(false);
@@ -373,16 +399,48 @@ export default function SimpleRequestByCompanyPage() {
                     <div className="bg-white rounded-2xl p-6">
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">03 · 딜러 정보</p>
                         <div className="space-y-4">
-                            <input
-                                required
-                                name="dealerName"
-                                placeholder="딜러 성함 또는 상사명"
-                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
-                                onChange={handleChange}
-                            />
+                            <div className="relative">
+                                <input
+                                    required
+                                    name="dealerName"
+                                    autoComplete="off"
+                                    value={formData.dealerName}
+                                    placeholder="딜러 성함 또는 상사명"
+                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    onChange={handleChange}
+                                    onFocus={() => dealerSuggests.length > 0 && setShowDealerSuggests(true)}
+                                    // 목록을 누르는 순간 blur가 먼저 일어나 목록이 사라지면 선택이 안 된다 —
+                                    // 클릭이 처리될 시간을 주고 닫는다.
+                                    onBlur={() => setTimeout(() => setShowDealerSuggests(false), 150)}
+                                />
+                                {showDealerSuggests && dealerSuggests.length > 0 && (
+                                    <ul className="absolute z-20 left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-xl shadow-lg overflow-hidden max-h-64 overflow-y-auto">
+                                        {dealerSuggests.map((d) => (
+                                            <li key={`${d.dealerName}-${d.contact}`}>
+                                                <button
+                                                    type="button"
+                                                    className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 transition-colors"
+                                                    onClick={() => {
+                                                        // 이름과 연락처를 한 번에 채운다 — 이게 이 기능의 목적이다.
+                                                        setFormData(prev => ({ ...prev, dealerName: d.dealerName, contact: d.contact }));
+                                                        setShowDealerSuggests(false);
+                                                    }}
+                                                >
+                                                    <span className="block text-sm font-semibold text-zinc-900">{d.dealerName}</span>
+                                                    <span className="block text-xs text-zinc-500 mt-0.5">
+                                                        {d.contact}
+                                                        {d.count > 1 && <span className="ml-2 text-zinc-400">이전 접수 {d.count}건</span>}
+                                                    </span>
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                             <input
                                 type="tel"
                                 name="contact"
+                                value={formData.contact}
                                 placeholder="딜러 연락처 (선택 · - 제외)"
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
