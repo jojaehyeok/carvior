@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { clsx } from 'clsx';
 import PrivacyModal from '@/components/PrivacyModal';
@@ -143,6 +143,9 @@ export default function SimpleRequestByCompanyPage() {
     // 지난 접수 기록에서 이름으로 찾아 연락처까지 한 번에 채워준다.
     const [dealerSuggests, setDealerSuggests] = useState<{ dealerName: string; contact: string; count: number }[]>([]);
     const [showDealerSuggests, setShowDealerSuggests] = useState(false);
+    // 번호 없이 접수됐던 딜러를 고르면 연락처 칸으로 바로 커서를 옮긴다 — 그 자리에서 번호를
+    // 넣으면 이번 접수와 함께 저장돼, 다음부터는 자동완성이 번호까지 채워준다.
+    const contactInputRef = useRef<HTMLInputElement>(null);
 
     const [placeQuery, setPlaceQuery] = useState('');
     const [placeResults, setPlaceResults] = useState<{ name: string; address: string }[]>([]);
@@ -422,13 +425,19 @@ export default function SimpleRequestByCompanyPage() {
                                                     className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 transition-colors"
                                                     onClick={() => {
                                                         // 이름과 연락처를 한 번에 채운다 — 이게 이 기능의 목적이다.
-                                                        setFormData(prev => ({ ...prev, dealerName: d.dealerName, contact: d.contact }));
+                                                        // 번호 없는 후보면 이름만 채우고, 이미 입력해둔 연락처는 지우지 않는다.
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            dealerName: d.dealerName,
+                                                            contact: d.contact || prev.contact,
+                                                        }));
                                                         setShowDealerSuggests(false);
+                                                        if (!d.contact) setTimeout(() => contactInputRef.current?.focus(), 0);
                                                     }}
                                                 >
                                                     <span className="block text-sm font-semibold text-zinc-900">{d.dealerName}</span>
                                                     <span className="block text-xs text-zinc-500 mt-0.5">
-                                                        {d.contact}
+                                                        {d.contact || <span className="text-zinc-400">번호 없음 · 선택 후 직접 입력</span>}
                                                         {d.count > 1 && <span className="ml-2 text-zinc-400">이전 접수 {d.count}건</span>}
                                                     </span>
                                                 </button>
@@ -438,6 +447,7 @@ export default function SimpleRequestByCompanyPage() {
                                 )}
                             </div>
                             <input
+                                ref={contactInputRef}
                                 type="tel"
                                 name="contact"
                                 value={formData.contact}
