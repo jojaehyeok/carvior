@@ -48,15 +48,15 @@ const SKIN_LAYERS: Layer[] = [
 // 골격(내판) — 겉에서 안 보이는 차체 구조.
 // 한 그림이 여러 진단 부위를 아우르는 경우가 있어서(예: 프런트 엔드 구조 = 라디에이터
 // 서포트 + 사이드멤버 + 크로스멤버) parts에 묶어서 넣는다.
+//
+// 인사이드 패널은 받은 그림이 4장이었는데 전부 같은 부위라, 한 장만 쓰고 나머지는 지웠다.
+// 조수석은 이 그림을 좌우 반전해서 쓰므로 좌/우를 따로 둘 필요가 없다.
 const FRAME_LAYERS: Layer[] = [
   { parts: [19, 22, 23, 27], src: `${A}/frame-front-member.png`,     label: '프런트 사이드멤버·라디에이터 서포트' },
-  { parts: [21, 24, 25, 26], src: `${A}/frame-front-wheelhouse.png`, label: '프런트 휠하우스·인사이드 패널' },
-  { parts: [28],             src: `${A}/frame-dash.png`,             label: '대쉬 패널' },
-  { parts: [2, 12],          src: `${A}/frame-a-pillar.png`,         label: 'A필러' },
-  { parts: [4, 15],          src: `${A}/frame-b-pillar.png`,         label: 'B필러' },
-  { parts: [6, 17],          src: `${A}/frame-c-pillar.png`,         label: 'C필러' },
-  { parts: [9],              src: `${A}/frame-roof-rail.png`,        label: '루프' },
-  { parts: [31, 32, 34, 35], src: `${A}/frame-rear-wheelhouse.png`,  label: '리어 휠하우스·리어 사이드멤버' },
+  { parts: [25, 26, 31, 35], src: `${A}/frame-front-wheelhouse.png`, label: '휠하우스' },
+  { parts: [21, 24],         src: `${A}/frame-inside-panel.png`,     label: '인사이드 패널' },
+  { parts: [20],             src: `${A}/frame-front-panel.png`,      label: '프런트 패널' },
+  { parts: [32, 34],         src: `${A}/frame-rear-wheelhouse.png`,  label: '리어 사이드멤버' },
 ];
 
 type Side = 'driver' | 'passenger';
