@@ -38,23 +38,23 @@ const SYMBOL_STYLE: Record<string, { label: string; bg: string }> = {
   P: { label: '도장필요',  bg: '#ec4899' },
 };
 
-// 그림 위 핀 위치(운전석 이미지 open-left.png 기준 %). 조수석은 x를 100에서 뺀다.
-// 이미지가 3:2(1536×1024)이고 컨테이너도 aspect-[3/2] + object-contain이라 %가 그대로 맞는다.
-// 그림을 바꾸면 이 값들도 같이 다시 잡아야 한다.
+// 그림 위 핀 위치(운전석 기준 %). 조수석은 x를 100에서 뺀다.
+// 기준 이미지는 close-all.png(1448×1086, 4:3)이고, 열린 그림들도 차 위치가 같아서
+// 그림이 바뀌어도 이 좌표가 그대로 맞는다. 컨테이너도 aspect-[4/3] + object-contain.
 const SLOT_POS: Record<string, { x: number; y: number }> = {
-  frontPanel:  { x: 7,  y: 63 },  // 프런트 패널(그릴 주변)
-  hood:        { x: 24, y: 33 },  // 열려 있는 후드
-  frontFender: { x: 33, y: 57 },  // 앞휀더(앞바퀴 위)
-  aPillar:     { x: 45, y: 30 },  // A필러(앞유리 옆)
-  frontDoor:   { x: 60, y: 62 },  // 열려 있는 앞도어
-  sideSill:    { x: 70, y: 80 },  // 사이드실(문 아래 문턱)
-  bPillar:     { x: 73, y: 40 },  // B필러
-  rearDoor:    { x: 81, y: 55 },  // 열려 있는 뒷도어
-  cPillar:     { x: 88, y: 32 },  // C필러
-  quarter:     { x: 91, y: 52 },  // 쿼터패널(뒷바퀴 위)
-  roof:        { x: 63, y: 18 },  // 루프
-  trunk:       { x: 86, y: 14 },  // 열려 있는 트렁크 리드
-  rearPanel:   { x: 96, y: 41 },  // 리어 패널
+  frontPanel:  { x: 11, y: 62 },  // 프런트 패널(그릴)
+  hood:        { x: 29, y: 50 },  // 후드
+  frontFender: { x: 45, y: 55 },  // 앞휀더(앞바퀴 위)
+  aPillar:     { x: 47, y: 35 },  // A필러(앞유리 옆)
+  frontDoor:   { x: 60, y: 52 },  // 앞도어
+  sideSill:    { x: 68, y: 66 },  // 사이드실(문 아래 문턱)
+  bPillar:     { x: 68, y: 37 },  // B필러
+  rearDoor:    { x: 75, y: 50 },  // 뒷도어
+  cPillar:     { x: 82, y: 38 },  // C필러
+  quarter:     { x: 88, y: 50 },  // 쿼터패널(뒷바퀴 위)
+  roof:        { x: 62, y: 27 },  // 루프
+  trunk:       { x: 91, y: 42 },  // 트렁크 리드
+  rearPanel:   { x: 96, y: 50 },  // 리어 패널
 };
 
 // 부위 인덱스 → 그림 슬롯(외판). 여기 없는 인덱스는 차체 골격이다.
@@ -91,11 +91,11 @@ const FRAME_ZONE: Record<number, Zone> = {
   35: 'rear',   // 조수석 리어 휠하우스
 };
 
-// 열린 그림 기준 — 엔진룸 / 실내 바닥 / 트렁크 안쪽
+// 차 앞쪽 / 실내 바닥 / 뒤쪽 — 골격은 겉에서 안 보이므로 구역만 가리킨다
 const ZONE_POS: Record<Zone, { x: number; y: number }> = {
-  front:  { x: 26, y: 46 },
-  center: { x: 66, y: 70 },
-  rear:   { x: 90, y: 26 },
+  front:  { x: 27, y: 62 },
+  center: { x: 66, y: 60 },
+  rear:   { x: 90, y: 58 },
 };
 
 const ZONE_LABEL: Record<Zone, string> = {
@@ -120,17 +120,28 @@ interface Props {
   reportHref?: string;
 }
 
-// 손상이 있으면 문·후드·트렁크가 열린 그림을 쓴다 — 골격 손상을 가리키려면 엔진룸과
-// 트렁크 안쪽이 보여야 하고, 외판 손상도 문이 열려 있어야 면이 드러난다.
-// 손상이 하나도 없으면 닫힌 그림.
+// 손상난 부위가 열려 있는 그림을 골라서 보여준다.
 //
-// ⚠ "손상난 패널만 열고 나머지는 닫기"는 이 그림으로는 못 한다. 그러려면 닫힌 차를 배경으로
-// 후드/앞문/뒷문/트렁크 각각의 "열린 상태" 투명 PNG 4장을 겹쳐야 한다(조합이 16가지라
-// 통이미지로는 불가능). 레이어 4장이 준비되면 여기서 겹치도록 바꾸면 된다.
-const IMAGES = {
-  driver:    { open: '/open-left.png',  closed: '/close-left.png' },
-  passenger: { open: '/open-right.png', closed: '/close-right.png' },
-};
+// 쓰는 이미지는 전부 1448×1086(4:3)이고 차 위치가 픽셀 단위로 같아서, 그림을 바꿔도
+// 차가 움직이지 않는다(= 핀 좌표를 한 벌만 관리하면 된다).
+// 조수석 면은 이 그림들을 CSS로 좌우 반전해서 쓴다.
+//
+// ⚠ 한계: 이 파일들은 "부위만 잘라낸 투명 레이어"가 아니라 통이미지라서, 두 부위를 동시에
+// 열 수 없다(앞문 이미지는 뒷문이 닫힌 상태를 이미 포함하고 있어서 겹치면 서로 덮어버림).
+// 그래서 아래 우선순위로 한 장만 고른다. 동시에 열려면 문짝만 오려낸 투명 PNG가 필요하다.
+// ⚠ open-hood.png는 다른 이미지들과 확대 비율이 달라서(차 앞부분만 크게 잡힘) 쓰지 않았다.
+//   같은 구도로 다시 뽑으면 후드도 여기에 추가할 수 있다.
+const IMG_CLOSED     = '/close-all.png';
+const IMG_FRONT_DOOR = '/open-frontdoor.png';
+const IMG_REAR_DOOR  = '/open-backdoor1.png';
+const IMG_TRUNK      = '/open-backdoor.png';
+
+// 열린 그림을 고를 우선순위 — 앞문 > 뒷문 > 트렁크
+const OPEN_BY_PART: { parts: number[]; src: string }[] = [
+  { parts: [1, 13], src: IMG_FRONT_DOOR },  // 운전석/조수석 앞도어
+  { parts: [5, 16], src: IMG_REAR_DOOR },   // 운전석/조수석 뒷도어
+  { parts: [10],    src: IMG_TRUNK },       // 트렁크 리드
+];
 
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
   const [side, setSide] = useState<Side>('driver');
@@ -177,8 +188,13 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
 
   const selectedPart = selected != null ? damaged.find(p => p.index === selected) : null;
   const openedGroup = zoneOpen ? zoneGroups.find(g => g.zone === zoneOpen) : null;
-  // 손상이 있으면 열린 그림(엔진룸·트렁크가 보여야 골격을 가리킬 수 있다), 없으면 닫힌 그림
-  const imageSrc = IMAGES[side][damaged.length > 0 ? 'open' : 'closed'];
+
+  // 이번 면에서 손상난 부위 중 "열 수 있는" 게 있으면 그 부위가 열린 그림을 쓴다.
+  const damagedIdx = new Set(
+    damaged.filter(p => { const o = partSide(p.index); return !o || o === side; }).map(p => p.index),
+  );
+  const imageSrc =
+    OPEN_BY_PART.find(o => o.parts.some(i => damagedIdx.has(i)))?.src ?? IMG_CLOSED;
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -229,9 +245,16 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
         </div>
 
         {/* 차량 그림 + 핀 */}
-        <div className="relative w-full aspect-[3/2] bg-white rounded-xl overflow-hidden">
+        <div className="relative w-full aspect-[4/3] bg-white rounded-xl overflow-hidden">
+          {/* 조수석 면은 같은 그림을 좌우 반전해서 쓴다(핀 x도 100에서 뺀 값을 쓰므로 서로 맞는다) */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={imageSrc} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
+          <img
+            src={imageSrc}
+            alt="차량 도면"
+            className="w-full h-full object-contain"
+            style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+            draggable={false}
+          />
 
           {pins.map(p => {
             const sym = p.symbols[0];
