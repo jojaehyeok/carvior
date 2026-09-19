@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 
 import { buildDiagRows, buildDiagSections } from '@/lib/inspectionSummary';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
+import PhotoGallery from '@/components/PhotoGallery';
 import BidModal from '@/components/auction/BidModal';
 import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
 
@@ -66,6 +67,7 @@ function AuctionDetailContent() {
   const [item, setItem] = useState<AuctionItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
@@ -264,11 +266,20 @@ function AuctionDetailContent() {
                 )}
               </div>
 
-              {/* 사진 카운터 */}
+              {/* 사진 카운터 — 누르면 카테고리별 전체보기 갤러리 */}
               {hasPhotos && (
-                <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                  {activePhoto + 1} / {totalPhotos}
-                </div>
+                <button
+                  onClick={() => setGalleryOpen(true)}
+                  className="absolute bottom-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-colors"
+                >
+                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                  사진 {totalPhotos}장 전체보기
+                </button>
               )}
 
               {/* 이전/다음 */}
@@ -676,6 +687,15 @@ function AuctionDetailContent() {
           </div>
         </div>
       )}
+
+      {/* 카테고리별 전체보기 갤러리 */}
+      <PhotoGallery
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        photos={item.photos}
+        title={`${item.titleKo ?? ''} ${item.carNumber ?? ''}`.trim() || undefined}
+        noticeRows={buildDiagRows(item.inspectionData, !!item.accident)}
+      />
     </div>
   );
 }
