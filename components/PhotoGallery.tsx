@@ -14,7 +14,8 @@ const TAB_GROUPS: { id: string; label: string; keys: string[] }[] = [
   { id: 'interior', label: '실내', keys: ['interior', 'dashboard'] },
   { id: 'engine', label: '엔진룸', keys: ['engine'] },
   { id: 'undercarriage', label: '하부', keys: ['undercarriage'] },
-  { id: 'option', label: '옵션', keys: ['extra', 'extraMemo'] },
+  // extraMemo(기타사진)는 스캐너·도막측정기 화면 같은 진단 과정 사진이라 매물 화면에선 제외한다.
+  { id: 'option', label: '옵션', keys: ['extra'] },
   { id: 'damage', label: '고지사항', keys: ['damage'] },
 ];
 
@@ -27,7 +28,6 @@ const KEY_LABEL: Record<string, string> = {
   engine: '엔진룸',
   undercarriage: '하부 & 누유',
   extra: '옵션',
-  extraMemo: '기타',
   damage: '내외판 데미지',
 };
 
