@@ -1,12 +1,15 @@
 'use client';
 
-// 매물 상세 "차량 상태" — 차량 일러스트 위에 손상난 외판을 색으로 칠해서 보여준다.
+// 매물 상세 "차량 상태" — 손상난 부위를 차 그림으로 보여준다.
 //
-// CARVIOR_vehicle_assets 팩의 base-car.png 위에 패널별 오버레이(*-replace.png)를 겹친다.
-// 오버레이는 해당 패널 모양만 들어있는 투명 PNG라 여러 장을 동시에 올려도 서로 안 덮는다.
-// 원본 오버레이가 주황색이라, 교환(X)은 CSS 필터로 빨강으로 돌려서 구분한다.
+// CARVIOR_vehicle_assets의 01~12 세트만 쓴다(차가 오른쪽을 보는 구도로 서로 정렬됨).
+//  - 11_base-car-closed        : 아무 데도 손상 없을 때의 기본 그림
+//  - 01/02                     : 그 패널을 떼어내 골격이 드러난 그림(교환급 손상 표현)
+//  - 03/04/10                  : 그 문/후드를 떼거나 연 그림
+//  - 05~09                     : 부위별 부품 그림(목록 썸네일용 — 차 위에 얹는 용도가 아님)
 //
-// 그림은 한쪽 면만 보이므로 조수석은 전체를 좌우 반전해서 쓴다.
+// ⚠ 01~04, 10은 "차 전체" 그림이라 겹칠 수 없다(겹치면 서로 덮음).
+//   그래서 한 번에 한 부위만 보여주고, 목록에서 눌러 부위를 바꾸는 방식으로 만든다.
 
 import { useState } from 'react';
 
@@ -30,23 +33,16 @@ const SYMBOL_LABEL: Record<string, string> = {
   A: '흠집', U: '요철', T: '깨짐', C: '부식', P: '도장필요',
 };
 
-const ASSETS = '/CARVIOR_vehicle_assets';
-const BASE_CAR = `${ASSETS}/base-car.png`;
+const A = '/CARVIOR_vehicle_assets';
+const BASE_CAR = `${A}/11_base-car-closed.png`;
 
-// 그림에 칠할 수 있는 외판 — 부위 인덱스 → 오버레이 파일.
-// 운전석/조수석 같은 부위는 같은 파일을 쓰고, 조수석일 때 전체를 좌우 반전한다.
-//
-// ⚠ 오버레이 파일 조건: base-car.png와 같은 1448×1086이고, 그 패널이 차에서 실제로
-//   있는 자리에 그려져 있고 나머지는 전부 투명이어야 한다(그래서 파일 하나가 캔버스의
-//   4~8%만 차지한다). 부위를 캔버스 가운데 크게 그린 "부품 그림"은 여기 쓸 수 없다.
-//
-// 쿼터패널은 받은 파일이 조각만 들어있어서(캔버스의 0.2%) 제외했다.
-// 조건에 맞는 파일이 오면 아래에 한 줄만 추가하면 된다.
-const PANEL_OVERLAY: { parts: number[]; src: string; label: string }[] = [
-  { parts: [8],      src: `${ASSETS}/hood-replace.png`,          label: '후드' },
-  { parts: [0, 11],  src: `${ASSETS}/front-fender-replace.png`,  label: '앞휀더' },
-  { parts: [1, 13],  src: `${ASSETS}/front-door-replace.png`,    label: '앞도어' },
-  { parts: [5, 16],  src: `${ASSETS}/rear-door-replace.png`,     label: '뒷도어' },
+// 부위별로 보여줄 차 그림 + 부품 썸네일
+const PART_VIEW: { parts: number[]; label: string; car: string; thumb: string }[] = [
+  { parts: [8],     label: '후드',      car: `${A}/10_hood-open.png`,                      thumb: `${A}/08_hood-replace-overlay.png` },
+  { parts: [0, 11], label: '앞휀더',    car: `${A}/01_front-fender-structure-exposed.png`, thumb: `${A}/09_front-fender-replace-overlay.png` },
+  { parts: [1, 13], label: '앞도어',    car: `${A}/04_front-door-removed.png`,             thumb: `${A}/07_front-door-replace-overlay.png` },
+  { parts: [5, 16], label: '뒷도어',    car: `${A}/03_rear-door-removed.png`,              thumb: `${A}/06_rear-door-replace-overlay.png` },
+  { parts: [7, 18], label: '쿼터패널',  car: `${A}/02_quarter-panel-structure-exposed.png`, thumb: `${A}/05_quarter-panel-replace-overlay.png` },
 ];
 
 type Side = 'driver' | 'passenger';
@@ -67,9 +63,9 @@ interface Props {
 
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
   const [side, setSide] = useState<Side>('driver');
+  const [picked, setPicked] = useState<string | null>(null);
 
-  // 앱 입력은 B(판금)와 W(용접)를 나누지만 딜러가 구분하기 어려워해서 표시에서만 합친다
-  // (리포트 페이지와 같은 처리).
+  // 앱 입력은 B(판금)와 W(용접)를 나누지만 딜러가 구분하기 어려워해서 표시에서만 합친다.
   const damaged = (damages ?? [])
     .map((syms, i) => ({
       index: i,
@@ -78,24 +74,25 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
     }))
     .filter(p => p.symbols.length > 0);
 
-  // 이번 면에 해당하는 손상만
   const onThisSide = damaged.filter(p => {
     const owner = partSide(p.index);
     return !owner || owner === side;
   });
 
-  // 칠할 오버레이 — 교환(X)이 섞여 있으면 빨강, 아니면 원본 주황 그대로.
-  const overlays = PANEL_OVERLAY
-    .map(o => {
-      const hit = onThisSide.find(p => o.parts.includes(p.index));
-      if (!hit) return null;
-      return { ...o, replace: hit.symbols.includes('X'), part: hit };
+  // 그림으로 보여줄 수 있는 손상 부위
+  const views = PART_VIEW
+    .map(v => {
+      const hit = onThisSide.find(p => v.parts.includes(p.index));
+      return hit ? { ...v, part: hit } : null;
     })
-    .filter((o): o is NonNullable<typeof o> => o !== null);
+    .filter((v): v is NonNullable<typeof v> => v !== null);
 
-  // 오버레이가 없는 외판·골격은 목록으로만 보여준다.
-  const overlayParts = new Set(PANEL_OVERLAY.flatMap(o => o.parts));
-  const listed = damaged.filter(p => !overlayParts.has(p.index));
+  // 고른 게 이번 면에 없으면 첫 번째로 되돌린다(면 전환 시 빈 화면 방지).
+  const active = views.find(v => v.label === picked) ?? views[0] ?? null;
+
+  // 그림으로 못 보여주는 나머지 부위
+  const viewParts = new Set(PART_VIEW.flatMap(v => v.parts));
+  const listed = damaged.filter(p => !viewParts.has(p.index));
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -135,7 +132,7 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           {([['driver', '운전석'], ['passenger', '조수석']] as const).map(([s, label]) => (
             <button
               key={s}
-              onClick={() => setSide(s)}
+              onClick={() => { setSide(s); setPicked(null); }}
               className={`px-3 py-1.5 rounded-full text-xs font-black transition-colors ${
                 side === s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
@@ -145,57 +142,57 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           ))}
         </div>
 
-        {/* 차량 그림 + 패널 색칠 */}
-        <div
-          className="relative w-full aspect-[4/3]"
-          style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
-        >
+        {/* 차 그림 — 고른 부위를 떼어낸 상태로 보여준다 */}
+        <div className="relative w-full aspect-[4/3]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={BASE_CAR} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
-          {overlays.map(o => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={o.src}
-              src={o.src}
-              alt=""
-              title={`${o.part.name}: ${o.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}`}
-              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              // 원본 오버레이가 주황색이라, 교환은 색상을 빨강 쪽으로 돌려서 구분한다.
-              style={o.replace ? { filter: 'hue-rotate(-22deg) saturate(1.45)' } : undefined}
-              draggable={false}
-            />
-          ))}
+          <img
+            src={active?.car ?? BASE_CAR}
+            alt={active ? `${active.part.name} 손상 표시` : '차량 도면'}
+            className="w-full h-full object-contain"
+            style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+            draggable={false}
+          />
+          {active && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+              {active.part.name} · {active.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
+            </div>
+          )}
         </div>
 
-        {/* 범례 */}
-        {overlays.length > 0 && (
-          <div className="flex items-center gap-4 justify-center -mt-1 mb-3">
-            <span className="flex items-center gap-1.5 text-xs text-gray-500">
-              <span className="w-3 h-3 rounded-sm" style={{ background: '#e8502f' }} /> 교환
-            </span>
-            <span className="flex items-center gap-1.5 text-xs text-gray-500">
-              <span className="w-3 h-3 rounded-sm" style={{ background: '#f59b4b' }} /> 판금·도장 등
-            </span>
-          </div>
-        )}
-
-        {/* 색칠된 패널 요약 */}
-        {overlays.length > 0 && (
-          <div className="border border-gray-100 rounded-xl divide-y divide-gray-100 mb-3">
-            {overlays.map(o => (
-              <div key={o.src} className="flex items-center justify-between gap-3 px-3 py-2">
-                <span className="text-sm font-bold text-gray-800">{o.part.name}</span>
-                <span className={`text-sm font-black ${o.replace ? 'text-red-600' : 'text-amber-600'}`}>
-                  {o.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
-                </span>
-              </div>
-            ))}
+        {/* 부위 선택 — 그림이 한 번에 한 부위만 보여줘서, 눌러서 바꾼다 */}
+        {views.length > 0 && (
+          <div className="mt-2">
+            {views.length > 1 && (
+              <p className="text-xs text-gray-400 mb-2">부위를 누르면 그 부위를 떼어낸 그림으로 바뀝니다</p>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              {views.map(v => (
+                <button
+                  key={v.label}
+                  onClick={() => setPicked(v.label)}
+                  className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-colors ${
+                    active?.label === v.label
+                      ? 'border-gray-900 bg-gray-50'
+                      : 'border-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={v.thumb} alt="" className="w-12 h-12 object-contain shrink-0" draggable={false} />
+                  <span className="min-w-0">
+                    <span className="block text-xs font-bold text-gray-900 truncate">{v.part.name}</span>
+                    <span className={`block text-xs font-bold ${v.part.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
+                      {v.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
         {/* 그림에 없는 나머지 부위 — 필러·사이드실·루프·트렁크와 차체 골격 */}
         {listed.length > 0 && (
-          <div>
+          <div className="mt-4">
             <p className="text-xs font-black text-gray-400 mb-2">그림에 표시되지 않는 부위</p>
             <div className="border border-gray-100 rounded-xl divide-y divide-gray-100">
               {listed.map(p => (
