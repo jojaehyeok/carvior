@@ -1,13 +1,12 @@
 'use client';
 
-// 매물 상세 "차량 상태" — 차량 일러스트 위에 손상 부위 핀을 얹어 보여준다.
+// 매물 상세 "차량 상태" — 차량 일러스트 위에 손상난 외판을 색으로 칠해서 보여준다.
 //
-// 그림은 한쪽 옆면만 보이므로 운전석/조수석 두 장(좌우 대칭)을 쓰고, 핀 좌표는 한 벌만
-// 관리한다(조수석은 x를 100에서 뺀 값 = 좌우 반전).
+// CARVIOR_vehicle_assets 팩의 base-car.png 위에 패널별 오버레이(*-replace.png)를 겹친다.
+// 오버레이는 해당 패널 모양만 들어있는 투명 PNG라 여러 장을 동시에 올려도 서로 안 덮는다.
+// 원본 오버레이가 주황색이라, 교환(X)은 CSS 필터로 빨강으로 돌려서 구분한다.
 //
-// ⚠ 진단 부위 37개 중 그림에 찍을 수 있는 건 외판 19개뿐이다. 나머지 18개(사이드멤버,
-// 휠하우스, 크로스멤버, 대쉬패널, 플로어 등)는 차체 안쪽 골격이라 그림에 자리가 없어서
-// 아래 목록으로 따로 보여준다 — 딜러에게 가장 중요한 정보라 절대 빠뜨리면 안 된다.
+// 그림은 한쪽 면만 보이므로 조수석은 전체를 좌우 반전해서 쓴다.
 
 import { useState } from 'react';
 
@@ -26,87 +25,27 @@ export const PART_NAMES = [
   '조수석 리어 사이드멤버', '조수석 리어 휠하우스', '리어 패널',
 ];
 
-const SYMBOL_STYLE: Record<string, { label: string; bg: string }> = {
-  X: { label: '교환',      bg: '#ef4444' },
-  W: { label: '판금/용접', bg: '#3b82f6' },
-  B: { label: '판금/용접', bg: '#3b82f6' },
-  M: { label: '탈부착',    bg: '#eab308' },
-  A: { label: '흠집',      bg: '#3b82f6' },
-  U: { label: '요철',      bg: '#a855f7' },
-  T: { label: '깨짐',      bg: '#6b7280' },
-  C: { label: '부식',      bg: '#22c55e' },
-  P: { label: '도장필요',  bg: '#ec4899' },
+const SYMBOL_LABEL: Record<string, string> = {
+  X: '교환', W: '판금/용접', B: '판금/용접', M: '탈부착',
+  A: '흠집', U: '요철', T: '깨짐', C: '부식', P: '도장필요',
 };
 
-// 그림 위 핀 위치(운전석 기준 %). 조수석은 x를 100에서 뺀다.
-// 기준 이미지는 close-all.png(1448×1086, 4:3)이고, 열린 그림들도 차 위치가 같아서
-// 그림이 바뀌어도 이 좌표가 그대로 맞는다. 컨테이너도 aspect-[4/3] + object-contain.
-const SLOT_POS: Record<string, { x: number; y: number }> = {
-  frontPanel:  { x: 11, y: 62 },  // 프런트 패널(그릴)
-  hood:        { x: 29, y: 50 },  // 후드
-  frontFender: { x: 45, y: 55 },  // 앞휀더(앞바퀴 위)
-  aPillar:     { x: 47, y: 35 },  // A필러(앞유리 옆)
-  frontDoor:   { x: 60, y: 52 },  // 앞도어
-  sideSill:    { x: 68, y: 66 },  // 사이드실(문 아래 문턱)
-  bPillar:     { x: 68, y: 37 },  // B필러
-  rearDoor:    { x: 75, y: 50 },  // 뒷도어
-  cPillar:     { x: 82, y: 38 },  // C필러
-  quarter:     { x: 88, y: 50 },  // 쿼터패널(뒷바퀴 위)
-  roof:        { x: 62, y: 27 },  // 루프
-  trunk:       { x: 91, y: 42 },  // 트렁크 리드
-  rearPanel:   { x: 96, y: 50 },  // 리어 패널
-};
+const ASSETS = '/CARVIOR_vehicle_assets';
+const BASE_CAR = `${ASSETS}/base-car.png`;
 
-// 부위 인덱스 → 그림 슬롯(외판). 여기 없는 인덱스는 차체 골격이다.
-const PART_SLOT: Record<number, string> = {
-  0: 'frontFender', 1: 'frontDoor', 2: 'aPillar', 3: 'sideSill',
-  4: 'bPillar', 5: 'rearDoor', 6: 'cPillar', 7: 'quarter',
-  8: 'hood', 9: 'roof', 10: 'trunk',
-  11: 'frontFender', 12: 'aPillar', 13: 'frontDoor', 14: 'sideSill',
-  15: 'bPillar', 16: 'rearDoor', 17: 'cPillar', 18: 'quarter',
-  20: 'frontPanel', 36: 'rearPanel',
-};
-
-// 골격 부위는 겉에서 안 보이지만 어느 쪽 문제인지는 알려줘야 한다 —
-// 문이 열린 그림에서는 엔진룸·실내·트렁크 안쪽이 드러나므로 그 영역을 가리킨다.
-// 정확한 부품 위치가 아니라 "이 구역" 표시라서, 클릭하면 부위명을 그대로 보여준다.
-type Zone = 'front' | 'center' | 'rear';
-
-const FRAME_ZONE: Record<number, Zone> = {
-  19: 'front',  // 라디에이터 서포트
-  21: 'front',  // 운전석 인사이드 패널
-  22: 'front',  // 운전석 프런트 사이드멤버
-  23: 'front',  // 조수석 프런트 사이드멤버
-  24: 'front',  // 조수석 인사이드 패널
-  25: 'front',  // 운전석 프런트 휠하우스
-  26: 'front',  // 조수석 프런트 휠하우스
-  27: 'front',  // 크로스 멤버
-  28: 'center', // 대쉬 패널
-  29: 'center', // 플로어 패널
-  30: 'rear',   // 패키지 트레이
-  31: 'rear',   // 운전석 리어 휠하우스
-  32: 'rear',   // 운전석 리어 사이드멤버
-  33: 'rear',   // 트렁크 플로어 패널
-  34: 'rear',   // 조수석 리어 사이드멤버
-  35: 'rear',   // 조수석 리어 휠하우스
-};
-
-// 차 앞쪽 / 실내 바닥 / 뒤쪽 — 골격은 겉에서 안 보이므로 구역만 가리킨다
-const ZONE_POS: Record<Zone, { x: number; y: number }> = {
-  front:  { x: 27, y: 62 },
-  center: { x: 66, y: 60 },
-  rear:   { x: 90, y: 58 },
-};
-
-const ZONE_LABEL: Record<Zone, string> = {
-  front: '엔진룸 쪽 골격',
-  center: '실내 바닥 쪽 골격',
-  rear: '트렁크 쪽 골격',
-};
+// 그림에 칠할 수 있는 외판 — 부위 인덱스 → 오버레이 파일.
+// 운전석/조수석 같은 부위는 같은 파일을 쓰고, 조수석일 때 전체를 좌우 반전한다.
+const PANEL_OVERLAY: { parts: number[]; src: string; label: string }[] = [
+  { parts: [8],      src: `${ASSETS}/hood-replace.png`,          label: '후드' },
+  { parts: [0, 11],  src: `${ASSETS}/front-fender-replace.png`,  label: '앞휀더' },
+  { parts: [1, 13],  src: `${ASSETS}/front-door-replace.png`,    label: '앞도어' },
+  { parts: [5, 16],  src: `${ASSETS}/rear-door-replace.png`,     label: '뒷도어' },
+  { parts: [7, 18],  src: `${ASSETS}/quarter-panel-replace.png`, label: '쿼터패널' },
+];
 
 type Side = 'driver' | 'passenger';
 
-// 부위가 어느 면에 속하는지 — 이름으로 판별한다(후드·루프처럼 양쪽 공통인 것은 null).
+// 부위가 어느 면에 속하는지 — 후드처럼 양쪽 공통인 것은 null.
 function partSide(index: number): Side | null {
   const name = PART_NAMES[index] ?? '';
   if (name.startsWith('운전석')) return 'driver';
@@ -120,28 +59,8 @@ interface Props {
   reportHref?: string;
 }
 
-// 손상난 부위가 열려 있는 그림을 골라서 보여준다.
-//
-// 쓰는 이미지는 전부 1448×1086(4:3)이고 차 위치가 픽셀 단위로 같아서, 그림을 바꿔도
-// 차가 움직이지 않는다(= 핀 좌표를 한 벌만 관리하면 된다).
-// 조수석 면은 이 그림들을 CSS로 좌우 반전해서 쓴다.
-//
-// 닫힌 차(close-all.png)를 깔고, 손상난 부위의 "열림" 레이어만 그 위에 겹친다.
-// 레이어는 원본 open-*.png에서 닫힘 대비 달라지는 픽셀만 추출해서 만든 투명 PNG라
-// 서로 덮지 않는다 → 앞문·뒷문·트렁크를 동시에 열 수 있다.
-// (추출 스크립트는 scratchpad/make-layers.js — 이미지 교체 시 다시 돌리면 된다)
-const IMG_CLOSED = '/close-all.png';
-
-const OPEN_LAYERS: { parts: number[]; src: string }[] = [
-  { parts: [1, 13], src: '/layer-frontdoor.png' },  // 운전석/조수석 앞도어
-  { parts: [5, 16], src: '/layer-reardoor.png' },   // 운전석/조수석 뒷도어
-  { parts: [10],    src: '/layer-trunk.png' },      // 트렁크 리드
-];
-
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
   const [side, setSide] = useState<Side>('driver');
-  const [selected, setSelected] = useState<number | null>(null);
-  const [zoneOpen, setZoneOpen] = useState<Zone | null>(null);
 
   // 앱 입력은 B(판금)와 W(용접)를 나누지만 딜러가 구분하기 어려워해서 표시에서만 합친다
   // (리포트 페이지와 같은 처리).
@@ -153,42 +72,24 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
     }))
     .filter(p => p.symbols.length > 0);
 
-  // 이번 면에 그릴 수 있는 핀
-  const pins = damaged
-    .map(p => {
-      const slot = PART_SLOT[p.index];
-      if (!slot) return null;
-      const owner = partSide(p.index);
-      if (owner && owner !== side) return null;
-      const pos = SLOT_POS[slot];
-      if (!pos) return null;
-      return { ...p, x: side === 'passenger' ? 100 - pos.x : pos.x, y: pos.y };
+  // 이번 면에 해당하는 손상만
+  const onThisSide = damaged.filter(p => {
+    const owner = partSide(p.index);
+    return !owner || owner === side;
+  });
+
+  // 칠할 오버레이 — 교환(X)이 섞여 있으면 빨강, 아니면 원본 주황 그대로.
+  const overlays = PANEL_OVERLAY
+    .map(o => {
+      const hit = onThisSide.find(p => o.parts.includes(p.index));
+      if (!hit) return null;
+      return { ...o, replace: hit.symbols.includes('X'), part: hit };
     })
-    .filter((p): p is NonNullable<typeof p> => p !== null);
+    .filter((o): o is NonNullable<typeof o> => o !== null);
 
-  // 골격 손상을 구역별로 묶는다 — 한 구역에 여러 부위가 몰리면 핀이 겹치므로 개수로 표시.
-  const zoneGroups = (['front', 'center', 'rear'] as Zone[])
-    .map(zone => {
-      const parts = damaged.filter(p => {
-        if (FRAME_ZONE[p.index] !== zone) return false;
-        const owner = partSide(p.index);
-        return !owner || owner === side;
-      });
-      return { zone, parts, pos: ZONE_POS[zone] };
-    })
-    .filter(g => g.parts.length > 0);
-
-  // 그림에 표시할 수 없는 부위 = 외판 슬롯도 없고 골격 구역도 없는 것
-  const unpinned = damaged.filter(p => !PART_SLOT[p.index] && FRAME_ZONE[p.index] === undefined);
-
-  const selectedPart = selected != null ? damaged.find(p => p.index === selected) : null;
-  const openedGroup = zoneOpen ? zoneGroups.find(g => g.zone === zoneOpen) : null;
-
-  // 이번 면에서 손상난 부위에 해당하는 열림 레이어만 골라 겹친다.
-  const damagedIdx = new Set(
-    damaged.filter(p => { const o = partSide(p.index); return !o || o === side; }).map(p => p.index),
-  );
-  const openLayers = OPEN_LAYERS.filter(l => l.parts.some(i => damagedIdx.has(i)));
+  // 오버레이가 없는 외판·골격은 목록으로만 보여준다.
+  const overlayParts = new Set(PANEL_OVERLAY.flatMap(o => o.parts));
+  const listed = damaged.filter(p => !overlayParts.has(p.index));
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -228,7 +129,7 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           {([['driver', '운전석'], ['passenger', '조수석']] as const).map(([s, label]) => (
             <button
               key={s}
-              onClick={() => { setSide(s); setSelected(null); setZoneOpen(null); }}
+              onClick={() => setSide(s)}
               className={`px-3 py-1.5 rounded-full text-xs font-black transition-colors ${
                 side === s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
@@ -238,151 +139,65 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           ))}
         </div>
 
-        {/* 차량 그림 + 핀 */}
-        <div className="relative w-full aspect-[4/3] bg-white rounded-xl overflow-hidden">
-          {/* 조수석 면은 같은 그림을 좌우 반전해서 쓴다(핀 x도 100에서 뺀 값을 쓰므로 서로 맞는다) */}
+        {/* 차량 그림 + 패널 색칠 */}
+        <div
+          className="relative w-full aspect-[4/3]"
+          style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={IMG_CLOSED}
-            alt="차량 도면"
-            className="w-full h-full object-contain"
-            style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
-            draggable={false}
-          />
-          {/* 손상난 부위만 열린 상태로 겹친다 — 여러 개가 동시에 열릴 수 있다 */}
-          {openLayers.map(l => (
+          <img src={BASE_CAR} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
+          {overlays.map(o => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={l.src}
-              src={l.src}
+              key={o.src}
+              src={o.src}
               alt=""
+              title={`${o.part.name}: ${o.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}`}
               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+              // 원본 오버레이가 주황색이라, 교환은 색상을 빨강 쪽으로 돌려서 구분한다.
+              style={o.replace ? { filter: 'hue-rotate(-22deg) saturate(1.45)' } : undefined}
               draggable={false}
             />
           ))}
-
-          {pins.map(p => {
-            const sym = p.symbols[0];
-            const style = SYMBOL_STYLE[sym] ?? SYMBOL_STYLE.X;
-            const isSel = selected === p.index;
-            return (
-              <button
-                key={p.index}
-                type="button"
-                onClick={() => { setSelected(prev => (prev === p.index ? null : p.index)); setZoneOpen(null); }}
-                title={`${p.name}: ${p.symbols.map(s => SYMBOL_STYLE[s]?.label ?? s).join(', ')}`}
-                className="absolute w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black text-white -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110"
-                style={{
-                  left: `${p.x}%`,
-                  top: `${p.y}%`,
-                  backgroundColor: style.bg,
-                  border: isSel ? '2.5px solid #111827' : '1.5px solid rgba(255,255,255,0.9)',
-                  boxShadow: isSel ? '0 0 0 3px rgba(17,24,39,0.15)' : '0 1px 3px rgba(0,0,0,0.35)',
-                  zIndex: isSel ? 2 : 1,
-                }}
-              >
-                {sym}
-              </button>
-            );
-          })}
-
-          {/* 골격 구역 마커 — 외판 핀과 구분되게 점선 테두리 + 흰 배경 */}
-          {zoneGroups.map(g => {
-            const isSel = zoneOpen === g.zone;
-            return (
-              <button
-                key={g.zone}
-                type="button"
-                onClick={() => { setZoneOpen(prev => (prev === g.zone ? null : g.zone)); setSelected(null); }}
-                title={`${ZONE_LABEL[g.zone]} ${g.parts.length}곳`}
-                className="absolute px-2 h-6 rounded-full flex items-center gap-1 text-[11px] font-black -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110 bg-white"
-                style={{
-                  left: `${side === 'passenger' ? 100 - g.pos.x : g.pos.x}%`,
-                  top: `${g.pos.y}%`,
-                  color: '#b45309',
-                  border: isSel ? '2.5px solid #111827' : '2px dashed #b45309',
-                  boxShadow: isSel ? '0 0 0 3px rgba(17,24,39,0.15)' : '0 1px 3px rgba(0,0,0,0.25)',
-                  zIndex: isSel ? 2 : 1,
-                }}
-              >
-                골격 {g.parts.length}
-              </button>
-            );
-          })}
-
-          {pins.length === 0 && zoneGroups.length === 0 && damaged.length > 0 && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
-              이 면에 표기된 손상은 없습니다
-            </div>
-          )}
         </div>
 
-        {/* 선택한 골격 구역 상세 — 구역 안에 있는 부위를 그대로 나열한다 */}
-        {openedGroup && (
-          <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-            <p className="text-sm font-bold text-amber-900">{ZONE_LABEL[openedGroup.zone]}</p>
-            <p className="text-[11px] text-amber-700/70 mb-2">
-              겉에서 보이지 않는 부위라 정확한 위치가 아니라 해당 구역을 가리킵니다
-            </p>
-            <div className="space-y-1.5">
-              {openedGroup.parts.map(p => (
-                <div key={p.index} className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-gray-800">{p.name}</span>
-                  <div className="flex flex-wrap justify-end gap-1">
-                    {p.symbols.map(sym => (
-                      <span
-                        key={sym}
-                        className="text-xs px-2 py-0.5 rounded-full text-white font-medium"
-                        style={{ backgroundColor: SYMBOL_STYLE[sym]?.bg ?? '#6b7280' }}
-                      >
-                        {SYMBOL_STYLE[sym]?.label ?? sym}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+        {/* 범례 */}
+        {overlays.length > 0 && (
+          <div className="flex items-center gap-4 justify-center -mt-1 mb-3">
+            <span className="flex items-center gap-1.5 text-xs text-gray-500">
+              <span className="w-3 h-3 rounded-sm" style={{ background: '#e8502f' }} /> 교환
+            </span>
+            <span className="flex items-center gap-1.5 text-xs text-gray-500">
+              <span className="w-3 h-3 rounded-sm" style={{ background: '#f59b4b' }} /> 판금·도장 등
+            </span>
           </div>
         )}
 
-        {/* 선택한 핀 상세 */}
-        {selectedPart && (
-          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-            <p className="text-sm font-bold text-gray-900">{selectedPart.name}</p>
-            <div className="flex flex-wrap gap-1 mt-1.5">
-              {selectedPart.symbols.map(sym => (
-                <span
-                  key={sym}
-                  className="text-xs px-2 py-0.5 rounded-full text-white font-medium"
-                  style={{ backgroundColor: SYMBOL_STYLE[sym]?.bg ?? '#6b7280' }}
-                >
-                  {SYMBOL_STYLE[sym]?.label ?? sym}
+        {/* 색칠된 패널 요약 */}
+        {overlays.length > 0 && (
+          <div className="border border-gray-100 rounded-xl divide-y divide-gray-100 mb-3">
+            {overlays.map(o => (
+              <div key={o.src} className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="text-sm font-bold text-gray-800">{o.part.name}</span>
+                <span className={`text-sm font-black ${o.replace ? 'text-red-600' : 'text-amber-600'}`}>
+                  {o.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
                 </span>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* 그림에 못 찍는 부위 — 골격 손상이라 오히려 더 중요하다 */}
-        {unpinned.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-black text-gray-400 mb-2">차체 내부·골격 (그림에 표시되지 않음)</p>
+        {/* 그림에 없는 나머지 부위 — 필러·사이드실·루프·트렁크와 차체 골격 */}
+        {listed.length > 0 && (
+          <div>
+            <p className="text-xs font-black text-gray-400 mb-2">그림에 표시되지 않는 부위</p>
             <div className="border border-gray-100 rounded-xl divide-y divide-gray-100">
-              {unpinned.map(p => (
+              {listed.map(p => (
                 <div key={p.index} className="flex items-center justify-between gap-3 px-3 py-2">
                   <span className="text-sm text-gray-700">{p.name}</span>
-                  <div className="flex flex-wrap justify-end gap-1">
-                    {p.symbols.map(sym => (
-                      <span
-                        key={sym}
-                        className="text-xs px-2 py-0.5 rounded-full text-white font-medium"
-                        style={{ backgroundColor: SYMBOL_STYLE[sym]?.bg ?? '#6b7280' }}
-                      >
-                        {SYMBOL_STYLE[sym]?.label ?? sym}
-                      </span>
-                    ))}
-                  </div>
+                  <span className={`text-sm font-bold ${p.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
+                    {p.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
+                  </span>
                 </div>
               ))}
             </div>
@@ -390,7 +205,7 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
         )}
 
         {damaged.length === 0 && (
-          <p className="mt-4 py-5 text-sm font-medium text-center text-green-600 border border-green-100 bg-green-50 rounded-xl">
+          <p className="mt-2 py-5 text-sm font-medium text-center text-green-600 border border-green-100 bg-green-50 rounded-xl">
             표기된 손상이 없습니다
           </p>
         )}
