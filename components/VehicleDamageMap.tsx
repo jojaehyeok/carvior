@@ -35,12 +35,18 @@ const BASE_CAR = `${ASSETS}/base-car.png`;
 
 // 그림에 칠할 수 있는 외판 — 부위 인덱스 → 오버레이 파일.
 // 운전석/조수석 같은 부위는 같은 파일을 쓰고, 조수석일 때 전체를 좌우 반전한다.
+//
+// ⚠ 오버레이 파일 조건: base-car.png와 같은 1448×1086이고, 그 패널이 차에서 실제로
+//   있는 자리에 그려져 있고 나머지는 전부 투명이어야 한다(그래서 파일 하나가 캔버스의
+//   4~8%만 차지한다). 부위를 캔버스 가운데 크게 그린 "부품 그림"은 여기 쓸 수 없다.
+//
+// 쿼터패널은 받은 파일이 조각만 들어있어서(캔버스의 0.2%) 제외했다.
+// 조건에 맞는 파일이 오면 아래에 한 줄만 추가하면 된다.
 const PANEL_OVERLAY: { parts: number[]; src: string; label: string }[] = [
   { parts: [8],      src: `${ASSETS}/hood-replace.png`,          label: '후드' },
   { parts: [0, 11],  src: `${ASSETS}/front-fender-replace.png`,  label: '앞휀더' },
   { parts: [1, 13],  src: `${ASSETS}/front-door-replace.png`,    label: '앞도어' },
   { parts: [5, 16],  src: `${ASSETS}/rear-door-replace.png`,     label: '뒷도어' },
-  { parts: [7, 18],  src: `${ASSETS}/quarter-panel-replace.png`, label: '쿼터패널' },
 ];
 
 type Side = 'driver' | 'passenger';
