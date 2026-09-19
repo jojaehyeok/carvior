@@ -140,8 +140,9 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
         </div>
 
         {/* 차량 그림 + 패널 색칠 */}
+        {/* isolate: mix-blend-multiply가 이 박스 밖(페이지 배경)까지 섞이지 않게 가둔다 */}
         <div
-          className="relative w-full aspect-[4/3]"
+          className="relative w-full aspect-[4/3] isolate"
           style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -154,8 +155,15 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
               alt=""
               title={`${o.part.name}: ${o.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}`}
               className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-              // 원본 오버레이가 주황색이라, 교환은 색상을 빨강 쪽으로 돌려서 구분한다.
-              style={o.replace ? { filter: 'hue-rotate(-22deg) saturate(1.45)' } : undefined}
+              style={{
+                // 그냥 덮으면 유리·음영·도어핸들이 다 가려져서 스티커 붙인 것처럼 보인다.
+                // multiply로 올리면 아래 그림의 밝기가 살아남아 "칠한" 느낌이 난다.
+                // 오버레이 외곽이 패널 경계를 정확히 따라가지 않아서, 이렇게 해야 어긋남도 덜 튄다.
+                mixBlendMode: 'multiply',
+                opacity: 0.75,
+                // 원본 오버레이가 주황색이라, 교환은 색상을 빨강 쪽으로 돌려서 구분한다.
+                ...(o.replace ? { filter: 'hue-rotate(-22deg) saturate(1.45)' } : {}),
+              }}
               draggable={false}
             />
           ))}
