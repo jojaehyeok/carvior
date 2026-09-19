@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
+import { buildDiagRows, buildDiagSections } from '@/lib/inspectionSummary';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import BidModal from '@/components/auction/BidModal';
 import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
@@ -528,15 +529,14 @@ function AuctionDetailContent() {
                   )}
                 </div>
                 <div className="space-y-1.5">
-                  {[
-                    { label: '누유', value: item.inspectionData?.leakDesc ?? '없음' },
-                    { label: '파손', value: '없음' },
-                  ].map(r => (
-                    <div key={r.label} className="flex justify-between text-xs">
-                      <span className="text-gray-400">{r.label}</span>
-                      <span className={`font-bold ${r.value === '없음' || r.value === '이상 없음' ? 'text-gray-700' : 'text-amber-600'}`}>{r.value}</span>
-                    </div>
-                  ))}
+                  {buildDiagRows(item.inspectionData, !!item.accident)
+                    .filter(r => r.label === '누유·누수' || r.label === '경고등')
+                    .map(r => (
+                      <div key={r.label} className="flex justify-between text-xs">
+                        <span className="text-gray-400">{r.label}</span>
+                        <span className={`font-bold ${r.bad ? 'text-amber-600' : 'text-gray-700'}`}>{r.value}</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -714,14 +714,7 @@ function DetailTabs({ item }: { item: AuctionItem }) {
 
   const inspected = !!item.hasReport;
 
-  const diagRows = [
-    { label: '프레임 진단',   value: item.accident ? '수리됨' : '정상',           bad: !!item.accident },
-    { label: '외부패널 진단', value: item.accident ? '교환됨' : '교환 없음',      bad: !!item.accident },
-    { label: '누유·누수',     value: item.inspectionData?.leakDesc ?? '없음',      bad: false },
-    { label: '경고등',        value: item.inspectionData?.warningDesc ?? '없음',   bad: false },
-    { label: '주행 상태',     value: item.inspectionData?.driveDesc ?? '이상 없음', bad: false },
-    { label: '옵션 작동',     value: item.inspectionData?.optionsDesc ?? '이상 없음', bad: false },
-  ];
+  const diagRows = buildDiagRows(item.inspectionData, !!item.accident);
 
   return (
     <div>
@@ -886,39 +879,17 @@ function DetailTabs({ item }: { item: AuctionItem }) {
                   items: [
                     { label: '외부패널 교환', value: item.accident ? '교환됨' : '없음',    bad: !!item.accident },
                     { label: '프레임 수리',   value: item.accident ? '수리됨' : '없음',    bad: !!item.accident },
-                    { label: '하부 부식',     value: '없음',                              bad: false },
                   ],
                 },
-                {
-                  section: '누유·누수',
-                  items: [
-                    { label: '엔진 누유',   value: item.inspectionData?.leakDesc ?? '없음',  bad: false },
-                    { label: '변속기 누유', value: '없음',                                   bad: false },
-                    { label: '냉각수 누수', value: '없음',                                   bad: false },
-                  ],
-                },
-                {
-                  section: '자기진단',
-                  items: [
-                    { label: '엔진',   value: item.inspectionData?.driveDesc   ?? '이상 없음', bad: false },
-                    { label: '변속기', value: '이상 없음',                                    bad: false },
-                    { label: '경고등', value: item.inspectionData?.warningDesc ?? '없음',      bad: false },
-                  ],
-                },
+                // 진단하지 않은 항목(변속기 누유·냉각수 누수·변속기 자기진단 등)을 "없음"으로
+                // 박아두면 하자가 없다고 단정하는 셈이라, 평가사가 실제로 기록한 항목만 보여준다.
+                ...buildDiagSections(item.inspectionData).map(s => ({ section: s.section, items: s.rows })),
                 {
                   section: '소모품·외관',
                   items: [
                     { label: '타이어',   value: item.conditionData?.tireTread ? `앞 ${item.conditionData.tireTread.front}% / 뒤 ${item.conditionData.tireTread.back}%` : '양호', bad: false },
                     { label: '도색 필요', value: item.conditionData?.paintNeeded != null ? `${item.conditionData.paintNeeded}곳` : '없음', bad: (item.conditionData?.paintNeeded ?? 0) > 2 },
                     { label: '휠 스크래치', value: item.conditionData?.wheelScratch != null ? `${item.conditionData.wheelScratch}개` : '없음', bad: false },
-                  ],
-                },
-                {
-                  section: '옵션 작동',
-                  items: [
-                    { label: '에어컨·히터', value: item.inspectionData?.optionsDesc ?? '정상', bad: false },
-                    { label: '전동 시트',   value: '정상', bad: false },
-                    { label: '창문',        value: '정상', bad: false },
                   ],
                 },
               ].map(({ section, items }) => (

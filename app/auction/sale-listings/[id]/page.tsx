@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
+import { buildDiagRows } from '@/lib/inspectionSummary';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import { fmtKRW } from '@/components/auction/shared';
 
@@ -197,13 +198,9 @@ function SaleListingDetailContent() {
     { label: '색상',     value: item.color || '-' },
   ];
 
-  const diagRows = [
-    { label: '누유·누수', value: item.inspectionDetails?.leakDesc || '없음' },
-    { label: '경고등',    value: item.inspectionDetails?.warningDesc || '없음' },
-    { label: '주행 상태', value: item.inspectionDetails?.driveDesc || '이상 없음' },
-    { label: '옵션 작동', value: item.inspectionDetails?.optionsDesc || '이상 없음' },
-    { label: '엔진',      value: item.inspectionDetails?.engineDesc || '이상 없음' },
-  ];
+  // 프레임/외부패널은 이 화면에 사고 정보가 없어서 제외하고, 평가 항목만 보여준다.
+  const diagRows = buildDiagRows(item.inspectionDetails, false)
+    .filter(r => r.label !== '프레임 진단' && r.label !== '외부패널 진단');
 
   return (
     <div className={embed ? 'bg-white' : 'min-h-screen bg-white'}>
