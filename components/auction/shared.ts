@@ -22,6 +22,8 @@ export interface AuctionItem {
   carHash?: string;
   hasReport?: boolean;
   photos?: Record<string, string[]>;
+  // 한바퀴 촬영 영상(360 회전 뷰어용) — 스마트옥션 출품 차만 있음
+  video360Url?: string;
   specs?: { label: string; value: string }[];
   options?: string[];
   inspectedAt?: string;

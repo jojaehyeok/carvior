@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { buildDiagRows, buildDiagSections } from '@/lib/inspectionSummary';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import PhotoGallery from '@/components/PhotoGallery';
+import Car360Viewer from '@/components/Car360Viewer';
 import BidModal from '@/components/auction/BidModal';
 import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
 
@@ -68,6 +69,7 @@ function AuctionDetailContent() {
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'photo' | 'spin'>('photo');
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [viewCount, setViewCount] = useState(0);
@@ -141,6 +143,7 @@ function AuctionDetailContent() {
             inspectionData: found.inspectionData,
             conditionData: found.conditionData,
             adminMemo: found.adminMemo,
+            video360Url: found.video360Url ?? undefined,
           });
         }
       })
@@ -187,6 +190,7 @@ function AuctionDetailContent() {
 
   const photos = collectPhotos(item);
   const hasPhotos = photos.length > 0;
+  const has360 = !!item.video360Url;
   const totalPhotos = photos.length;
 
   const prevPhoto = () => setActivePhoto(p => (p - 1 + totalPhotos) % totalPhotos);
@@ -232,7 +236,31 @@ function AuctionDetailContent() {
 
           {/* ── 왼쪽: 사진 갤러리 ── */}
           <div>
-            {/* 메인 사진 */}
+            {/* 360 영상이 있는 매물만 보기 전환 탭을 띄운다(대부분은 사진만 있음) */}
+            {has360 && (
+              <div className="flex gap-1 mb-2">
+                {([['photo', '사진'], ['spin', '360° 회전']] as const).map(([mode, label]) => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`px-4 py-2 rounded-full text-xs font-black transition-colors ${
+                      viewMode === mode ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {has360 && viewMode === 'spin' ? (
+              <Car360Viewer
+                videoUrl={item.video360Url!}
+                poster={photos.find(p => p.url)?.url}
+                className="border border-gray-100"
+              />
+            ) : (
+            /* 메인 사진 */
             <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden border border-gray-100">
               {hasPhotos && photos[activePhoto]?.url ? (
                 <img
@@ -304,6 +332,7 @@ function AuctionDetailContent() {
                 </>
               )}
             </div>
+            )}
 
             {/* 썸네일 스트립 */}
             {hasPhotos && (
