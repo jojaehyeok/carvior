@@ -101,15 +101,15 @@ export default function PhotoGallery({ photos, noticeRows, open, onClose, title 
 
   return (
     <div className="fixed inset-0 z-[100] bg-white flex flex-col">
-      {/* 탭 바 */}
+      {/* 탭 바 — 아래 사진 스트림과 같은 폭/가운데 정렬을 써서 따로 놀지 않게 한다 */}
       <div className="shrink-0 border-b border-gray-200 bg-white">
-        <div className="flex items-center">
+        <div className="max-w-2xl mx-auto w-full px-4 flex items-center">
           <div className="flex-1 flex overflow-x-auto no-scrollbar">
             {sections.map(s => (
               <button
                 key={s.id}
                 onClick={() => goTab(s.id)}
-                className={`shrink-0 px-4 py-3.5 text-sm font-black border-b-2 transition-colors ${
+                className={`shrink-0 px-3 py-3.5 text-sm font-black border-b-2 transition-colors ${
                   activeTab === s.id
                     ? 'text-gray-900 border-gray-900'
                     : 'text-gray-400 border-transparent hover:text-gray-600'
@@ -136,7 +136,7 @@ export default function PhotoGallery({ photos, noticeRows, open, onClose, title 
 
       {/* 사진 스트림 */}
       <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto overscroll-contain">
-        <div className="max-w-2xl mx-auto px-4 py-4">
+        <div className="max-w-2xl mx-auto w-full px-4 py-4">
           {title && <p className="text-xs font-bold text-gray-400 mb-3">{title}</p>}
 
           {sections.map(s => (
