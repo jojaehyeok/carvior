@@ -209,7 +209,10 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
         {active.length > 0 && (
           <div className="mt-2 border border-gray-100 rounded-xl divide-y divide-gray-100">
             {/* 한 부위에 그림이 여러 장 걸릴 수 있어서(인사이드 패널 4장) 부위 기준으로 합친다 */}
-            {[...new Map(active.flatMap(l => l.hits).map(p => [p.index, p])).values()].map(p => (
+            {active
+              .flatMap(l => l.hits)
+              .filter((p, i, arr) => arr.findIndex(q => q.index === p.index) === i)
+              .map(p => (
               <div key={p.index} className="flex items-center justify-between gap-3 px-3 py-2">
                 <span className="text-sm font-bold text-gray-800">{p.name}</span>
                 <span className={`text-sm font-black ${p.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
