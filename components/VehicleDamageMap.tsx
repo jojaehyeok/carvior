@@ -126,21 +126,16 @@ interface Props {
 // 차가 움직이지 않는다(= 핀 좌표를 한 벌만 관리하면 된다).
 // 조수석 면은 이 그림들을 CSS로 좌우 반전해서 쓴다.
 //
-// ⚠ 한계: 이 파일들은 "부위만 잘라낸 투명 레이어"가 아니라 통이미지라서, 두 부위를 동시에
-// 열 수 없다(앞문 이미지는 뒷문이 닫힌 상태를 이미 포함하고 있어서 겹치면 서로 덮어버림).
-// 그래서 아래 우선순위로 한 장만 고른다. 동시에 열려면 문짝만 오려낸 투명 PNG가 필요하다.
-// ⚠ open-hood.png는 다른 이미지들과 확대 비율이 달라서(차 앞부분만 크게 잡힘) 쓰지 않았다.
-//   같은 구도로 다시 뽑으면 후드도 여기에 추가할 수 있다.
-const IMG_CLOSED     = '/close-all.png';
-const IMG_FRONT_DOOR = '/open-frontdoor.png';
-const IMG_REAR_DOOR  = '/open-backdoor1.png';
-const IMG_TRUNK      = '/open-backdoor.png';
+// 닫힌 차(close-all.png)를 깔고, 손상난 부위의 "열림" 레이어만 그 위에 겹친다.
+// 레이어는 원본 open-*.png에서 닫힘 대비 달라지는 픽셀만 추출해서 만든 투명 PNG라
+// 서로 덮지 않는다 → 앞문·뒷문·트렁크를 동시에 열 수 있다.
+// (추출 스크립트는 scratchpad/make-layers.js — 이미지 교체 시 다시 돌리면 된다)
+const IMG_CLOSED = '/close-all.png';
 
-// 열린 그림을 고를 우선순위 — 앞문 > 뒷문 > 트렁크
-const OPEN_BY_PART: { parts: number[]; src: string }[] = [
-  { parts: [1, 13], src: IMG_FRONT_DOOR },  // 운전석/조수석 앞도어
-  { parts: [5, 16], src: IMG_REAR_DOOR },   // 운전석/조수석 뒷도어
-  { parts: [10],    src: IMG_TRUNK },       // 트렁크 리드
+const OPEN_LAYERS: { parts: number[]; src: string }[] = [
+  { parts: [1, 13], src: '/layer-frontdoor.png' },  // 운전석/조수석 앞도어
+  { parts: [5, 16], src: '/layer-reardoor.png' },   // 운전석/조수석 뒷도어
+  { parts: [10],    src: '/layer-trunk.png' },      // 트렁크 리드
 ];
 
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
@@ -189,12 +184,11 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
   const selectedPart = selected != null ? damaged.find(p => p.index === selected) : null;
   const openedGroup = zoneOpen ? zoneGroups.find(g => g.zone === zoneOpen) : null;
 
-  // 이번 면에서 손상난 부위 중 "열 수 있는" 게 있으면 그 부위가 열린 그림을 쓴다.
+  // 이번 면에서 손상난 부위에 해당하는 열림 레이어만 골라 겹친다.
   const damagedIdx = new Set(
     damaged.filter(p => { const o = partSide(p.index); return !o || o === side; }).map(p => p.index),
   );
-  const imageSrc =
-    OPEN_BY_PART.find(o => o.parts.some(i => damagedIdx.has(i)))?.src ?? IMG_CLOSED;
+  const openLayers = OPEN_LAYERS.filter(l => l.parts.some(i => damagedIdx.has(i)));
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -249,12 +243,24 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           {/* 조수석 면은 같은 그림을 좌우 반전해서 쓴다(핀 x도 100에서 뺀 값을 쓰므로 서로 맞는다) */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imageSrc}
+            src={IMG_CLOSED}
             alt="차량 도면"
             className="w-full h-full object-contain"
             style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
             draggable={false}
           />
+          {/* 손상난 부위만 열린 상태로 겹친다 — 여러 개가 동시에 열릴 수 있다 */}
+          {openLayers.map(l => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={l.src}
+              src={l.src}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+              draggable={false}
+            />
+          ))}
 
           {pins.map(p => {
             const sym = p.symbols[0];
