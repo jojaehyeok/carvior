@@ -1,15 +1,14 @@
 'use client';
 
-// 매물 상세 "차량 상태" — 손상난 부위를 차 그림으로 보여준다.
+// 매물 상세 "차량 상태" — 손상난 부위를 차 그림 위에 색으로 칠해서 보여준다.
 //
-// CARVIOR_vehicle_assets의 01~12 세트만 쓴다(차가 오른쪽을 보는 구도로 서로 정렬됨).
-//  - 11_base-car-closed        : 아무 데도 손상 없을 때의 기본 그림
-//  - 01/02                     : 그 패널을 떼어내 골격이 드러난 그림(교환급 손상 표현)
-//  - 03/04/10                  : 그 문/후드를 떼거나 연 그림
-//  - 05~09                     : 부위별 부품 그림(목록 썸네일용 — 차 위에 얹는 용도가 아님)
+// 외판(겉면)과 골격(내판)을 탭으로 나눈다. 딜러가 보는 관점이 다르기 때문 —
+// 외판은 도색·판금으로 해결되지만 골격은 사고 이력 판단이 달라진다.
 //
-// ⚠ 01~04, 10은 "차 전체" 그림이라 겹칠 수 없다(겹치면 서로 덮음).
-//   그래서 한 번에 한 부위만 보여주고, 목록에서 눌러 부위를 바꾸는 방식으로 만든다.
+// 에셋은 전부 1448×1086, 각 부위가 차에서 실제로 있는 자리에만 그려진 투명 PNG라
+// 여러 장을 동시에 겹쳐도 서로 안 덮는다(= 손상난 부위를 한꺼번에 표시할 수 있다).
+//   skin-*  : 외판 오버레이(주황)
+//   frame-* : 골격 오버레이(파랑)
 
 import { useState } from 'react';
 
@@ -34,18 +33,34 @@ const SYMBOL_LABEL: Record<string, string> = {
 };
 
 const A = '/CARVIOR_vehicle_assets';
-const BASE_CAR = `${A}/11_base-car-closed.png`;
+const BASE_CAR = `${A}/skin-base.png`;
 
-// 부위별로 보여줄 차 그림 + 부품 썸네일
-const PART_VIEW: { parts: number[]; label: string; car: string; thumb: string }[] = [
-  { parts: [8],     label: '후드',      car: `${A}/10_hood-open.png`,                      thumb: `${A}/08_hood-replace-overlay.png` },
-  { parts: [0, 11], label: '앞휀더',    car: `${A}/01_front-fender-structure-exposed.png`, thumb: `${A}/09_front-fender-replace-overlay.png` },
-  { parts: [1, 13], label: '앞도어',    car: `${A}/04_front-door-removed.png`,             thumb: `${A}/07_front-door-replace-overlay.png` },
-  { parts: [5, 16], label: '뒷도어',    car: `${A}/03_rear-door-removed.png`,              thumb: `${A}/06_rear-door-replace-overlay.png` },
-  { parts: [7, 18], label: '쿼터패널',  car: `${A}/02_quarter-panel-structure-exposed.png`, thumb: `${A}/05_quarter-panel-replace-overlay.png` },
+type Layer = { parts: number[]; src: string; label: string };
+
+// 외판 — 겉에서 보이는 패널
+const SKIN_LAYERS: Layer[] = [
+  { parts: [8],     src: `${A}/skin-hood.png`,         label: '후드' },
+  { parts: [0, 11], src: `${A}/skin-front-fender.png`, label: '앞휀더' },
+  { parts: [1, 13], src: `${A}/skin-front-door.png`,   label: '앞도어' },
+  { parts: [5, 16], src: `${A}/skin-rear-door.png`,    label: '뒷도어' },
+];
+
+// 골격(내판) — 겉에서 안 보이는 차체 구조.
+// 한 그림이 여러 진단 부위를 아우르는 경우가 있어서(예: 프런트 엔드 구조 = 라디에이터
+// 서포트 + 사이드멤버 + 크로스멤버) parts에 묶어서 넣는다.
+const FRAME_LAYERS: Layer[] = [
+  { parts: [19, 22, 23, 27], src: `${A}/frame-front-member.png`,     label: '프런트 사이드멤버·라디에이터 서포트' },
+  { parts: [21, 24, 25, 26], src: `${A}/frame-front-wheelhouse.png`, label: '프런트 휠하우스·인사이드 패널' },
+  { parts: [28],             src: `${A}/frame-dash.png`,             label: '대쉬 패널' },
+  { parts: [2, 12],          src: `${A}/frame-a-pillar.png`,         label: 'A필러' },
+  { parts: [4, 15],          src: `${A}/frame-b-pillar.png`,         label: 'B필러' },
+  { parts: [6, 17],          src: `${A}/frame-c-pillar.png`,         label: 'C필러' },
+  { parts: [9],              src: `${A}/frame-roof-rail.png`,        label: '루프' },
+  { parts: [31, 32, 34, 35], src: `${A}/frame-rear-wheelhouse.png`,  label: '리어 휠하우스·리어 사이드멤버' },
 ];
 
 type Side = 'driver' | 'passenger';
+type Tab = 'skin' | 'frame';
 
 // 부위가 어느 면에 속하는지 — 후드처럼 양쪽 공통인 것은 null.
 function partSide(index: number): Side | null {
@@ -63,7 +78,7 @@ interface Props {
 
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
   const [side, setSide] = useState<Side>('driver');
-  const [picked, setPicked] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>('skin');
 
   // 앱 입력은 B(판금)와 W(용접)를 나누지만 딜러가 구분하기 어려워해서 표시에서만 합친다.
   const damaged = (damages ?? [])
@@ -79,20 +94,23 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
     return !owner || owner === side;
   });
 
-  // 그림으로 보여줄 수 있는 손상 부위
-  const views = PART_VIEW
-    .map(v => {
-      const hit = onThisSide.find(p => v.parts.includes(p.index));
-      return hit ? { ...v, part: hit } : null;
+  // 이번 탭·면에서 칠할 오버레이. 한 그림이 여러 부위를 덮으므로 해당 부위를 모아둔다.
+  const layerDefs = tab === 'skin' ? SKIN_LAYERS : FRAME_LAYERS;
+  const active = layerDefs
+    .map(l => {
+      const hits = onThisSide.filter(p => l.parts.includes(p.index));
+      if (hits.length === 0) return null;
+      // 하나라도 교환이면 빨강으로 강조한다.
+      return { ...l, hits, replace: hits.some(p => p.symbols.includes('X')) };
     })
-    .filter((v): v is NonNullable<typeof v> => v !== null);
+    .filter((l): l is NonNullable<typeof l> => l !== null);
 
-  // 고른 게 이번 면에 없으면 첫 번째로 되돌린다(면 전환 시 빈 화면 방지).
-  const active = views.find(v => v.label === picked) ?? views[0] ?? null;
+  // 그림이 없는 부위는 목록으로만 — 빠뜨리면 정보가 사라지므로 반드시 보여준다.
+  const drawable = new Set([...SKIN_LAYERS, ...FRAME_LAYERS].flatMap(l => l.parts));
+  const listed = damaged.filter(p => !drawable.has(p.index));
 
-  // 그림으로 못 보여주는 나머지 부위
-  const viewParts = new Set(PART_VIEW.flatMap(v => v.parts));
-  const listed = damaged.filter(p => !viewParts.has(p.index));
+  const skinCount = damaged.filter(p => SKIN_LAYERS.some(l => l.parts.includes(p.index))).length;
+  const frameCount = damaged.filter(p => FRAME_LAYERS.some(l => l.parts.includes(p.index))).length;
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -127,12 +145,28 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           </div>
         </div>
 
+        {/* 외판 / 골격 */}
+        <div className="flex border-b border-gray-200 mb-3">
+          {([['skin', '외판', skinCount], ['frame', '골격(내판)', frameCount]] as const).map(([t, label, cnt]) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`px-4 py-2.5 text-sm font-black border-b-2 -mb-px transition-colors ${
+                tab === t ? 'text-gray-900 border-gray-900' : 'text-gray-400 border-transparent hover:text-gray-600'
+              }`}
+            >
+              {label}
+              {cnt > 0 && <span className="ml-1 text-xs text-amber-600">{cnt}</span>}
+            </button>
+          ))}
+        </div>
+
         {/* 운전석/조수석 전환 */}
         <div className="flex gap-1 mb-2">
           {([['driver', '운전석'], ['passenger', '조수석']] as const).map(([s, label]) => (
             <button
               key={s}
-              onClick={() => { setSide(s); setPicked(null); }}
+              onClick={() => setSide(s)}
               className={`px-3 py-1.5 rounded-full text-xs font-black transition-colors ${
                 side === s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
@@ -142,55 +176,47 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           ))}
         </div>
 
-        {/* 차 그림 — 고른 부위를 떼어낸 상태로 보여준다 */}
-        <div className="relative w-full aspect-[4/3]">
+        {/* 차 그림 + 손상 부위 색칠 */}
+        <div
+          className="relative w-full aspect-[4/3]"
+          style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={active?.car ?? BASE_CAR}
-            alt={active ? `${active.part.name} 손상 표시` : '차량 도면'}
-            className="w-full h-full object-contain"
-            style={{ transform: side === 'passenger' ? 'scaleX(-1)' : undefined }}
-            draggable={false}
-          />
-          {active && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-              {active.part.name} · {active.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
+          <img src={BASE_CAR} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
+          {active.map(l => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={l.src}
+              src={l.src}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              // 교환은 빨강 쪽으로 색을 돌려 강조한다(외판은 주황, 골격은 파랑이 원본색).
+              style={l.replace ? { filter: 'hue-rotate(-25deg) saturate(1.5)' } : undefined}
+              draggable={false}
+            />
+          ))}
+          {active.length === 0 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
+              이 면에 표기된 {tab === 'skin' ? '외판' : '골격'} 손상 없음
             </div>
           )}
         </div>
 
-        {/* 부위 선택 — 그림이 한 번에 한 부위만 보여줘서, 눌러서 바꾼다 */}
-        {views.length > 0 && (
-          <div className="mt-2">
-            {views.length > 1 && (
-              <p className="text-xs text-gray-400 mb-2">부위를 누르면 그 부위를 떼어낸 그림으로 바뀝니다</p>
-            )}
-            <div className="grid grid-cols-2 gap-2">
-              {views.map(v => (
-                <button
-                  key={v.label}
-                  onClick={() => setPicked(v.label)}
-                  className={`flex items-center gap-2 p-2 rounded-xl border text-left transition-colors ${
-                    active?.label === v.label
-                      ? 'border-gray-900 bg-gray-50'
-                      : 'border-gray-200 hover:border-gray-400'
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={v.thumb} alt="" className="w-12 h-12 object-contain shrink-0" draggable={false} />
-                  <span className="min-w-0">
-                    <span className="block text-xs font-bold text-gray-900 truncate">{v.part.name}</span>
-                    <span className={`block text-xs font-bold ${v.part.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
-                      {v.part.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
+        {/* 칠해진 부위 설명 */}
+        {active.length > 0 && (
+          <div className="mt-2 border border-gray-100 rounded-xl divide-y divide-gray-100">
+            {active.flatMap(l => l.hits).map(p => (
+              <div key={p.index} className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="text-sm font-bold text-gray-800">{p.name}</span>
+                <span className={`text-sm font-black ${p.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
+                  {p.symbols.map(s => SYMBOL_LABEL[s] ?? s).join(', ')}
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* 그림에 없는 나머지 부위 — 필러·사이드실·루프·트렁크와 차체 골격 */}
+        {/* 그림에 없는 부위 — 사이드실·쿼터패널·플로어·트렁크 등 */}
         {listed.length > 0 && (
           <div className="mt-4">
             <p className="text-xs font-black text-gray-400 mb-2">그림에 표시되지 않는 부위</p>
