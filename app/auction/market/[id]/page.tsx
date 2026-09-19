@@ -9,6 +9,7 @@ import { buildDiagRows, buildDiagSections } from '@/lib/inspectionSummary';
 import AuctionAccessGate from '@/components/AuctionAccessGate';
 import PhotoGallery from '@/components/PhotoGallery';
 import Car360Viewer from '@/components/Car360Viewer';
+import VehicleDamageMap from '@/components/VehicleDamageMap';
 import BidModal from '@/components/auction/BidModal';
 import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
 
@@ -144,6 +145,7 @@ function AuctionDetailContent() {
             conditionData: found.conditionData,
             adminMemo: found.adminMemo,
             video360Url: found.video360Url ?? undefined,
+            damages: Array.isArray(found.damages) ? found.damages : null,
           });
         }
       })
@@ -920,6 +922,15 @@ function DetailTabs({ item }: { item: AuctionItem }) {
                     전체 리포트 보기
                   </a>
                 )}
+              </div>
+
+              {/* 부위별 손상 표시 — 어디가 어떻게 상했는지 그림에서 바로 보이게 */}
+              <div className="mb-6">
+                <VehicleDamageMap
+                  damages={item.damages}
+                  accident={!!item.accident}
+                  reportHref={item.carHash ? `/report/${item.carHash}` : undefined}
+                />
               </div>
 
               {[

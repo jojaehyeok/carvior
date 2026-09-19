@@ -24,6 +24,8 @@ export interface AuctionItem {
   photos?: Record<string, string[]>;
   // 한바퀴 촬영 영상(360 회전 뷰어용) — 스마트옥션 출품 차만 있음
   video360Url?: string;
+  // 부위별 손상 마커(37개 부위 × 손상기호) — 리포트와 같은 순서
+  damages?: string[][] | null;
   specs?: { label: string; value: string }[];
   options?: string[];
   inspectedAt?: string;
