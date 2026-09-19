@@ -5,6 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import PriceChart from '@/components/PriceChart';
 
 type SpecMatch = { manufacturer: string; model: string; badge: string; count: number };
+// 같은 모델그룹 안의 세대 — 스포티지면 "스포티지 5세대 / 더 볼드 / 4세대..." 처럼 나온다.
+// 세대가 다르면 사실상 다른 차라서 시세도 완전히 다르다.
+type Generation = { generation: string; count: number; yearMin: number; yearMax: number };
 type Listing = {
   id: string;
   model: string;
@@ -36,6 +39,9 @@ function PricePageInner() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [searched, setSearched] = useState(false);
   const [mileageInput, setMileageInput] = useState('');
+  const [generations, setGenerations] = useState<Generation[]>([]);
+  // null = 전체 세대(기존 동작). 세대를 고르면 그 세대 매물만으로 시세를 다시 계산한다.
+  const [generation, setGeneration] = useState<string | null>(null);
 
   // 대시보드 등에서 ?manufacturer=&model=&badge=&mileage= 로 딥링크하면 검색 단계를 건너뛰고
   // 바로 그 등급의 그래프를 보여준다.
@@ -48,7 +54,7 @@ function PricePageInner() {
     if (mileageParam) setMileageInput(mileageParam);
     setQuery(`${manufacturer} ${model}`);
     setSearched(true);
-    handleSelect({ manufacturer, model, badge, count: 0 });
+    handleSelect({ manufacturer, model, badge, count: 0 }, searchParams.get('generation'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -68,13 +74,13 @@ function PricePageInner() {
     }
   };
 
-  const handleSelect = async (m: SpecMatch) => {
-    setSelected(m);
-    setStep('listings');
+  // 매물 조회 — gen이 있으면 그 세대만, 없으면 기존처럼 모델그룹 전체를 섞어서 본다.
+  const fetchListings = async (m: SpecMatch, gen: string | null) => {
     setLoading(true);
     setListings([]);
     try {
       const qs = new URLSearchParams({ manufacturer: m.manufacturer, model: m.model, badge: m.badge });
+      if (gen) qs.set('generation', gen);
       const res = await fetch(`${API}/external/car-spec/listings?${qs.toString()}`);
       const data = await res.json();
       setListings(Array.isArray(data) ? data : []);
@@ -83,6 +89,26 @@ function PricePageInner() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelect = async (m: SpecMatch, gen: string | null = null) => {
+    setSelected(m);
+    setStep('listings');
+    setGeneration(gen);
+    setGenerations([]);
+    // 세대 목록은 그래프를 막지 않고 따로 받아온다 — 실패해도 전체 세대 기준 시세는 그대로 보인다.
+    const qs = new URLSearchParams({ manufacturer: m.manufacturer, model: m.model, badge: m.badge });
+    fetch(`${API}/external/car-spec/generations?${qs.toString()}`)
+      .then((r) => r.json())
+      .then((d) => setGenerations(Array.isArray(d) ? d : []))
+      .catch(() => setGenerations([]));
+    await fetchListings(m, gen);
+  };
+
+  const handleGeneration = (gen: string | null) => {
+    if (!selected || gen === generation) return;
+    setGeneration(gen);
+    void fetchListings(selected, gen);
   };
 
   return (
@@ -118,7 +144,7 @@ function PricePageInner() {
           </button>
         </div>
 
-        {loading && (
+        {loading && step === 'search' && (
           <div className="text-center text-gray-400 py-10">불러오는 중...</div>
         )}
 
@@ -146,7 +172,7 @@ function PricePageInner() {
         )}
 
         {/* 2단계: 비교 매물 시세 */}
-        {!loading && step === 'listings' && (
+        {step === 'listings' && (
           <div>
             <button
               onClick={() => setStep('search')}
@@ -157,7 +183,47 @@ function PricePageInner() {
             <p className="text-sm font-bold text-gray-900 mb-1">{selected?.manufacturer} {selected?.model}</p>
             <p className="text-xs text-gray-400 mb-5">{selected?.badge} · 실거래 비교매물</p>
 
-            {listings.length > 0 && (
+            {/* 세대 선택 — 같은 스포티지라도 NQ5와 더 볼드는 시세가 완전히 달라서, 세대를
+                안 나누면 전 세대가 한 그래프에 섞여 추세선이 엉뚱하게 나온다. */}
+            {generations.length > 1 && (
+              <div className="mb-5">
+                <p className="text-xs font-bold text-gray-400 mb-2">세대 선택</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => handleGeneration(null)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                      generation === null
+                        ? 'bg-black text-white border-black'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                    }`}
+                  >
+                    전체
+                  </button>
+                  {generations.map((g) => (
+                    <button
+                      key={g.generation}
+                      onClick={() => handleGeneration(g.generation)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${
+                        generation === g.generation
+                          ? 'bg-black text-white border-black'
+                          : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                      }`}
+                    >
+                      {g.generation}
+                      {g.yearMin > 0 && (
+                        <span className="ml-1 font-normal opacity-60">
+                          {g.yearMin === g.yearMax ? `${g.yearMin}` : `${g.yearMin}~${g.yearMax}`}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {loading && <div className="text-center text-gray-400 py-10">불러오는 중...</div>}
+
+            {!loading && listings.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-1">
                   <input
@@ -171,7 +237,7 @@ function PricePageInner() {
                 <PriceChart
                   listings={listings}
                   targetMileage={mileageInput ? parseInt(mileageInput, 10) : undefined}
-                  subtitle={selected ? `${selected.manufacturer} ${selected.model} · ${selected.badge}` : undefined}
+                  subtitle={selected ? `${generation || `${selected.manufacturer} ${selected.model}`} · ${selected.badge}` : undefined}
                   depRangeLow={searchParams.get('depLow') ? Number(searchParams.get('depLow')) : undefined}
                   depRangeHigh={searchParams.get('depHigh') ? Number(searchParams.get('depHigh')) : undefined}
                   depLabel={searchParams.get('depLabel') || undefined}
@@ -179,7 +245,7 @@ function PricePageInner() {
               </div>
             )}
 
-            {listings.length === 0 ? (
+            {loading ? null : listings.length === 0 ? (
               <div className="text-center text-gray-400 py-10">비교할 매물을 찾지 못했어요.</div>
             ) : (
               <div className="border border-gray-100 rounded-2xl divide-y divide-gray-100 overflow-hidden">
@@ -198,7 +264,9 @@ function PricePageInner() {
                       <div className="w-16 h-12 rounded-lg bg-gray-100 shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">{l.badge}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{l.badge}</p>
+                      {/* 전체 세대를 섞어 볼 때 이 매물이 어느 세대인지 알 수 있어야 한다 */}
+                      {l.model && <p className="text-xs text-gray-500 mt-0.5 truncate">{l.model}</p>}
                       <p className="text-xs text-gray-400 mt-1">
                         {l.year}년식 · {l.mileage?.toLocaleString()}km · {l.fuel}
                       </p>
