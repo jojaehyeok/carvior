@@ -193,7 +193,7 @@ const STR = {
   damageArea: { ko: "손상 부위", en: "Damaged Areas", ru: "Поврежденные зоны", ar: "مناطق التلف" },
   partsSuffix: { ko: "개 부위", en: "parts", ru: "зон.", ar: "أجزاء" },
   noAccidentBadge: { ko: "무사고 차량", en: "No Accident History", ru: "Без ДТП", ar: "لا يوجد حوادث" },
-  hoverHint: { ko: "마커에 마우스를 올리면 부위명을 확인할 수 있어요", en: "Hover over a marker to see the part name", ru: "Наведите курсор на маркер, чтобы увидеть название детали", ar: "مرر المؤشر فوق العلامة لرؤية اسم الجزء" },
+  hoverHint: { ko: "마커를 누르면 부위명과 손상 내용, 데미지 사진을 볼 수 있어요", en: "Tap a marker to see the part name, damage type and photos", ru: "Нажмите на маркер, чтобы увидеть деталь, тип повреждения и фото", ar: "اضغط على العلامة لعرض اسم الجزء ونوع الضرر والصور" },
   noAccidentCard: { ko: "무사고 차량이예요 🎉", en: "No accident history 🎉", ru: "Без ДТП 🎉", ar: "لا يوجد حوادث 🎉" },
   photosTitle: { ko: "차량 사진", en: "Vehicle Photos", ru: "Фотографии автомобиля", ar: "صور السيارة" },
   footerNote: { ko: "본 리포트는 진단 시점 기준으로 작성되었습니다.", en: "This report reflects the vehicle's condition at the time of inspection.", ru: "Этот отчет составлен на момент диагностики.", ar: "يعكس هذا التقرير حالة السيارة وقت الفحص." },
@@ -316,7 +316,18 @@ function TireGauge({ value, label }: { value: number; label: string }) {
 }
 
 // ─── 차량 손상 다이어그램 ────────────────────────────────────────────────────────
-function DamageChecker({ damages, lang }: { damages: string[][]; lang: Lang }) {
+function DamageChecker({
+  damages,
+  lang,
+  selected,
+  onSelect,
+}: {
+  damages: string[][];
+  lang: Lang;
+  // 선택된 부위 인덱스 — 마커를 눌러서 아래 상세(부위명·손상내용·사진)를 여는 데 쓴다.
+  selected?: number | null;
+  onSelect?: (index: number) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
@@ -358,9 +369,13 @@ function DamageChecker({ damages, lang }: { damages: string[][]; lang: Lang }) {
         const left = wRatio * (pos.x + 60) - boxSize / 2;
         const top  = hRatio * (pos.y + 60) - boxSize / 2;
 
+        const isSelected = selected === i;
+
         return (
-          <div
+          <button
             key={i}
+            type="button"
+            onClick={() => onSelect?.(i)}
             title={`${partName(i, lang)}: ${syms.map(s => SYMBOL_LABEL_I18N[s]?.[lang] ?? SYMBOL_STYLE[s]?.label ?? s).join(", ")}`}
             style={{
               position: "absolute",
@@ -369,12 +384,16 @@ function DamageChecker({ damages, lang }: { damages: string[][]; lang: Lang }) {
               width:  boxSize,
               height: boxSize,
               backgroundColor: style.bg,
-              border: `1.5px solid ${style.border}`,
+              // 선택된 마커는 검은 테두리로 도드라지게 — 아래 상세와 어느 부위가 연결됐는지 보이게 한다.
+              border: isSelected ? `2.5px solid #111827` : `1.5px solid ${style.border}`,
+              boxShadow: isSelected ? '0 0 0 3px rgba(17,24,39,0.15)' : undefined,
               borderRadius: boxSize / 2,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              cursor: "default",
+              cursor: onSelect ? "pointer" : "default",
+              padding: 0,
+              zIndex: isSelected ? 2 : 1,
             }}
           >
             <span
@@ -388,7 +407,7 @@ function DamageChecker({ damages, lang }: { damages: string[][]; lang: Lang }) {
             >
               {sym}
             </span>
-          </div>
+          </button>
         );
       })}
     </div>
@@ -459,6 +478,8 @@ export default function PublicReportPage() {
   const pdfRef = useRef<HTMLDivElement>(null);
   // 딜러 의뢰 리포트(수출용 차량 등)에서만 노출되는 언어 전환 — 구매동행 리포트는 항상 ko
   const [lang, setLang] = useState<Lang>("ko");
+  // 도면에서 선택한 손상 부위 — 마커/목록 어느 쪽을 눌러도 같은 값을 가리킨다.
+  const [selectedPart, setSelectedPart] = useState<number | null>(null);
 
   const downloadPDF = () => {
     if (!data || pdfLoading) return;
@@ -569,7 +590,7 @@ export default function PublicReportPage() {
     car_status.keys.general + car_status.keys.special;
 
   const damagedParts = damages
-    .map((syms, i) => ({ name: partName(i, lang), symbols: syms }))
+    .map((syms, i) => ({ index: i, name: partName(i, lang), symbols: syms }))
     .filter((p) => p.symbols.length > 0);
 
   return (
@@ -784,13 +805,85 @@ export default function PublicReportPage() {
         </h2>
         <p className="mb-4 text-xs text-gray-400">{t("hoverHint", lang)}</p>
 
-        <DamageChecker damages={damages} lang={lang} />
+        <DamageChecker
+          damages={damages}
+          lang={lang}
+          selected={selectedPart}
+          onSelect={(i) => setSelectedPart((prev) => (prev === i ? null : i))}
+        />
+
+        {/* 선택한 부위 상세 — 손상 내용과 내외판 데미지 사진을 같이 보여준다.
+            사진은 부위별로 태깅되어 있지 않아서(평가사 앱이 데미지 사진을 한 묶음으로 저장),
+            "이 부위 사진"이라고 단정하지 않고 데미지 사진 전체를 보여주고 그렇게 안내한다. */}
+        {selectedPart !== null && (damages[selectedPart]?.length ?? 0) > 0 && (
+          <div className="mt-4 border border-gray-900/10 bg-gray-50 rounded-xl p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-sm font-bold text-gray-900">{partName(selectedPart, lang)}</p>
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {damages[selectedPart].map((sym) => {
+                    const s = SYMBOL_STYLE[sym];
+                    const label = SYMBOL_LABEL_I18N[sym]?.[lang] ?? s?.label ?? sym;
+                    return (
+                      <span
+                        key={sym}
+                        className="text-xs px-2 py-0.5 rounded-full border font-medium"
+                        style={s ? { backgroundColor: s.bg, color: s.text, borderColor: s.border } : {}}
+                      >
+                        {label}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedPart(null)}
+                className="shrink-0 text-gray-400 hover:text-gray-700"
+                aria-label="닫기"
+              >
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </div>
+
+            {(images.damage?.length ?? 0) > 0 ? (
+              <>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {images.damage!.map((url, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={url}
+                      alt=""
+                      loading="lazy"
+                      className="h-28 rounded-lg border border-gray-200 bg-white"
+                    />
+                  ))}
+                </div>
+                <p className="text-[11px] text-gray-400 mt-2">
+                  내외판 데미지 사진 전체입니다 — 부위별로 구분해서 저장되지는 않습니다.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-gray-400">등록된 데미지 사진이 없습니다.</p>
+            )}
+          </div>
+        )}
 
         {/* 손상 목록 */}
         {damagedParts.length > 0 ? (
           <div className="mt-4 space-y-1.5">
             {damagedParts.map((part) => (
-              <div key={part.name} className="flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0">
+              // 목록을 눌러도 도면의 해당 마커가 선택되게 — 부위명만 보고 위치를 찾기 어렵다.
+              <button
+                key={part.name}
+                type="button"
+                onClick={() => setSelectedPart((prev) => (prev === part.index ? null : part.index))}
+                className={`w-full flex items-center gap-3 py-1.5 border-b border-gray-100 last:border-0 text-left rounded-md px-1 transition-colors ${
+                  selectedPart === part.index ? 'bg-gray-100' : 'hover:bg-gray-50'
+                }`}
+              >
                 <p className="flex-1 text-sm text-gray-700">{part.name}</p>
                 <div className="flex flex-wrap justify-end gap-1">
                   {part.symbols.map((sym) => {
@@ -807,7 +900,7 @@ export default function PublicReportPage() {
                     );
                   })}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         ) : (
