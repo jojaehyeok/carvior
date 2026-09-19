@@ -49,14 +49,17 @@ const SKIN_LAYERS: Layer[] = [
 // 한 그림이 여러 진단 부위를 아우르는 경우가 있어서(예: 프런트 엔드 구조 = 라디에이터
 // 서포트 + 사이드멤버 + 크로스멤버) parts에 묶어서 넣는다.
 //
-// 인사이드 패널은 받은 그림이 4장이었는데 전부 같은 부위라, 한 장만 쓰고 나머지는 지웠다.
-// 조수석은 이 그림을 좌우 반전해서 쓰므로 좌/우를 따로 둘 필요가 없다.
+// 인사이드 패널은 그림이 4장 왔다 — 같은 부위의 서로 다른 구역이라 손상 시 네 장을 같이 올린다.
+// (겹쳐도 서로 안 덮는 위치 오버레이라 가능)
 const FRAME_LAYERS: Layer[] = [
-  { parts: [19, 22, 23, 27], src: `${A}/frame-front-member.png`,     label: '프런트 사이드멤버·라디에이터 서포트' },
-  { parts: [25, 26, 31, 35], src: `${A}/frame-front-wheelhouse.png`, label: '휠하우스' },
-  { parts: [21, 24],         src: `${A}/frame-inside-panel.png`,     label: '인사이드 패널' },
-  { parts: [20],             src: `${A}/frame-front-panel.png`,      label: '프런트 패널' },
-  { parts: [32, 34],         src: `${A}/frame-rear-wheelhouse.png`,  label: '리어 사이드멤버' },
+  { parts: [19, 22, 23, 27], src: `${A}/frame-front-member.png`,        label: '프런트 사이드멤버·라디에이터 서포트' },
+  { parts: [25, 26, 31, 35], src: `${A}/frame-front-wheelhouse.png`,    label: '휠하우스' },
+  { parts: [21, 24],         src: `${A}/frame-inside-panel.png`,        label: '인사이드 패널' },
+  { parts: [21, 24],         src: `${A}/frame-inside-panel-right.png`,  label: '인사이드 패널(우측)' },
+  { parts: [21, 24],         src: `${A}/frame-inside-panel-2.png`,      label: '인사이드 패널' },
+  { parts: [21, 24],         src: `${A}/frame-inside-panel-3.png`,      label: '인사이드 패널' },
+  { parts: [20],             src: `${A}/frame-front-panel.png`,         label: '프런트 패널' },
+  { parts: [32, 34],         src: `${A}/frame-rear-wheelhouse.png`,     label: '리어 사이드멤버' },
 ];
 
 type Side = 'driver' | 'passenger';
@@ -205,7 +208,8 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
         {/* 칠해진 부위 설명 */}
         {active.length > 0 && (
           <div className="mt-2 border border-gray-100 rounded-xl divide-y divide-gray-100">
-            {active.flatMap(l => l.hits).map(p => (
+            {/* 한 부위에 그림이 여러 장 걸릴 수 있어서(인사이드 패널 4장) 부위 기준으로 합친다 */}
+            {[...new Map(active.flatMap(l => l.hits).map(p => [p.index, p])).values()].map(p => (
               <div key={p.index} className="flex items-center justify-between gap-3 px-3 py-2">
                 <span className="text-sm font-bold text-gray-800">{p.name}</span>
                 <span className={`text-sm font-black ${p.symbols.includes('X') ? 'text-red-600' : 'text-amber-600'}`}>
