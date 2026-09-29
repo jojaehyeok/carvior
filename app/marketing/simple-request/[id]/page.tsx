@@ -204,10 +204,7 @@ export default function SimpleRequestByCompanyPage() {
     // 카톡 화면 캡처·명함 사진에서 글자를 읽어 같은 방식으로 채운다.
     // 사진 1장당 OCR 호출 1건이 과금되므로(월 100건 무료, 초과 시 건당 약 3원)
     // 글로 받은 내용은 붙여넣기를 쓰고 사진일 때만 사용한다.
-    const handlePhotoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        e.target.value = ''; // 같은 사진을 다시 고를 수 있게 초기화
-        if (!file) return;
+    const runOcr = async (file: File) => {
         setOcrLoading(true);
         setParseMsg('');
         try {
@@ -227,6 +224,30 @@ export default function SimpleRequestByCompanyPage() {
         } finally {
             setOcrLoading(false);
         }
+    };
+
+    const handlePhotoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // 같은 사진을 다시 고를 수 있게 초기화
+        if (file) await runOcr(file);
+    };
+
+    // 캡처를 파일로 저장하지 않고 Ctrl+V로 바로 붙여넣는 경우 — 클립보드에 이미지가 있으면
+    // 그걸 OCR로 보낸다. 글자를 붙여넣은 경우에는 평소대로 입력칸에 들어가게 둔다.
+    const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        const item = Array.from(e.clipboardData?.items ?? []).find(i => i.type.startsWith('image/'));
+        const file = item?.getAsFile();
+        if (!file) return;
+        e.preventDefault();
+        await runOcr(file);
+    };
+
+    // 캡처 파일을 끌어다 놓는 경우도 같은 경로로 처리한다.
+    const handleDrop = async (e: React.DragEvent<HTMLTextAreaElement>) => {
+        const file = Array.from(e.dataTransfer?.files ?? []).find(f => f.type.startsWith('image/'));
+        if (!file) return;
+        e.preventDefault();
+        await runOcr(file);
     };
 
     // 파서가 돌려준 항목을 폼에 채운다(글·사진 공통).
@@ -421,11 +442,15 @@ export default function SimpleRequestByCompanyPage() {
                         </p>
                         <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
                             카톡으로 받은 내용을 그대로 붙여넣고 자동 채우기를 누르면 아래 항목이 채워집니다.
+                            캡처 이미지는 저장하지 않고 이 칸에 <span className="font-bold text-zinc-700">Ctrl+V로 바로 붙여넣거나</span> 끌어다 놓아도 됩니다.
                             채워진 내용은 꼭 확인하고 제출해주세요.
                         </p>
                         <textarea
                             value={pasteText}
                             onChange={e => setPasteText(e.target.value)}
+                            onPaste={handlePaste}
+                            onDrop={handleDrop}
+                            onDragOver={e => e.preventDefault()}
                             rows={4}
                             placeholder={'예)\n차량번호 : 31루 8635\n차종 : 투싼 ix\n주행거리 : 24만km\n청담동 40-24\n차주 : 010-0000-0000'}
                             className="w-full border border-zinc-200 rounded-xl p-3 text-sm outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-300 text-zinc-900"
