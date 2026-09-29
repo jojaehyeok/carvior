@@ -47,7 +47,7 @@ function DateTimeSelector({ onDateTimeSelect }: { onDateTimeSelect: (date: strin
                             className={clsx(
                                 'flex-shrink-0 w-13 h-[72px] rounded-xl flex flex-col items-center justify-center transition-all border',
                                 selectedDate === item.full
-                                    ? 'bg-zinc-900 border-zinc-900 shadow-lg scale-105'
+                                    ? 'bg-violet-600 border-violet-600 shadow-lg scale-105'
                                     : 'bg-white border-zinc-200 hover:border-zinc-400'
                             )}
                             style={{ minWidth: '52px' }}
@@ -76,7 +76,7 @@ function DateTimeSelector({ onDateTimeSelect }: { onDateTimeSelect: (date: strin
                                 'py-2.5 rounded-xl text-sm font-bold border transition-all',
                                 !selectedDate && 'opacity-25 cursor-not-allowed',
                                 selectedTime === time
-                                    ? 'bg-zinc-900 border-zinc-900 text-white'
+                                    ? 'bg-violet-600 border-violet-600 text-white'
                                     : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-400'
                             )}
                         >
@@ -388,14 +388,14 @@ export default function SimpleRequestByCompanyPage() {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-100 font-sans">
+        <div className="min-h-screen bg-gradient-to-b from-violet-50 via-white to-violet-50 font-sans">
             {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
             {/* ── NAV ── */}
             <nav className="bg-white border-b border-zinc-200 px-6 py-3 flex justify-center items-center gap-2 sticky top-0 z-50">
                 {companyLabel && (
                     <span className="text-sm font-bold text-zinc-700">{companyLabel}</span>
                 )}
-                <span className="text-[10px] bg-zinc-900 text-white px-2.5 py-1 rounded-full font-extrabold tracking-wide">B2B</span>
+                <span className="text-[10px] bg-violet-600 text-white px-2.5 py-1 rounded-full font-extrabold tracking-wide">B2B</span>
             </nav>
             {/* ── 지역 안내 ── */}
             <div className="bg-zinc-50 border-b border-zinc-100 px-6 py-2.5 text-center">
@@ -403,14 +403,14 @@ export default function SimpleRequestByCompanyPage() {
             </div>
 
             {/* ── HERO ── */}
-            <div className="bg-white px-6 pt-10 pb-8 border-b border-zinc-100">
+            <div className="bg-gradient-to-b from-white to-violet-50/60 px-6 pt-12 pb-10 border-b border-violet-100">
                 <div className="max-w-xl mx-auto">
                     <div className="flex items-center gap-2 mb-5">
-                        <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">딜러 전용 · 간편 신청</span>
+                        <span className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest">딜러 전용 · 간편 신청</span>
                         <span className="text-zinc-300">|</span>
                         <span className="text-[10px] font-bold text-zinc-400">📍 서울 · 경기 · 인천</span>
                     </div>
-                    <h1 className="text-3xl font-black text-zinc-900 leading-tight mb-2">
+                    <h1 className="text-3xl font-black leading-tight mb-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
                         진단 신청서
                     </h1>
                     <p className="text-zinc-500 text-sm leading-relaxed">
@@ -434,8 +434,8 @@ export default function SimpleRequestByCompanyPage() {
                 <form onSubmit={handleFormSubmit} className="space-y-3">
 
                     {/* 00. 카톡 내용 붙여넣기 — 접수 직원이 손으로 옮겨 적던 걸 대신한다 */}
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">
+                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-2">
                             빠른 접수 · 선택
                         </p>
                         <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
@@ -451,18 +451,18 @@ export default function SimpleRequestByCompanyPage() {
                             onDragOver={e => e.preventDefault()}
                             rows={4}
                             placeholder={'예)\n차량번호 : 31루 8635\n차종 : 투싼 ix\n주행거리 : 24만km\n청담동 40-24\n차주 : 010-0000-0000'}
-                            className="w-full border border-zinc-200 rounded-xl p-3 text-sm outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-300 text-zinc-900"
+                            className="w-full border border-violet-100 bg-violet-50/40 rounded-2xl p-3 text-sm outline-none focus:border-violet-400 focus:bg-white transition-colors placeholder:text-zinc-300 text-zinc-900"
                         />
                         <div className="flex items-center gap-3 mt-2">
                             <button
                                 type="button"
                                 onClick={handleAutoFill}
                                 disabled={parsing || !pasteText.trim()}
-                                className="bg-zinc-900 disabled:bg-zinc-300 text-white px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
+                                className="bg-violet-600 disabled:bg-violet-200 text-white px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
                             >
                                 {parsing ? '읽는 중' : '자동 채우기'}
                             </button>
-                            <label className="bg-white border border-zinc-300 text-zinc-700 px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap cursor-pointer">
+                            <label className="bg-white border border-violet-200 text-violet-700 px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 hover:bg-violet-50 transition-colors whitespace-nowrap cursor-pointer">
                                 {ocrLoading ? '사진 읽는 중' : '사진으로 접수'}
                                 <input
                                     type="file"
@@ -477,9 +477,9 @@ export default function SimpleRequestByCompanyPage() {
                     </div>
 
                     {/* 01. 차량 확인 */}
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1.5">01 · 차량 확인</p>
-                        <p className="text-sm font-bold text-red-500 mb-5">차량번호·소유자 정보는 선택사항입니다</p>
+                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-1.5">01 · 차량 확인</p>
+                        <p className="text-sm font-semibold text-zinc-400 mb-5">차량번호·소유자 정보는 선택사항입니다</p>
                         <div className="space-y-4">
                             <div>
                                 <input
@@ -488,7 +488,7 @@ export default function SimpleRequestByCompanyPage() {
                                     placeholder="차량번호 (예: 123가4567)"
                                     className={clsx(
                                         'w-full text-lg font-black border-b-2 pb-2 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900',
-                                        carError ? 'border-red-400' : 'border-zinc-100 focus:border-zinc-900'
+                                        carError ? 'border-red-400' : 'border-zinc-100 focus:border-violet-500'
                                     )}
                                     onChange={handleChange}
                                     onBlur={handleCarBlur}
@@ -499,23 +499,23 @@ export default function SimpleRequestByCompanyPage() {
                                 value={formData.carOwner}
                                 name="carOwner"
                                 placeholder="차량 소유자 성함"
-                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
                             <input
                                 value={formData.carModel}
                                 name="carModel"
                                 placeholder="차량명 (선택 · 예: S450L, 그랜드 체로키)"
-                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
                         </div>
                     </div>
 
                     {/* 02. 차량 상태 */}
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1.5">02 · 차량 상태</p>
-                        <p className="text-sm font-bold text-red-500 mb-5">차량 연식·희망 매입가는 선택사항입니다</p>
+                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-1.5">02 · 차량 상태</p>
+                        <p className="text-sm font-semibold text-zinc-400 mb-5">차량 연식·희망 매입가는 선택사항입니다</p>
                         <div className="space-y-4">
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 연식</label>
@@ -523,7 +523,7 @@ export default function SimpleRequestByCompanyPage() {
                                     value={formData.carYear}
                                     name="carYear"
                                     onChange={handleChange}
-                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
+                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
                                 >
                                     <option value="">연식 선택</option>
                                     {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map(y => (
@@ -539,7 +539,7 @@ export default function SimpleRequestByCompanyPage() {
                                     name="desiredPrice"
                                     placeholder="예: 1500"
                                     min="0"
-                                    className="w-full border-b-2 border-zinc-100 pb-2 pr-10 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    className="w-full border-b-2 border-violet-100 pb-2 pr-10 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                     onChange={handleChange}
                                 />
                                 <span className="absolute right-0 bottom-2 text-xs text-zinc-400 font-bold">만원</span>
@@ -548,8 +548,8 @@ export default function SimpleRequestByCompanyPage() {
                     </div>
 
                     {/* 03. 딜러 정보 */}
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">03 · 딜러 정보</p>
+                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-5">03 · 딜러 정보</p>
                         <div className="space-y-4">
                             <div className="relative">
                                 <input
@@ -558,7 +558,7 @@ export default function SimpleRequestByCompanyPage() {
                                     autoComplete="off"
                                     value={formData.dealerName}
                                     placeholder="딜러 성함 또는 상사명"
-                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                     onChange={handleChange}
                                     onFocus={() => dealerSuggests.length > 0 && setShowDealerSuggests(true)}
                                     // 목록을 누르는 순간 blur가 먼저 일어나 목록이 사라지면 선택이 안 된다 —
@@ -601,7 +601,7 @@ export default function SimpleRequestByCompanyPage() {
                                 name="contact"
                                 value={formData.contact}
                                 placeholder="딜러 연락처 (선택 · - 제외)"
-                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
                             <div>
@@ -610,7 +610,7 @@ export default function SimpleRequestByCompanyPage() {
                                     value={formData.customerContact}
                                     name="customerContact"
                                     placeholder="고객 연락처 (선택 · - 제외)"
-                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                     onChange={handleChange}
                                 />
                                 <p className="text-[11px] text-zinc-400 mt-1.5">
@@ -621,13 +621,13 @@ export default function SimpleRequestByCompanyPage() {
                     </div>
 
                     {/* 04. 장소 및 시간 */}
-                    <div className="bg-white rounded-2xl p-6 space-y-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest">04 · 장소 및 시간</p>
+                    <div className="bg-white rounded-3xl p-6 space-y-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest">04 · 장소 및 시간</p>
                         <DateTimeSelector onDateTimeSelect={handleDateTimeChange} />
                         <div className="pt-4 border-t border-zinc-50 space-y-4">
                             {formData.address ? (
                                 <div className="flex items-start justify-between gap-3">
-                                    <p className="flex-1 pb-2 border-b-2 border-zinc-100 text-zinc-700 font-medium">{formData.address}</p>
+                                    <p className="flex-1 pb-2 border-b-2 border-violet-100 text-zinc-700 font-medium">{formData.address}</p>
                                     <button
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, address: '' }))}
@@ -644,13 +644,13 @@ export default function SimpleRequestByCompanyPage() {
                                             onChange={e => setPlaceQuery(e.target.value)}
                                             onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchPlace(); } }}
                                             placeholder="장소를 입력한 후 검색을 눌러주세요 (예: 벤츠강남전시장)"
-                                            className="flex-1 border-b-2 border-zinc-100 pb-2 bg-transparent text-zinc-700 outline-none font-medium placeholder:text-zinc-300"
+                                            className="flex-1 border-b-2 border-violet-100 pb-2 bg-transparent text-zinc-700 outline-none font-medium placeholder:text-zinc-300"
                                         />
                                         <button
                                             type="button"
                                             onClick={searchPlace}
                                             disabled={searchingPlace}
-                                            className="bg-zinc-900 disabled:bg-zinc-300 text-white px-4 py-1.5 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
+                                            className="bg-violet-600 disabled:bg-violet-200 text-white px-4 py-1.5 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
                                         >
                                             {searchingPlace ? '검색 중' : '검색'}
                                         </button>
@@ -681,7 +681,7 @@ export default function SimpleRequestByCompanyPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
-                                                    className="w-full bg-zinc-900 hover:bg-zinc-700 text-white text-xs font-extrabold py-3 rounded-xl transition-colors"
+                                                    className="w-full bg-violet-600 hover:bg-violet-700 text-white text-xs font-extrabold py-3 rounded-xl transition-colors"
                                                 >
                                                     &ldquo;{placeQuery.trim()}&rdquo; 그대로 등록하기
                                                 </button>
@@ -690,7 +690,7 @@ export default function SimpleRequestByCompanyPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => selectPlace({ name: '', address: placeQuery.trim() })}
-                                                className="w-full text-left px-4 py-3 mt-2 border border-dashed border-zinc-300 rounded-xl text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
+                                                className="w-full text-left px-4 py-3 mt-2 border border-dashed border-violet-200 rounded-xl text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
                                             >
                                                 검색결과에 없나요? <span className="font-bold text-zinc-900">&ldquo;{placeQuery.trim()}&rdquo;</span> 그대로 등록하기
                                             </button>
@@ -703,15 +703,15 @@ export default function SimpleRequestByCompanyPage() {
                                 value={formData.detailAddress}
                                 name="detailAddress"
                                 placeholder="상세주소 (층, 구역 등)"
-                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
                         </div>
                     </div>
 
                     {/* 추가 전달사항 */}
-                    <div className="bg-white rounded-2xl p-6">
-                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-4">추가 전달사항 (선택)</p>
+                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-4">추가 전달사항 (선택)</p>
                         <textarea
                             value={formData.additionalMemo}
                             name="additionalMemo"
@@ -731,12 +731,12 @@ export default function SimpleRequestByCompanyPage() {
                     </div>
 
                     {/* 개인정보 동의 */}
-                    <label className="flex items-start gap-3 cursor-pointer bg-white rounded-2xl px-4 py-4 border border-zinc-100">
+                    <label className="flex items-start gap-3 cursor-pointer bg-white rounded-3xl px-4 py-4 border border-violet-100 shadow-sm shadow-violet-100/60">
                         <div
                             onClick={() => setPrivacyAgreed(v => !v)}
                             className={clsx(
                                 'flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all mt-0.5',
-                                privacyAgreed ? 'bg-zinc-900 border-zinc-900' : 'border-zinc-300'
+                                privacyAgreed ? 'bg-violet-600 border-violet-600' : 'border-zinc-300'
                             )}
                         >
                             {privacyAgreed && <span className="text-white text-[11px] font-black leading-none">✓</span>}
@@ -759,7 +759,7 @@ export default function SimpleRequestByCompanyPage() {
                             'w-full py-5 rounded-2xl text-base font-extrabold transition-all',
                             (isSubmitting || !!carError || !privacyAgreed)
                                 ? 'bg-zinc-300 text-zinc-400 cursor-not-allowed'
-                                : 'bg-zinc-900 text-white active:scale-[0.98] shadow-lg shadow-zinc-300'
+                                : 'bg-violet-600 text-white active:scale-[0.98] shadow-lg shadow-violet-200'
                         )}
                     >
                         {isSubmitting ? '접수 중...' : '진단 신청하기 →'}
