@@ -82,7 +82,7 @@ export default function CarviorInspectionPage() {
                         </div>
                         <div className="inline-flex items-center gap-1.5 border border-blue-400/30 rounded-full px-3 py-1.5 bg-blue-500/10">
                             <span className="text-xs text-blue-400">📍</span>
-                            <span className="text-xs font-bold text-blue-300">서울 · 경기 · 인천 운영 중</span>
+                            <span className="text-xs font-bold text-blue-300">전국 주요 지역 운영 중</span>
                         </div>
                     </div>
 
@@ -127,7 +127,7 @@ export default function CarviorInspectionPage() {
             {/* ── 신뢰 뱃지 바 ── */}
             <section className="px-5 py-4 bg-zinc-100">
                 <div className="flex flex-wrap items-center justify-center max-w-xl gap-5 mx-auto">
-                    {['수도권 진단 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
+                    {['전국 진단 평가사', '방문 평가', '당일 리포트', '딜러 직접 경쟁', '카드/간편결제'].map(t => (
                         <div key={t} className="flex items-center gap-1.5 text-xs font-bold text-zinc-500">
                             <span className="w-4 h-4 rounded-full bg-zinc-900 text-white flex items-center justify-center text-[9px]">✓</span>
                             {t}
@@ -325,8 +325,8 @@ export default function CarviorInspectionPage() {
                         <div>
                             <p className="text-blue-300 text-xs font-extrabold mb-0.5">현재 운영 지역</p>
                             <p className="text-xs leading-relaxed text-zinc-400">
-                                서울 · 경기 · 인천 (수도권) 지역에서 운영 중입니다.<br />
-                                타 지역은 순차적으로 확대할 예정이에요.
+                                수도권(서울·경기·인천)과 부산·경남, 대구, 충청, 강원 등<br />
+                                전국 주요 지역에서 운영 중이에요. 그 외 지역은 문의 주시면 확인해 드려요.
                             </p>
                         </div>
                     </div>

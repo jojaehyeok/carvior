@@ -402,7 +402,7 @@ export default function SimpleRequestByCompanyPage() {
             </nav>
             {/* ── 지역 안내 ── */}
             <div className="bg-zinc-50 border-b border-zinc-100 px-6 py-2.5 text-center">
-                <p className="text-[11px] text-zinc-500">📍 현재 <strong className="text-zinc-700">서울 · 경기 · 인천 (수도권)</strong> 지역에서 운영 중입니다. 타 지역은 순차적으로 확대 예정입니다.</p>
+                <p className="text-[11px] text-zinc-500">📍 현재 <strong className="text-zinc-700">수도권·부산·경남·대구·충청·강원 등 전국 주요 지역</strong>에서 운영 중입니다. 그 외 지역은 문의 주시면 확인해 드립니다.</p>
             </div>
 
             {/* ── HERO ── */}
@@ -411,14 +411,14 @@ export default function SimpleRequestByCompanyPage() {
                     <div className="flex items-center gap-2 mb-5">
                         <span className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest">딜러 전용 · 간편 신청</span>
                         <span className="text-zinc-300">|</span>
-                        <span className="text-[10px] font-bold text-zinc-400">📍 서울 · 경기 · 인천</span>
+                        <span className="text-[10px] font-bold text-zinc-400">📍 전국 주요 지역</span>
                     </div>
                     <h1 className="text-3xl font-black leading-tight mb-2 bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent">
                         진단 신청서
                     </h1>
                     <p className="text-zinc-500 text-sm leading-relaxed">
                         차량 정보를 입력하면 카비어 진단 평가사가 직접 방문합니다.<br />
-                        <span className="text-zinc-700 font-semibold">수도권(서울·경기·인천) 지역</span> 운영 중
+                        <span className="text-zinc-700 font-semibold">전국 주요 지역</span>에서 운영 중
                     </p>
                     <label className="flex items-center gap-2 cursor-pointer select-none mt-3">
                         <input
@@ -728,8 +728,8 @@ export default function SimpleRequestByCompanyPage() {
                     <div className="flex items-start gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3.5">
                         <span className="text-base flex-shrink-0">📍</span>
                         <p className="text-zinc-500 text-xs leading-relaxed">
-                            현재 <span className="text-zinc-800 font-bold">서울 · 경기 · 인천 (수도권)</span> 지역에서 운영 중입니다.
-                            타 지역은 순차적으로 확대 예정입니다.
+                            현재 <span className="text-zinc-800 font-bold">수도권(서울·경기·인천)</span>과 <span className="text-zinc-800 font-bold">부산·경남, 대구, 충청, 강원</span> 등
+                            전국 주요 지역에서 운영 중입니다. 그 외 지역은 문의 주시면 확인해 드립니다.
                         </p>
                     </div>
 
