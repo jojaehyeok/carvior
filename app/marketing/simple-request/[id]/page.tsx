@@ -100,6 +100,7 @@ export default function SimpleRequestByCompanyPage() {
     const [pasteText, setPasteText] = useState('');
     const [parsing, setParsing] = useState(false);
     const [parseMsg, setParseMsg] = useState('');
+    const [ocrLoading, setOcrLoading] = useState(false);
     const [isSelfOwned, setIsSelfOwned] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -192,6 +193,44 @@ export default function SimpleRequestByCompanyPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data?.message || '내용을 읽지 못했습니다.');
 
+            applyParsed(data);
+        } catch (e) {
+            setParseMsg(e instanceof Error ? e.message : '내용을 읽지 못했습니다.');
+        } finally {
+            setParsing(false);
+        }
+    };
+
+    // 카톡 화면 캡처·명함 사진에서 글자를 읽어 같은 방식으로 채운다.
+    // 사진 1장당 OCR 호출 1건이 과금되므로(월 100건 무료, 초과 시 건당 약 3원)
+    // 글로 받은 내용은 붙여넣기를 쓰고 사진일 때만 사용한다.
+    const handlePhotoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        e.target.value = ''; // 같은 사진을 다시 고를 수 있게 초기화
+        if (!file) return;
+        setOcrLoading(true);
+        setParseMsg('');
+        try {
+            const form = new FormData();
+            form.append('image', file);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/request/parse-intake/image`, {
+                method: 'POST',
+                body: form,
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.message || '사진에서 글자를 읽지 못했습니다.');
+            // 읽어낸 원문을 붙여넣기 칸에 보여준다 — 잘못 읽은 곳을 눈으로 확인하고 고칠 수 있게.
+            if (data.text) setPasteText(data.text);
+            applyParsed(data);
+        } catch (err) {
+            setParseMsg(err instanceof Error ? err.message : '사진에서 글자를 읽지 못했습니다.');
+        } finally {
+            setOcrLoading(false);
+        }
+    };
+
+    // 파서가 돌려준 항목을 폼에 채운다(글·사진 공통).
+    const applyParsed = (data: { fields?: Record<string, string> }) => {
             const f: Record<string, string> = data.fields ?? {};
             const filled: string[] = [];
             setFormData(prev => {
@@ -218,11 +257,6 @@ export default function SimpleRequestByCompanyPage() {
                     ? '채울 수 있는 항목을 찾지 못했어요. 직접 입력해주세요.'
                     : `${filled.join(', ')}${filled.length ? ' 을(를) 채웠어요.' : ''}${f.address ? ' 주소는 아래에서 검색을 눌러 확인해주세요.' : ''}`.trim(),
             );
-        } catch (e) {
-            setParseMsg(e instanceof Error ? e.message : '내용을 읽지 못했습니다.');
-        } finally {
-            setParsing(false);
-        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -405,6 +439,16 @@ export default function SimpleRequestByCompanyPage() {
                             >
                                 {parsing ? '읽는 중' : '자동 채우기'}
                             </button>
+                            <label className="bg-white border border-zinc-300 text-zinc-700 px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap cursor-pointer">
+                                {ocrLoading ? '사진 읽는 중' : '사진으로 접수'}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    disabled={ocrLoading}
+                                    onChange={handlePhotoPick}
+                                />
+                            </label>
                             {parseMsg && <p className="text-xs text-zinc-500 flex-1">{parseMsg}</p>}
                         </div>
                     </div>
