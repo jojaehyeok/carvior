@@ -94,7 +94,6 @@ export default function SimpleRequestByCompanyPage() {
     const companyId = typeof params?.id === 'string' ? params.id : '';
     const companyLabel = COMPANY_LABELS[companyId] || companyId;
 
-    const [vehicleCategory, setVehicleCategory] = useState('');
     // 카톡으로 받은 접수 내용을 붙여넣어 폼을 자동으로 채우는 기능 —
     // 접수 직원이 손으로 옮겨 적던 걸 대신한다. 채우기만 하고 제출은 사람이 한다.
     const [pasteText, setPasteText] = useState('');
@@ -269,7 +268,6 @@ export default function SimpleRequestByCompanyPage() {
                 }
                 return next;
             });
-            if (f.vehicleCategory && !vehicleCategory) { setVehicleCategory(f.vehicleCategory); filled.push('차종'); }
             // 주소는 검색으로 확정해야 좌표가 잡힌다 — 검색창에 넣어만 두고 확인은 사람이 한다.
             if (f.address) setPlaceQuery(f.address);
 
@@ -356,7 +354,7 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...submitData, source: isSelfOwned ? `self-${companyId}` : companyId, additionalMemo: `${vehicleCategory ? `[${vehicleCategory}] ` : ''}${formData.additionalMemo}`.trim(), privacyAgreed }),
+                body: JSON.stringify({ ...submitData, source: isSelfOwned ? `self-${companyId}` : companyId, additionalMemo: formData.additionalMemo.trim(), privacyAgreed }),
             });
 
             const dbResult = await dbResponse.json();
@@ -483,18 +481,6 @@ export default function SimpleRequestByCompanyPage() {
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-1.5">01 · 차량 확인</p>
                         <p className="text-sm font-bold text-red-500 mb-5">차량번호·소유자 정보는 선택사항입니다</p>
                         <div className="space-y-4">
-                            <div>
-                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 구분</label>
-                                <select
-                                    value={vehicleCategory}
-                                    onChange={e => setVehicleCategory(e.target.value)}
-                                    className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
-                                >
-                                    <option value="">선택해주세요</option>
-                                    <option value="승용차">승용차</option>
-                                    <option value="포터·봉고">포터·봉고 (화물)</option>
-                                </select>
-                            </div>
                             <div>
                                 <input
                                     value={formData.carNumber}
