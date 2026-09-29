@@ -204,6 +204,9 @@ export default function SimpleRequestByCompanyPage() {
     // 사진 1장당 OCR 호출 1건이 과금되므로(월 100건 무료, 초과 시 건당 약 3원)
     // 글로 받은 내용은 붙여넣기를 쓰고 사진일 때만 사용한다.
     const runOcr = async (file: File) => {
+        // 사진 인식은 건당 요금이 청구된다. 버튼·붙여넣기·끌어놓기가 모두 이 함수를 지나므로
+        // 여기서 한 번만 확인받는다 — 글로 온 내용까지 사진으로 올리는 걸 막기 위함.
+        if (!window.confirm('사진 인식은 건당 요금이 청구됩니다. 글로 받은 내용은 붙여넣기를 이용해주세요. 사진으로 진행할까요?')) return;
         setOcrLoading(true);
         setParseMsg('');
         try {
@@ -440,7 +443,7 @@ export default function SimpleRequestByCompanyPage() {
                         </p>
                         <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
                             카톡으로 받은 내용을 그대로 붙여넣고 자동 채우기를 누르면 아래 항목이 채워집니다.
-                            캡처 이미지는 저장하지 않고 이 칸에 <span className="font-bold text-zinc-700">Ctrl+V로 바로 붙여넣거나</span> 끌어다 놓아도 됩니다.
+                            캡처 이미지는 저장하지 않고 이 칸에 <span className="font-bold text-zinc-700">Ctrl+V로 바로 붙여넣거나</span> 끌어다 놓아도 됩니다. <span className="font-bold text-violet-600">사진 인식은 건당 요금이 청구되니</span>, 글로 받은 내용은 붙여넣기를 이용해주세요.
                             채워진 내용은 꼭 확인하고 제출해주세요.
                         </p>
                         <textarea
@@ -463,7 +466,7 @@ export default function SimpleRequestByCompanyPage() {
                                 {parsing ? '읽는 중' : '자동 채우기'}
                             </button>
                             <label className="bg-white border border-violet-200 text-violet-700 px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 hover:bg-violet-50 transition-colors whitespace-nowrap cursor-pointer">
-                                {ocrLoading ? '사진 읽는 중' : '사진으로 접수'}
+                                {ocrLoading ? '사진 읽는 중' : '사진으로 접수 (유료)'}
                                 <input
                                     type="file"
                                     accept="image/*"
