@@ -95,6 +95,11 @@ export default function SimpleRequestByCompanyPage() {
     const companyLabel = COMPANY_LABELS[companyId] || companyId;
 
     const [vehicleCategory, setVehicleCategory] = useState('');
+    // 카톡으로 받은 접수 내용을 붙여넣어 폼을 자동으로 채우는 기능 —
+    // 접수 직원이 손으로 옮겨 적던 걸 대신한다. 채우기만 하고 제출은 사람이 한다.
+    const [pasteText, setPasteText] = useState('');
+    const [parsing, setParsing] = useState(false);
+    const [parseMsg, setParseMsg] = useState('');
     const [isSelfOwned, setIsSelfOwned] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -170,6 +175,54 @@ export default function SimpleRequestByCompanyPage() {
     const handleDateTimeChange = useCallback((date: string, time: string) => {
         setFormData(prev => ({ ...prev, preferredDateTime: `${date} ${time}` }));
     }, []);
+
+    // 붙여넣은 글에서 항목을 뽑아 빈칸을 채운다. 이미 입력해둔 값은 덮어쓰지 않는다 —
+    // 사람이 고쳐둔 값을 자동 채우기가 되돌리면 알아채기 어렵다.
+    const handleAutoFill = async () => {
+        if (!pasteText.trim()) { setParseMsg('붙여넣을 내용을 입력해주세요.'); return; }
+        setParsing(true);
+        setParseMsg('');
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/request/parse-intake`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: pasteText }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.message || '내용을 읽지 못했습니다.');
+
+            const f: Record<string, string> = data.fields ?? {};
+            const filled: string[] = [];
+            setFormData(prev => {
+                const next = { ...prev };
+                const labels: Record<string, string> = {
+                    carNumber: '차량번호', carOwner: '소유자', carYear: '연식', desiredPrice: '희망가',
+                    dealerName: '딜러', contact: '딜러 연락처', customerContact: '고객 연락처',
+                    detailAddress: '상세주소', additionalMemo: '특이사항',
+                };
+                for (const key of Object.keys(labels)) {
+                    if (f[key] && !String(prev[key as keyof typeof prev] || '').trim()) {
+                        (next as Record<string, string>)[key] = f[key];
+                        filled.push(labels[key]);
+                    }
+                }
+                return next;
+            });
+            if (f.vehicleCategory && !vehicleCategory) { setVehicleCategory(f.vehicleCategory); filled.push('차종'); }
+            // 주소는 검색으로 확정해야 좌표가 잡힌다 — 검색창에 넣어만 두고 확인은 사람이 한다.
+            if (f.address) setPlaceQuery(f.address);
+
+            setParseMsg(
+                filled.length === 0 && !f.address
+                    ? '채울 수 있는 항목을 찾지 못했어요. 직접 입력해주세요.'
+                    : `${filled.join(', ')}${filled.length ? ' 을(를) 채웠어요.' : ''}${f.address ? ' 주소는 아래에서 검색을 눌러 확인해주세요.' : ''}`.trim(),
+            );
+        } catch (e) {
+            setParseMsg(e instanceof Error ? e.message : '내용을 읽지 못했습니다.');
+        } finally {
+            setParsing(false);
+        }
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -325,6 +378,35 @@ export default function SimpleRequestByCompanyPage() {
             {/* ── FORM ── */}
             <main className="max-w-xl mx-auto px-4 py-6 pb-16">
                 <form onSubmit={handleFormSubmit} className="space-y-3">
+
+                    {/* 00. 카톡 내용 붙여넣기 — 접수 직원이 손으로 옮겨 적던 걸 대신한다 */}
+                    <div className="bg-white rounded-2xl p-6">
+                        <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-2">
+                            빠른 접수 · 선택
+                        </p>
+                        <p className="text-xs text-zinc-500 mb-3 leading-relaxed">
+                            카톡으로 받은 내용을 그대로 붙여넣고 자동 채우기를 누르면 아래 항목이 채워집니다.
+                            채워진 내용은 꼭 확인하고 제출해주세요.
+                        </p>
+                        <textarea
+                            value={pasteText}
+                            onChange={e => setPasteText(e.target.value)}
+                            rows={4}
+                            placeholder={'예)\n차량번호 : 31루 8635\n차종 : 투싼 ix\n주행거리 : 24만km\n청담동 40-24\n차주 : 010-0000-0000'}
+                            className="w-full border border-zinc-200 rounded-xl p-3 text-sm outline-none focus:border-zinc-900 transition-colors placeholder:text-zinc-300 text-zinc-900"
+                        />
+                        <div className="flex items-center gap-3 mt-2">
+                            <button
+                                type="button"
+                                onClick={handleAutoFill}
+                                disabled={parsing || !pasteText.trim()}
+                                className="bg-zinc-900 disabled:bg-zinc-300 text-white px-4 py-2 rounded-xl text-xs font-extrabold active:scale-95 transition-transform whitespace-nowrap"
+                            >
+                                {parsing ? '읽는 중' : '자동 채우기'}
+                            </button>
+                            {parseMsg && <p className="text-xs text-zinc-500 flex-1">{parseMsg}</p>}
+                        </div>
+                    </div>
 
                     {/* 01. 차량 확인 */}
                     <div className="bg-white rounded-2xl p-6">
