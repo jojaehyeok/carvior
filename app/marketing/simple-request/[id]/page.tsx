@@ -105,6 +105,7 @@ export default function SimpleRequestByCompanyPage() {
     const [formData, setFormData] = useState({
         carNumber: '',
         carOwner: '',
+        carModel: '',
         carYear: '',
         desiredPrice: '',
         dealerName: '',
@@ -196,7 +197,7 @@ export default function SimpleRequestByCompanyPage() {
             setFormData(prev => {
                 const next = { ...prev };
                 const labels: Record<string, string> = {
-                    carNumber: '차량번호', carOwner: '소유자', carYear: '연식', desiredPrice: '희망가',
+                    carNumber: '차량번호', carOwner: '소유자', carModel: '차량명', carYear: '연식', desiredPrice: '희망가',
                     dealerName: '딜러', contact: '딜러 연락처', customerContact: '고객 연락처',
                     detailAddress: '상세주소', additionalMemo: '특이사항',
                 };
@@ -427,6 +428,7 @@ export default function SimpleRequestByCompanyPage() {
                             </div>
                             <div>
                                 <input
+                                    value={formData.carNumber}
                                     name="carNumber"
                                     placeholder="차량번호 (예: 123가4567)"
                                     className={clsx(
@@ -439,8 +441,16 @@ export default function SimpleRequestByCompanyPage() {
                                 {carError && <p className="text-red-500 text-xs mt-2">{carError}</p>}
                             </div>
                             <input
+                                value={formData.carOwner}
                                 name="carOwner"
                                 placeholder="차량 소유자 성함"
+                                className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                onChange={handleChange}
+                            />
+                            <input
+                                value={formData.carModel}
+                                name="carModel"
+                                placeholder="차량명 (선택 · 예: S450L, 그랜드 체로키)"
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
@@ -455,6 +465,7 @@ export default function SimpleRequestByCompanyPage() {
                             <div>
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 연식</label>
                                 <select
+                                    value={formData.carYear}
                                     name="carYear"
                                     onChange={handleChange}
                                     className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
@@ -469,6 +480,7 @@ export default function SimpleRequestByCompanyPage() {
                                 <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">희망 매입가</label>
                                 <input
                                     type="number"
+                                    value={formData.desiredPrice}
                                     name="desiredPrice"
                                     placeholder="예: 1500"
                                     min="0"
@@ -540,6 +552,7 @@ export default function SimpleRequestByCompanyPage() {
                             <div>
                                 <input
                                     type="tel"
+                                    value={formData.customerContact}
                                     name="customerContact"
                                     placeholder="고객 연락처 (선택 · - 제외)"
                                     className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
@@ -632,6 +645,7 @@ export default function SimpleRequestByCompanyPage() {
                             )}
                             <input
                                 id="detailAddress"
+                                value={formData.detailAddress}
                                 name="detailAddress"
                                 placeholder="상세주소 (층, 구역 등)"
                                 className="w-full border-b-2 border-zinc-100 pb-2 focus:border-zinc-900 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
@@ -644,6 +658,7 @@ export default function SimpleRequestByCompanyPage() {
                     <div className="bg-white rounded-2xl p-6">
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-4">추가 전달사항 (선택)</p>
                         <textarea
+                            value={formData.additionalMemo}
                             name="additionalMemo"
                             placeholder="특이사항, 요청사항 등"
                             className="w-full h-20 text-sm text-zinc-700 placeholder:text-zinc-300 outline-none resize-none leading-relaxed"
