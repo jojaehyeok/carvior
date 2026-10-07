@@ -259,6 +259,7 @@ export default function SimpleRequestByCompanyPage() {
             setFormData(prev => {
                 const next = { ...prev };
                 const labels: Record<string, string> = {
+                    // 연식·희망가는 폼에서 뺐지만, 붙여넣은 글에 적혀 있으면 그대로 접수에 실어 보낸다
                     carNumber: '차량번호', carOwner: '소유자', carModel: '차량명', carYear: '연식', desiredPrice: '희망가',
                     dealerName: '딜러', contact: '딜러 연락처', customerContact: '고객 연락처',
                     detailAddress: '상세주소', additionalMemo: '특이사항',
@@ -484,6 +485,13 @@ export default function SimpleRequestByCompanyPage() {
                         <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-1.5">01 · 차량 확인</p>
                         <p className="text-sm font-semibold text-zinc-400 mb-5">차량번호·소유자 정보는 선택사항입니다</p>
                         <div className="space-y-4">
+                            <input
+                                value={formData.carModel}
+                                name="carModel"
+                                placeholder="차량명 (예: S450L, 그랜드 체로키)"
+                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                onChange={handleChange}
+                            />
                             <div>
                                 <input
                                     value={formData.carNumber}
@@ -505,54 +513,27 @@ export default function SimpleRequestByCompanyPage() {
                                 className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
-                            <input
-                                value={formData.carModel}
-                                name="carModel"
-                                placeholder="차량명 (선택 · 예: S450L, 그랜드 체로키)"
-                                className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
-                                onChange={handleChange}
-                            />
-                        </div>
-                    </div>
-
-                    {/* 02. 차량 상태 */}
-                    <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
-                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-1.5">02 · 차량 상태</p>
-                        <p className="text-sm font-semibold text-zinc-400 mb-5">차량 연식·희망 매입가는 선택사항입니다</p>
-                        <div className="space-y-4">
+                            {/* 소유자 번호(고객 연락처) — 전엔 딜러 정보 칸에 있었는데, 차주 정보끼리
+                                모여 있는 게 접수하면서 받아적기 편하다는 요청으로 여기로 옮겼다. */}
                             <div>
-                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">차량 연식</label>
-                                <select
-                                    value={formData.carYear}
-                                    name="carYear"
-                                    onChange={handleChange}
-                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors bg-transparent text-zinc-700 font-medium"
-                                >
-                                    <option value="">연식 선택</option>
-                                    {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                                        <option key={y} value={y}>{y}년</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="relative">
-                                <label className="text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider mb-1.5 block">희망 매입가</label>
                                 <input
-                                    type="number"
-                                    value={formData.desiredPrice}
-                                    name="desiredPrice"
-                                    placeholder="예: 1500"
-                                    min="0"
-                                    className="w-full border-b-2 border-violet-100 pb-2 pr-10 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
+                                    type="tel"
+                                    value={formData.customerContact}
+                                    name="customerContact"
+                                    placeholder="소유자 번호 (고객 연락처 · - 제외)"
+                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                     onChange={handleChange}
                                 />
-                                <span className="absolute right-0 bottom-2 text-xs text-zinc-400 font-bold">만원</span>
+                                <p className="text-[11px] text-zinc-400 mt-1.5">
+                                    평가사가 전시장이 아닌 고객에게 직접 방문해야 하면 입력해주세요. 전시장 방문이면 비워두세요.
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* 03. 딜러 정보 */}
+                    {/* 02. 딜러 정보 */}
                     <div className="bg-white rounded-3xl p-6 border border-violet-100 shadow-sm shadow-violet-100/60">
-                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-5">03 · 딜러 정보</p>
+                        <p className="text-[10px] font-extrabold text-violet-500 uppercase tracking-widest mb-5">02 · 딜러 정보</p>
                         <div className="space-y-4">
                             <div className="relative">
                                 <input
@@ -607,19 +588,6 @@ export default function SimpleRequestByCompanyPage() {
                                 className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
-                            <div>
-                                <input
-                                    type="tel"
-                                    value={formData.customerContact}
-                                    name="customerContact"
-                                    placeholder="고객 연락처 (선택 · - 제외)"
-                                    className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
-                                    onChange={handleChange}
-                                />
-                                <p className="text-[11px] text-zinc-400 mt-1.5">
-                                    평가사가 전시장이 아닌 고객에게 직접 방문해야 하면 입력해주세요. 전시장 방문이면 비워두세요.
-                                </p>
-                            </div>
                         </div>
                     </div>
 
