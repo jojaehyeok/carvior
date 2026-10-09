@@ -16,6 +16,9 @@ interface ReportData {
   dealerName?: string | null;
   driverName?: string | null;
   assignedDriverId?: string | null;
+  // 검차한 날 — firstCompletedAt은 최초 진단완료 시각이라 이후 리포트를 수정해도 안 바뀐다.
+  completedAt?: string | null;
+  firstCompletedAt?: string | null;
   driverPhotoUrl?: string | null;
   driverCompletedCount?: number;
   isConsumerBooking?: boolean;
@@ -168,6 +171,7 @@ const STR = {
   loading: { ko: "리포트를 불러오는 중...", en: "Loading report...", ru: "Загрузка отчета...", ar: "جارٍ تحميل التقرير..." },
   notFound: { ko: "리포트를 찾을 수 없습니다.", en: "Report not found.", ru: "Отчет не найден.", ar: "التقرير غير موجود." },
   dealer: { ko: "딜러", en: "Dealer", ru: "Дилер", ar: "الوكيل" },
+  inspectedAt: { ko: "검차일", en: "Inspected", ru: "Дата осмотра", ar: "تاريخ الفحص" },
   inspector: { ko: "담당 진단평가사", en: "Inspector", ru: "Инспектор", ar: "الفاحص" },
   vehicleInfo: { ko: "차량 기본 정보", en: "Vehicle Information", ru: "Основная информация", ar: "معلومات السيارة" },
   estimatedRepairCost: { ko: "예상 정비비", en: "Estimated Repair Cost", ru: "Ориентировочная стоимость ремонта", ar: "تكلفة الإصلاح المتوقعة" },
@@ -582,6 +586,13 @@ export default function PublicReportPage() {
 
   const { dealerName, driverName, driverPhotoUrl, driverCompletedCount, car_info, evaluation, car_status, damages: rawDamages, images, checklistPhotos, isConsumerBooking, evaluationOk, engineNoiseVideoUrl, videoUrls } = data;
   const allIssueVideos = [...(videoUrls ?? []), ...(engineNoiseVideoUrl ? [engineNoiseVideoUrl] : [])];
+  // 검차일(년월일) — 서버가 UTC로 돌아서 한국시간으로 맞춰 찍는다
+  const inspectedRaw = data.firstCompletedAt || data.completedAt;
+  const inspectedDate = inspectedRaw
+    ? new Date(inspectedRaw).toLocaleDateString("ko-KR", {
+        timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+      })
+    : null;
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, 평가사 앱 입력은 그대로 두고
   // 리포트 표시에서만 B를 W로 합쳐서 보여준다(라벨도 "판금/용접"으로 통합)
   const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
@@ -623,6 +634,11 @@ export default function PublicReportPage() {
           {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
         </h1>
         {dealerName && !isPublicGallery && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
+        {/* 검차일 — 언제 본 차인지가 리포트에 없어서 나중에 "이거 언제 찍은 거냐"는 문의가 있었다.
+            최초 완료 시각(firstCompletedAt)을 쓴다. 이후 수정해도 검차한 날은 그대로다. */}
+        {inspectedDate && (
+          <p className="mt-1 text-sm text-gray-400">{t("inspectedAt", lang)}: {inspectedDate}</p>
+        )}
         {driverName && (
           <div className="mt-3 inline-flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}

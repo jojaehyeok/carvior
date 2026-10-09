@@ -43,6 +43,9 @@ const SYMBOL_COLOR: Record<string,string> = {
 export interface ReportData {
   dealerName?: string | null;
   driverName?: string | null;
+  // 검차한 날(최초 진단완료). 리포트를 나중에 수정해도 안 바뀐다.
+  completedAt?: string | null;
+  firstCompletedAt?: string | null;
   car_info: { number:string; type:string; mileage:number; color:string; repairCost:number };
   evaluation: { leakDesc:string; driveDesc:string; optionsDesc:string; warningDesc:string; engineDesc:string; memo:string };
   car_status: {
@@ -107,6 +110,13 @@ function Header({ carNumber, grade }:{ carNumber:string; grade:GradeInfo }) {
 // ─── Page 1: 차량정보 + 진단결과 + 손상 ─────────────────────────────────────
 function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
   const { dealerName, driverName, car_info, evaluation, car_status, damages: rawDamages } = data;
+  // 검차일(년월일) — 서버가 UTC로 돌아서 한국시간 기준으로 찍는다
+  const inspectedRaw = data.firstCompletedAt || data.completedAt;
+  const inspectedDate = inspectedRaw
+    ? new Date(inspectedRaw).toLocaleDateString("ko-KR", {
+        timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit",
+      })
+    : null;
   // 딜러가 B(판금)와 W(용접)를 구분하기 어려워해서, PDF에도 B를 W로 바꿔서 보여준다
   const damages = rawDamages.map((syms) => syms.map((s) => (s === "B" ? "W" : s)));
   const totalKeys = car_status.keys.smart+car_status.keys.folding+car_status.keys.general+car_status.keys.special;
@@ -136,6 +146,7 @@ function Page1({ data, grade }:{ data:ReportData; grade:GradeInfo }) {
                 {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
               </div>
               {dealerName && <div style={{ fontSize:9,color:"#9ca3af" }}>딜러: {dealerName}</div>}
+              {inspectedDate && <div style={{ fontSize:9,color:"#9ca3af" }}>검차일: {inspectedDate}</div>}
               {driverName && <div style={{ fontSize:9,color:"#9ca3af" }}>담당 진단평가사: {driverName}</div>}
             </div>
             <div style={{ display:"flex",gap:14 }}>
