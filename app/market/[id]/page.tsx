@@ -202,10 +202,10 @@ export default function MarketDetailPage() {
                   </Link>
                 ) : (
                   <Link
-                    href="/inspection"
+                    href="/call-evaluator"
                     className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors"
                   >
-                    이 차 검차 신청하기
+                    이 차, 평가사 부르기
                   </Link>
                 )}
               </div>
@@ -213,7 +213,7 @@ export default function MarketDetailPage() {
               {!hasReport && (
                 <p className="text-[12px] leading-relaxed text-gray-500 mt-4 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
                   이 차는 아직 카비어 진단을 받지 않았습니다. 개인 간 거래는 상태를 확인하기 어렵습니다 —
-                  <strong className="font-bold"> 계약 전에 검차를 받아보시는 것을 권합니다.</strong>
+                  <strong className="font-bold"> 계약 전에 평가사를 불러 확인해보시는 것을 권합니다.</strong>
                 </p>
               )}
             </div>

@@ -24,6 +24,14 @@ const VEHICLE_DATA_POINTS = [
   'VIN', '고장코드', '도막 측정', '옵션 작동', '누유', '사고·교환·판금',
 ];
 
+// 검차가 실제로 어떻게 흘러가는지 — 홈 '이용안내' 섹션에서 쓴다
+const INSPECTION_STEPS = [
+  { icon: '📝', title: '신청', desc: '차량번호와 차 있는 위치, 원하는 시간을 남기면 접수됩니다.' },
+  { icon: '🚗', title: '평가사 방문', desc: '가까운 진단평가사가 배정돼 그 자리로 직접 찾아갑니다.' },
+  { icon: '🔍', title: '현장 진단', desc: '외관·엔진룸·하부·도막·옵션 작동까지 항목별로 확인하고 사진으로 남깁니다.' },
+  { icon: '📄', title: '리포트 전달', desc: '결과를 링크로 받아 바로 열어보고, 상대에게 그대로 보낼 수 있습니다.' },
+];
+
 const PRINCIPLES = [
   { no: '01', title: '판매와 진단의 분리', desc: '차량 판매를 위해 진단 결과를 바꾸지 않습니다.' },
   { no: '02', title: '차량 상태의 기록', desc: '사진·진단결과·주요 확인사항을 데이터로 남깁니다.' },
@@ -119,60 +127,55 @@ export default function HomePage() {
            브랜드 소개보다 실제 매물이 먼저 보여야 거래 사이트로 읽힌다. */}
       <RecentListings />
 
-      {/* ── 거래 전 검차 안내 — 중개는 무료고 매출은 여기서 난다 ── */}
-      <section className="bg-violet-50 border-y border-violet-100">
-        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <span className="text-3xl">🔍</span>
-            <div>
-              <h2 className="text-xl font-black text-gray-900">개인 거래, 상태가 제일 불안하시죠</h2>
-              <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">
-                진단평가사가 차 있는 곳으로 직접 가서 확인하고 리포트를 드립니다.<br className="hidden sm:block" />
-                계약 전에 받아보시면 분쟁이 줄어듭니다. 국산 99,000원 · 수입 132,000원
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/inspection"
-            className="shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors"
-          >
-            검차 신청하기 →
-          </Link>
-        </div>
-      </section>
-
-      {/* ── CARVIOR VEHICLE DATA ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.3fr] gap-12 items-center">
-          <div className="grid grid-cols-2 gap-4">
-            <img src="/images/diagnostic-2.jpg" alt="도막 측정" className="rounded-2xl object-cover w-full h-56 col-span-1" />
-            <img src="/images/diagnostic-3.jpg" alt="하부 점검" className="rounded-2xl object-cover w-full h-56 col-span-1" />
-            <img src="/images/diagnostic-1.jpg" alt="진단 데이터 확인" className="rounded-2xl object-cover w-full h-40 col-span-2" />
-          </div>
-
-          <div>
-            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-4">CARVIOR VEHICLE DATA</p>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-5">
-              사진 몇 장이 아니라,<br />차량의 기록을 남깁니다.
+      {/* ── 검차 서비스 이용안내 ──
+           "사진 몇 장이 아니라 기록을 남긴다"는 주장만 있던 자리를, 실제로 어떻게 흘러가는지
+           단계로 보여주는 안내로 바꿨다. 개인 거래에서 제일 많이 묻는 게 "그래서 뭘 해주냐"다. */}
+      <section className="bg-slate-50 border-y border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
+          <div className="text-center mb-12">
+            <p className="text-[10px] font-black tracking-[0.2em] uppercase text-violet-500 mb-3">INSPECTION PROCESS</p>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-3">
+              검차는 이렇게 진행됩니다
             </h2>
-            <p className="text-gray-600 text-base leading-relaxed mb-8">
-              번호판 사진 두 장으로는 차량 상태를 증명할 수 없습니다.
-              카비어는 진단 한 건마다 30장 이상의 사진과 항목별 기록을 남깁니다.
+            <p className="text-slate-500 text-sm leading-relaxed">
+              평가사가 차가 있는 곳으로 직접 가서 확인하고, 결과를 리포트로 남깁니다.
             </p>
+          </div>
 
-            <div className="flex flex-wrap gap-2 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {INSPECTION_STEPS.map((s, i) => (
+              <div key={s.title} className="relative bg-white border border-violet-100 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-7 h-7 rounded-full bg-violet-600 text-white text-xs font-black flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="text-2xl">{s.icon}</span>
+                </div>
+                <h3 className="font-black text-slate-900 text-sm mb-1.5">{s.title}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white border border-violet-100 rounded-2xl p-6 md:p-7">
+            <p className="text-sm font-black text-slate-900 mb-1.5">무엇을 확인하나요?</p>
+            <p className="text-xs text-slate-500 mb-4">진단 한 건마다 30장 이상의 사진과 항목별 기록이 남습니다.</p>
+            <div className="flex flex-wrap gap-2">
               {VEHICLE_DATA_POINTS.map(tag => (
-                <span key={tag} className="text-xs font-bold text-gray-600 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
+                <span key={tag} className="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full">
                   {tag}
                 </span>
               ))}
             </div>
+          </div>
 
-            <p className="text-sm font-black text-violet-600">한 번의 진단이 차량의 디지털 기록이 됩니다.</p>
+          <div className="text-center mt-10">
+            <Link href="/call-evaluator" className="inline-block bg-violet-600 hover:bg-violet-700 text-white font-black px-8 py-3.5 rounded-xl text-sm transition-colors">
+              평가사 부르기 →
+            </Link>
           </div>
         </div>
       </section>
-
       {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
       {reviews.length > 0 && (
         <section className="bg-slate-50 border-y border-slate-100 py-20">
@@ -216,22 +219,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── CARVIOR 5 PRINCIPLES ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="text-center mb-12">
-          <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">CARVIOR 5 PRINCIPLES</p>
-          <h2 className="text-3xl font-black text-gray-900">카비어가 지키는 5가지 원칙</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {PRINCIPLES.map(p => (
-            <div key={p.no} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
-              <p className="text-[11px] font-black text-violet-400 mb-3">{p.no}</p>
-              <h3 className="font-black text-gray-900 text-sm mb-1.5">{p.title}</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <NoticeAndFaq />
 
       {/* ── 차바타 앱 안내 ──
            고객용·딜러용 앱은 따로 만들 예정이라, 지금은 실제로 나와 있는
@@ -287,7 +275,24 @@ export default function HomePage() {
       </section>
 
       {/* 공지·FAQ는 푸터 바로 위 — 거래 사이트에서 제일 자주 찾는 두 가지 */}
-      <NoticeAndFaq />
+
+      {/* ── CARVIOR 5 PRINCIPLES ── */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">CARVIOR 5 PRINCIPLES</p>
+          <h2 className="text-3xl font-black text-gray-900">카비어가 지키는 5가지 원칙</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {PRINCIPLES.map(p => (
+            <div key={p.no} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+              <p className="text-[11px] font-black text-violet-400 mb-3">{p.no}</p>
+              <h3 className="font-black text-gray-900 text-sm mb-1.5">{p.title}</h3>
+              <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
 
       {/* 최근 본 차량 · 찜 · 맨 위로 — 어느 화면에서나 오른쪽에 붙어 있다 */}
       <SideRail />

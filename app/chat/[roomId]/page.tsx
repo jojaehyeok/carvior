@@ -167,10 +167,10 @@ export default function ChatRoomPage() {
       <div className="bg-white border-t border-gray-200">
         <div className="max-w-3xl mx-auto px-5 pt-3">
           <Link
-            href="/inspection"
+            href="/call-evaluator"
             className="inline-flex items-center gap-1.5 text-[11px] font-bold text-violet-600 bg-violet-50 border border-violet-100 px-3 py-1.5 rounded-full hover:bg-violet-100 transition-colors"
           >
-            🔍 차량 상태가 궁금하면 검차 신청하기
+            🔍 차량 상태가 궁금하면 평가사 부르기
           </Link>
         </div>
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-end gap-2">
