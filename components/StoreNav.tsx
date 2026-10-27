@@ -107,6 +107,14 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
               )}
             </div>
           ) : (
+            <>
+            {/* 처음 온 사람이 "여기서 뭘 할 수 있나"를 먼저 보게 — 로그인 옆에 둔다 */}
+            <Link
+              href="/guide"
+              className="hidden lg:flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-violet-50"
+            >
+              ⓘ 이용가이드
+            </Link>
             <Link
               href="/login"
               className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-50"
@@ -116,6 +124,7 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
               </svg>
               로그인
             </Link>
+            </>
           )}
 
           <button className="p-2.5 text-gray-400 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-50" aria-label="검색">
