@@ -56,29 +56,23 @@ const SKIN_LAYERS: Layer[] = [
   { parts: [5, 16], src: `${A}/skin-rear-door.png` },
 ];
 
-// 골격은 차 위에 겹치지 않는다.
-//
-// 받은 골격 부품 그림들은 차 그림과 기준이 안 맞아서(부품만 크게 렌더된 컷) 겹치면
-// 차 앞부분을 통째로 덮어버린다. 대신 base-frame-left/right가 이미 A필러·B필러·C필러·
-// 사이드실·센터플로어·리어휠하우스 등 부위명이 전부 적힌 도면이라, 그 도면을 그대로 쓰고
-// 손상 부위는 목록으로 보여준다.
-//
-// 나중에 차 그림과 같은 기준(1448×1086, 부위가 차에서 있는 자리에만 그려진 투명 PNG)으로
-// 다시 받으면 SKIN_LAYERS처럼 겹치도록 바꾸면 된다.
-const FRAME_LAYERS: Layer[] = [];
+// 골격 — README.txt의 부위명 그대로. L=운전석, R=조수석.
+const FRAME_LAYERS: Layer[] = [
+  { parts: [19], src: `${A}/radiator-support.png` },      // 라디에이터 서포트
+  { parts: [22], src: `${A}/front-side-member-L.png` },   // 운전석 프런트 사이드멤버
+  { parts: [23], src: `${A}/front-side-member-R.png` },   // 조수석 프런트 사이드멤버
+  { parts: [25], src: `${A}/front-wheelhouse-L.png` },    // 운전석 프런트 휠하우스
+  { parts: [26], src: `${A}/front-wheelhouse-R.png` },    // 조수석 프런트 휠하우스
+  { parts: [21], src: `${A}/apron-panel-L.png` },         // 운전석 인사이드(에이프런) 패널
+  { parts: [24], src: `${A}/apron-panel-R.png` },         // 조수석 인사이드(에이프런) 패널
+  { parts: [28], src: `${A}/dash-panel.png` },            // 대쉬 패널
+  { parts: [3],  src: `${A}/rocker-panel-L.png` },        // 운전석 사이드실
+  { parts: [14], src: `${A}/rocker-panel-R.png` },        // 조수석 사이드실
+];
 
-// 목록에 같이 띄울 부품 그림 — 어떤 부위인지 눈으로 알 수 있게 한다.
+// 그림은 있지만 캔버스 규격(1254×1254)이 달라 차 위에 못 얹는 부위 —
+// 목록에서 부품 그림으로만 보여준다. 같은 규격으로 다시 뽑으면 위 FRAME_LAYERS로 옮기면 된다.
 const PART_THUMB: { parts: number[]; src: string }[] = [
-  { parts: [19], src: `${A}/radiator-support.png` },
-  { parts: [22], src: `${A}/front-side-member-L.png` },
-  { parts: [23], src: `${A}/front-side-member-R.png` },
-  { parts: [25], src: `${A}/front-wheelhouse-L.png` },
-  { parts: [26], src: `${A}/front-wheelhouse-R.png` },
-  { parts: [21], src: `${A}/apron-panel-L.png` },
-  { parts: [24], src: `${A}/apron-panel-R.png` },
-  { parts: [28], src: `${A}/dash-panel.png` },
-  { parts: [3],  src: `${A}/rocker-panel-L.png` },
-  { parts: [14], src: `${A}/rocker-panel-R.png` },
   { parts: [31], src: `${A}/rear-wheelhouse-L.png` },
   { parts: [35], src: `${A}/rear-wheelhouse-R.png` },
   { parts: [32], src: `${A}/rear-side-member-L.png` },
@@ -88,9 +82,6 @@ const PART_THUMB: { parts: number[]; src: string }[] = [
   { parts: [29], src: `${A}/center-floor.png` },
   { parts: [9],  src: `${A}/roof-rail.png` },
 ];
-
-// 골격 탭에서 목록으로 보여줄 부위(외판 오버레이로 칠해지는 것 외 전부)
-const FRAME_PART_INDEXES = new Set([3, 14, 9, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 2, 12, 4, 15, 6, 17, 7, 18, 10]);
 
 type Side = 'driver' | 'passenger';
 type Tab = 'skin' | 'frame';
@@ -112,6 +103,7 @@ interface Props {
 export default function VehicleDamageMap({ damages, accident, reportHref }: Props) {
   const [side, setSide] = useState<Side>('driver');
   const [tab, setTab] = useState<Tab>('skin');
+  const [guideOpen, setGuideOpen] = useState(false);
 
   // 앱 입력은 B(판금)와 W(용접)를 나누지만 딜러가 구분하기 어려워해서 표시에서만 합친다.
   const damaged = (damages ?? [])
@@ -148,8 +140,7 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
     .map(p => ({ ...p, thumb: PART_THUMB.find(t => t.parts.includes(p.index))?.src }));
 
   const skinCount = damaged.filter(p => SKIN_LAYERS.some(l => l.parts.includes(p.index))).length;
-  // 골격 탭에는 외판 오버레이로 칠해지지 않는 부위를 전부 모아 보여준다.
-  const frameCount = damaged.filter(p => !SKIN_LAYERS.some(l => l.parts.includes(p.index))).length;
+  const frameCount = damaged.filter(p => FRAME_LAYERS.some(l => l.parts.includes(p.index))).length;
 
   return (
     <div className="border-2 border-gray-100 rounded-2xl overflow-hidden">
@@ -215,44 +206,52 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
               </button>
             ))}
           </div>
+          {tab === 'frame' && (
+            <button
+              onClick={() => setGuideOpen(v => !v)}
+              className="text-xs font-bold text-gray-500 underline underline-offset-2 hover:text-gray-800"
+            >
+              {guideOpen ? '안내도 닫기' : '골격 부위 안내도'}
+            </button>
+          )}
         </div>
 
-        {/* 외판은 차 그림 위에 손상 패널을 칠하고, 골격은 부위명이 적힌 도면을 그대로 보여준다
-            (골격 부품 컷은 차 그림과 기준이 안 맞아서 겹치면 차를 덮어버린다) */}
-        {tab === 'skin' ? (
-          <div className="relative w-full aspect-[4/3]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={BASE_CAR} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
-            {active.map(l => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={l.src}
-                src={l.src}
-                alt=""
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                // 교환은 빨강 쪽으로 색을 돌려 강조한다.
-                style={l.replace ? { filter: 'hue-rotate(-25deg) saturate(1.5)' } : undefined}
-                draggable={false}
-              />
-            ))}
-            {active.length === 0 && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
-                이 면에 표기된 외판 손상 없음
-              </div>
-            )}
-          </div>
-        ) : (
+        {/* 부위명이 적힌 골격 안내도 — 그림에 못 칠하는 부위를 이름으로 찾을 때 */}
+        {tab === 'frame' && guideOpen && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={FRAME_GUIDE[side]}
-            alt="골격 부위 도면"
-            className="w-full rounded-xl border border-gray-100"
+            alt="골격 부위 안내도"
+            className="w-full rounded-xl border border-gray-100 mb-2"
             draggable={false}
           />
         )}
 
-        {/* 칠해진 부위 설명 — 외판 탭에서만 */}
-        {tab === 'skin' && shown.length > 0 && (
+        {/* 차 그림 + 손상 부위 색칠 */}
+        <div className="relative w-full aspect-[4/3]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={BASE_CAR} alt="차량 도면" className="w-full h-full object-contain" draggable={false} />
+          {active.map(l => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={l.src}
+              src={l.src}
+              alt=""
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+              // 교환은 빨강 쪽으로 색을 돌려 강조한다.
+              style={l.replace ? { filter: 'hue-rotate(-25deg) saturate(1.5)' } : undefined}
+              draggable={false}
+            />
+          ))}
+          {active.length === 0 && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-white text-[11px] font-bold px-3 py-1.5 rounded-full">
+              이 면에 표기된 {tab === 'skin' ? '외판' : '골격'} 손상 없음
+            </div>
+          )}
+        </div>
+
+        {/* 칠해진 부위 설명 */}
+        {shown.length > 0 && (
           <div className="mt-2 border border-gray-100 rounded-xl divide-y divide-gray-100">
             {shown.map(p => (
               <div key={p.index} className="flex items-center justify-between gap-3 px-3 py-2">
@@ -265,12 +264,10 @@ export default function VehicleDamageMap({ damages, accident, reportHref }: Prop
           </div>
         )}
 
-        {/* 나머지 부위 — 골격 탭에서는 이게 본문이고, 외판 탭에서는 보조 목록 */}
+        {/* 그림에 못 칠하는 부위 — 부품 그림이 있으면 같이 보여준다 */}
         {listed.length > 0 && (
           <div className="mt-4">
-            <p className="text-xs font-black text-gray-400 mb-2">
-              {tab === 'frame' ? '표기된 골격·기타 부위' : '그림에 표시되지 않는 부위'}
-            </p>
+            <p className="text-xs font-black text-gray-400 mb-2">그림에 표시되지 않는 부위</p>
             <div className="border border-gray-100 rounded-xl divide-y divide-gray-100">
               {listed.map(p => (
                 <div key={p.index} className="flex items-center gap-3 px-3 py-2">
