@@ -1,0 +1,186 @@
+'use client';
+
+// 개인 직거래 매물 상세 — 정찰가로 올라온 차 한 대를 보여준다.
+//
+// 돈이 되는 지점은 두 곳이다. 리포트가 이미 있으면 "리포트 보기"로 신뢰를 주고,
+// 없으면 "이 차 검차 신청"으로 보낸다(구매 전 검차 = 카비어 매출).
+// 판매자 연락처는 화면에 바로 띄우지 않는다 — 번호가 그대로 노출되면 영업 전화에 털린다.
+// 2단계에서 채팅이 붙으면 "문의하기"가 채팅방으로 연결된다.
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+
+const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
+
+interface Listing {
+  id: number;
+  titleKo: string;
+  trim?: string;
+  year: number;
+  mileage: number;
+  fuel?: string;
+  displacement?: number;
+  transmission?: string;
+  colorKo?: string;
+  accident: boolean;
+  askingPrice: number | null;
+  category?: string;
+  region?: string;
+  location?: string;
+  photos?: Record<string, string[] | undefined>;
+  hasReport?: boolean | number;
+  carHash?: string | null;
+  registeredAt?: string;
+}
+
+const fmtPrice = (n: number | null) => {
+  if (!n) return '가격 문의';
+  if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(1)}억원`;
+  return `${Math.round(n / 10_000).toLocaleString()}만원`;
+};
+
+export default function MarketDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const [item, setItem] = useState<Listing | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [photoIdx, setPhotoIdx] = useState(0);
+
+  useEffect(() => {
+    if (!id) return;
+    fetch(`${API}/public/personal-listings/${id}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setItem)
+      .catch(() => setItem(null))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) {
+    return <main className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-400">불러오는 중…</main>;
+  }
+
+  if (!item) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-5">
+        <p className="text-sm text-gray-500">매물을 찾을 수 없습니다. 이미 거래가 끝났을 수 있어요.</p>
+        <Link href="/market" className="text-sm font-bold text-violet-600 hover:underline">← 매물 목록으로</Link>
+      </main>
+    );
+  }
+
+  // 사진은 카테고리별로 나뉘어 있는데(외관·실내·엔진룸…) 상세에선 한 줄로 합쳐서 넘겨본다
+  const photos = Object.values(item.photos ?? {}).flat().filter(Boolean) as string[];
+  const hasReport = !!item.hasReport;
+
+  const SPECS: { label: string; value?: string | number | null }[] = [
+    { label: '연식', value: item.year ? `${item.year}년` : null },
+    { label: '주행거리', value: item.mileage ? `${item.mileage.toLocaleString()}km` : null },
+    { label: '연료', value: item.fuel },
+    { label: '변속기', value: item.transmission },
+    { label: '배기량', value: item.displacement ? `${item.displacement.toLocaleString()}cc` : null },
+    { label: '색상', value: item.colorKo },
+    { label: '지역', value: item.region },
+    { label: '사고 여부', value: item.accident ? '사고 이력 있음' : '무사고(신고 기준)' },
+  ];
+
+  return (
+    <main className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <Link href="/market" className="text-sm font-bold text-gray-400 hover:text-violet-600">← 매물 목록</Link>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mt-6">
+          {/* 사진 */}
+          <div className="lg:col-span-3">
+            <div className="aspect-[4/3] bg-gray-200 rounded-2xl overflow-hidden">
+              {photos[photoIdx] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photos[photoIdx]} alt={item.titleKo} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">사진 준비 중</div>
+              )}
+            </div>
+            {photos.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                {photos.map((p, i) => (
+                  <button
+                    key={p + i}
+                    onClick={() => setPhotoIdx(i)}
+                    className={`w-20 h-16 rounded-lg overflow-hidden shrink-0 border-2 ${i === photoIdx ? 'border-violet-500' : 'border-transparent'}`}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 정보 + 행동 */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              {hasReport && (
+                <span className="inline-block bg-violet-50 text-violet-700 border border-violet-200 text-[11px] font-black px-2.5 py-1 rounded-full mb-3">
+                  🔍 카비어 진단 완료
+                </span>
+              )}
+              <h1 className="text-2xl font-black text-gray-900">{item.titleKo}</h1>
+              {item.trim && <p className="text-sm text-gray-400 mt-1">{item.trim}</p>}
+
+              <p className="text-3xl font-black text-violet-700 mt-5">{fmtPrice(item.askingPrice)}</p>
+              <p className="text-xs text-gray-400 mt-1.5">판매자가 정한 가격입니다. 문의로 조정하실 수 있어요.</p>
+
+              <div className="mt-6 space-y-2.5">
+                {/* 2단계에서 채팅방으로 연결된다 — 지금은 준비 중 안내 */}
+                <button
+                  type="button"
+                  disabled
+                  className="w-full bg-gray-200 text-gray-400 font-black py-3.5 rounded-xl text-sm cursor-not-allowed"
+                >
+                  판매자에게 문의하기 (준비 중)
+                </button>
+
+                {hasReport && item.carHash ? (
+                  <Link
+                    href={`/car-report/${item.carHash}`}
+                    className="block w-full bg-violet-600 hover:bg-violet-700 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors"
+                  >
+                    진단 리포트 보기
+                  </Link>
+                ) : (
+                  <Link
+                    href="/inspection"
+                    className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors"
+                  >
+                    이 차 검차 신청하기
+                  </Link>
+                )}
+              </div>
+
+              {!hasReport && (
+                <p className="text-[12px] leading-relaxed text-gray-500 mt-4 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  이 차는 아직 카비어 진단을 받지 않았습니다. 개인 간 거래는 상태를 확인하기 어렵습니다 —
+                  <strong className="font-bold"> 계약 전에 검차를 받아보시는 것을 권합니다.</strong>
+                </p>
+              )}
+            </div>
+
+            {/* 제원 */}
+            <div className="bg-white rounded-2xl border border-gray-200 mt-5 divide-y divide-gray-100">
+              {SPECS.filter((s) => s.value).map((s) => (
+                <div key={s.label} className="flex items-center justify-between px-5 py-3">
+                  <span className="text-xs font-bold text-gray-400">{s.label}</span>
+                  <span className="text-sm font-bold text-gray-800">{s.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-[11px] leading-relaxed text-gray-400 mt-4">
+              카비어는 개인 간 직거래를 연결만 하며 거래 당사자가 아닙니다. 차량 상태·명의이전·대금은
+              당사자끼리 확인하셔야 합니다.
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
