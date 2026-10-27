@@ -291,6 +291,8 @@ function SelfRegisterForm() {
   // 가격·설명
   const [sellType, setSellType] = useState<string>('일반차량');
   const [priceKRW, setPriceKRW] = useState('');
+  // 개인 직거래(정찰제)가 기본 — 중개는 무료고, 딜러 경매는 선택이다
+  const [listingType, setListingType] = useState<'personal' | 'auction'>('personal');
   const [region, setRegion] = useState('서울');
   const [contact, setContact] = useState('');
   const [description, setDescription] = useState('');
@@ -492,6 +494,10 @@ function SelfRegisterForm() {
         color: car.color,
         colorKo: car.color,
         accident: false,
+        listingType,
+        // 개인 직거래는 이 가격이 그대로 매물에 붙는다(정찰제).
+        // 경매는 priceKRW가 "판매자 희망가(참고용)"라 askingPrice를 안 쓴다.
+        askingPrice: listingType === 'personal' ? Number(priceKRW) * 10000 : null,
         priceKRW: Number(priceKRW) * 10000,
         priceUSD: Math.round(Number(priceKRW) * 10000 / EXCHANGE_RATE),
         category: 'SUV',
@@ -810,6 +816,40 @@ function SelfRegisterForm() {
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100 space-y-4">
             <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">판매 정보</p>
 
+            {/* 거래 방식 — 개인 직거래가 기본. 둘은 보는 사람이 다르다.
+                개인 직거래는 누구나 보는 /market에 올라가고, 딜러 경매는 승인된 딜러만 본다. */}
+            <Field label="어떻게 파실래요?">
+              <div className="grid grid-cols-1 gap-2">
+                {([
+                  {
+                    key: 'personal' as const,
+                    title: '개인에게 직접 팔기',
+                    desc: '내가 정한 가격으로 올려요. 중개 수수료 없이 무료예요.',
+                  },
+                  {
+                    key: 'auction' as const,
+                    title: '딜러들에게 입찰받기',
+                    desc: '승인된 딜러들이 가격을 제시해요. 빠르게 팔고 싶을 때 좋아요.',
+                  },
+                ]).map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setListingType(opt.key)}
+                    className={`text-left px-4 py-3 rounded-xl border transition-colors ${
+                      listingType === opt.key
+                        ? 'bg-violet-50 border-violet-500'
+                        : 'bg-white border-zinc-200 hover:border-zinc-300'
+                    }`}
+                  >
+                    <p className={`text-sm font-black ${listingType === opt.key ? 'text-violet-700' : 'text-zinc-700'}`}>
+                      {opt.title}
+                    </p>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">{opt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </Field>
+
             <Field label="판매 구분">
               <div className="flex gap-2">
                 {SELL_TYPES.map(t => (
@@ -826,7 +866,7 @@ function SelfRegisterForm() {
               </div>
             </Field>
 
-            <Field label="희망 판매가" required>
+            <Field label={listingType === 'personal' ? "판매 가격 (이 금액으로 올라가요)" : "희망 판매가 (딜러 참고용)"} required>
               <div className="relative">
                 <input
                   type="number"
