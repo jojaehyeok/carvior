@@ -433,14 +433,9 @@ function SelfRegisterForm() {
       }
     }
     setPhotos(prev => ({ ...prev, [catKey]: [...prev[catKey], ...newUrls] }));
-    // 번호판·얼굴·주민번호 블러 (백그라운드 처리, 동일 S3 키에 덮어씀)
-    if (newUrls.length > 0) {
-      fetch('https://carvior.store/api/v1/admin/blur/photos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ urls: newUrls }),
-      }).catch(() => {});
-    }
+    // 자동 블러는 쓰지 않는다 — 개인 직거래 매물은 사는 쪽이 차량번호까지 보고 판단하는데,
+    // 번호판을 가려버리면 매물을 믿기 어려워진다(차량 조회도 못 한다).
+    // 개인정보가 찍힌 사진은 등록 전에 본인이 빼는 쪽으로 안내한다.
     setUploading(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carNumber, photos]);

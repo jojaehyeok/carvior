@@ -36,31 +36,31 @@ export default function SellPage() {
     <div className="min-h-screen bg-white font-sans antialiased">
 
       {/* ── HERO ── */}
-      <section className="bg-zinc-950 text-white">
+      <section className="bg-gradient-to-br from-violet-50 via-white to-slate-50 border-b border-violet-100">
         <div className="max-w-xl mx-auto px-5 pt-10 pb-8">
-          <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/30 rounded-full px-3 py-1.5 mb-5">
+          <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 rounded-full px-3 py-1.5 mb-5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-green-300 tracking-wider">수수료 0원 · 딜러 직거래</span>
+            <span className="text-[11px] font-bold text-green-700 tracking-wider">수수료 0원 · 딜러 직거래</span>
           </div>
 
           <h1 className="text-[1.9rem] sm:text-[2.2rem] font-black leading-[1.2] mb-3 tracking-tight">
             내 차를 등록하고<br />
-            <span className="text-violet-400">더 많이 받아가세요</span>
+            <span className="text-violet-600">더 많이 받아가세요</span>
           </h1>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+          <p className="text-slate-500 text-sm leading-relaxed mb-6">
             등록비 0원 · 수수료 0원 · 5분이면 완료.<br />
             딜러들이 경쟁해서 최고가를 제시합니다.
           </p>
 
           {/* 가격 비교 */}
-          <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 mb-6">
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-3">예상 수령액 차이 (예시)</p>
+          <div className="bg-white rounded-2xl p-4 border border-violet-100 shadow-sm mb-6">
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-3">예상 수령액 차이 (예시)</p>
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-violet-500" />
-                    <span className="text-sm font-bold text-white">카비어 셀프 등록</span>
+                    <span className="text-sm font-bold text-slate-900">카비어 셀프 등록</span>
                   </div>
                   <span className="text-base font-black text-violet-400 tabular-nums">+200만원</span>
                 </div>
@@ -70,9 +70,9 @@ export default function SellPage() {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-zinc-600" />
-                    <span className="text-sm text-zinc-500">일반 중고차 매입</span>
+                    <span className="text-sm text-slate-400">일반 중고차 매입</span>
                   </div>
-                  <span className="text-sm text-zinc-500 tabular-nums">기준가</span>
+                  <span className="text-sm text-slate-400 tabular-nums">기준가</span>
                 </div>
                 <div className="w-4/5 bg-zinc-700 rounded-full h-2" />
               </div>
@@ -87,14 +87,14 @@ export default function SellPage() {
               <span className="text-sm font-black text-green-300">0원</span>
             </div>
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
-              <span className="text-[11px] text-zinc-400">딜러 수수료</span>
+              <span className="text-[11px] text-slate-500">딜러 수수료</span>
               <span className="text-sm font-black text-violet-400">0원</span>
             </div>
           </div>
 
           <button
             onClick={() => router.push('/sell/register')}
-            className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-900/40"
+            className="w-full py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-slate-900 font-extrabold text-base rounded-2xl transition-all shadow-lg shadow-violet-900/40"
           >
             등록하기 →
           </button>
@@ -103,10 +103,10 @@ export default function SellPage() {
       </section>
 
       {/* ── 왜 셀프 등록인가 ── */}
-      <section className="bg-white py-12 px-5">
+      <section className="bg-white py-9 px-5">
         <div className="max-w-xl mx-auto">
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-1.5">WHY SELF REGISTER</p>
-          <h2 className="text-2xl font-black text-zinc-900 text-center mb-6 leading-tight">더 받을 수 있는 이유</h2>
+          <h2 className="text-xl font-black text-zinc-900 text-center mb-5 leading-tight">더 받을 수 있는 이유</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
@@ -129,27 +129,11 @@ export default function SellPage() {
         </div>
       </section>
 
-      {/* ── 중간 CTA ── */}
-      <section className="bg-violet-600 py-10 px-5">
-        <div className="max-w-xl mx-auto text-center">
-          <p className="text-violet-200 text-sm font-bold mb-2">등록비 0원 · 수수료 0원</p>
-          <p className="text-white text-xl font-black leading-tight mb-5">
-            5분 입력으로<br />더 높은 가격에 팔기
-          </p>
-          <button
-            onClick={() => router.push('/sell/register')}
-            className="inline-block px-10 py-3.5 bg-white text-violet-700 font-extrabold text-sm rounded-2xl hover:bg-violet-50 active:scale-95 transition-all shadow-lg"
-          >
-            지금 시작하기 →
-          </button>
-        </div>
-      </section>
-
       {/* ── 이용 방법 ── */}
-      <section className="bg-zinc-50 py-12 px-5">
+      <section className="bg-zinc-50 py-9 px-5">
         <div className="max-w-xl mx-auto">
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-1.5">HOW IT WORKS</p>
-          <h2 className="text-2xl font-black text-zinc-900 text-center mb-2 leading-tight">이용방법, 어렵지 않아요!</h2>
+          <h2 className="text-xl font-black text-zinc-900 text-center mb-2 leading-tight">이용방법, 어렵지 않아요!</h2>
           <p className="text-zinc-400 text-sm text-center mb-8">5단계, 5분이면 완료</p>
 
           <div className="space-y-0">
@@ -177,10 +161,10 @@ export default function SellPage() {
       </section>
 
       {/* ── 후기 ── */}
-      <section className="bg-white py-12 px-5">
+      <section className="bg-white py-9 px-5">
         <div className="max-w-xl mx-auto">
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-1.5">REVIEWS</p>
-          <h2 className="text-2xl font-black text-zinc-900 text-center mb-6">실제 판매자 후기</h2>
+          <h2 className="text-xl font-black text-zinc-900 text-center mb-5">실제 판매자 후기</h2>
           <div className="space-y-3">
             {[
               { name: '김*준', car: '기아 쏘렌토 2021', stars: 5, text: '딜러한테 직접 팔았을 때보다 230만원 더 받았어요. 카비어에 올리니까 딜러들이 먼저 연락 오더라고요.' },
@@ -207,10 +191,10 @@ export default function SellPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="bg-zinc-50 py-12 px-5">
+      <section className="bg-zinc-50 py-9 px-5">
         <div className="max-w-xl mx-auto">
           <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest text-center mb-1.5">FAQ</p>
-          <h2 className="text-2xl font-black text-zinc-900 text-center mb-6">자주 묻는 질문</h2>
+          <h2 className="text-xl font-black text-zinc-900 text-center mb-5">자주 묻는 질문</h2>
           <div className="space-y-2">
             {FAQS.map((faq, i) => (
               <div key={i} className="rounded-2xl border border-zinc-200 overflow-hidden bg-white">
@@ -231,33 +215,6 @@ export default function SellPage() {
           </div>
         </div>
       </section>
-
-      {/* ── 하단 CTA ── */}
-      <section className="bg-zinc-950 py-12 px-5">
-        <div className="max-w-xl mx-auto text-center space-y-4">
-          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">지금 시작하세요</p>
-          <h2 className="text-xl font-black text-white leading-tight">
-            내 차, 직접 등록하고<br />
-            <span className="text-violet-400">최고가에 판매</span>하세요
-          </h2>
-          <p className="text-zinc-500 text-xs">일반인·딜러·수출 차량 모두 · 검토 후 스토어 노출</p>
-          <button
-            onClick={() => router.push('/sell/register')}
-            className="w-full max-w-xs py-4 bg-violet-600 hover:bg-violet-500 active:scale-[0.98] text-white font-extrabold text-base rounded-2xl transition-all mx-auto block"
-          >
-            등록하기 →
-          </button>
-          <div className="pt-4 border-t border-zinc-800">
-            <p className="text-zinc-600 text-xs mb-1.5">등록 문의</p>
-            <a href="tel:01022856017" className="text-zinc-400 text-sm font-bold hover:text-white transition-colors">
-              📞 010-2285-6017
-            </a>
-            <p className="text-zinc-700 text-[10px] mt-1">평일 09:00 – 18:00</p>
-          </div>
-        </div>
-      </section>
-
-      <AppFooter />
 
       {/* ── 플로팅 CTA ── */}
       <div className={`fixed bottom-5 left-0 right-0 px-4 z-40 transition-all duration-300 ${
