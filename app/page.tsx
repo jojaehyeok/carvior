@@ -6,6 +6,7 @@ import AppFooter from '@/components/footermodal';
 import HomePromoPopups from '@/components/HomePromoPopups';
 import RecentListings from '@/components/home/RecentListings';
 import NoticeAndFaq from '@/components/home/NoticeAndFaq';
+import SideRail from '@/components/SideRail';
 import { brandLogoSlug } from '@/lib/carBrand';
 
 interface Review {
@@ -66,29 +67,29 @@ export default function HomePage() {
            전에는 화면을 가득 채워서 매물을 보려면 한참 내려야 했다. 여백을 줄여서 낮췄다.
            ⚠ max-height로 자르면 안 된다 — 글자 크기나 줄 수가 바뀌면 버튼부터 잘려나간다.
            배경 사진은 오른쪽에 붙여 배너 비주얼처럼 쓰고, 글자 쪽은 어둡게 덮어 읽히게 한다. */}
-      <section className="relative bg-zinc-900 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-violet-50 via-white to-slate-50 overflow-hidden border-b border-violet-100">
         <img
           src="/images/diagnostic-1.jpg"
           alt=""
-          className="absolute inset-y-0 right-0 w-full md:w-3/5 h-full object-cover object-center opacity-25"
+          className="absolute inset-y-0 right-0 w-full md:w-3/5 h-full object-cover object-center opacity-10"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-900/40 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/4" />
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-violet-300/20 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/4" />
 
         <div className="relative max-w-7xl mx-auto px-6 pt-14 pb-14">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
+            <span className="inline-flex items-center gap-1.5 bg-violet-100 border border-violet-200 text-violet-700 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
               <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
               독립 진단 기반 · 투명한 거래
             </span>
 
-            <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.2] mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 leading-[1.25] mb-4">
               중고차 거래,<br />
               이제 <span className="text-violet-400">차량 상태부터</span><br />
               투명하게.
             </h1>
 
-            <p className="text-zinc-300 text-sm md:text-base leading-relaxed mb-7">
+            <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-7">
               카비어는 차량을 직접 판매하지 않습니다.<br />
               독립된 진단평가와 투명한 거래 정보로<br />
               사는 사람과 파는 사람이 안심할 수 있는 시장을 만듭니다.
@@ -102,11 +103,11 @@ export default function HomePage() {
                 내 차 팔기 (무료) →
               </Link>
               <Link href="/market"
-                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
+                className="bg-white hover:bg-violet-50 border border-violet-200 text-violet-700 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
                 내 차 사기
               </Link>
               <Link href="/inspection"
-                className="bg-transparent hover:bg-white/10 border border-white/20 text-white/80 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
+                className="bg-transparent hover:bg-slate-100 border border-slate-200 text-slate-500 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
                 검차 신청
               </Link>
             </div>
@@ -174,7 +175,7 @@ export default function HomePage() {
 
       {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
       {reviews.length > 0 && (
-        <section className="bg-gray-50 border-y border-gray-100 py-20">
+        <section className="bg-slate-50 border-y border-slate-100 py-20">
           <div className="max-w-7xl mx-auto px-6">
             <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">REAL REVIEWS</p>
             <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-8">진단 받아보신 분들의 후기</h2>
@@ -235,20 +236,20 @@ export default function HomePage() {
       {/* ── 차바타 앱 안내 ──
            고객용·딜러용 앱은 따로 만들 예정이라, 지금은 실제로 나와 있는
            진단평가사 앱(차바타)만 소개한다. 앱이 더 나오면 여기에 나란히 붙이면 된다. */}
-      <section className="bg-zinc-900">
+      <section className="bg-gradient-to-br from-violet-50 to-slate-50 border-y border-violet-100">
         <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-10">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <img src="/logo-icon.svg" alt="" className="w-9 h-9" />
-              <span className="text-white text-xl font-black">차바타</span>
-              <span className="text-[10px] font-bold text-violet-300 bg-violet-500/20 border border-violet-500/30 px-2 py-0.5 rounded-full">
+              <span className="text-slate-900 text-xl font-black">차바타</span>
+              <span className="text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
                 진단평가사용
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-3">
               현장 진단을 더 쉽고 빠르게.
             </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-7">
+            <p className="text-slate-500 text-sm leading-relaxed mb-7">
               배정받은 의뢰 확인부터 사진 촬영·리포트 작성·정산 내역까지<br className="hidden sm:block" />
               진단평가사가 현장에서 쓰는 앱입니다.
             </p>
@@ -257,7 +258,7 @@ export default function HomePage() {
                 href="https://play.google.com/store/apps/details?id=com.rabbitjindan.ChavatarApp"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-colors"
+                className="flex items-center gap-2 bg-white hover:bg-violet-50 border border-violet-200 text-slate-700 font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition-colors"
               >
                 ▶ Google Play
               </a>
@@ -265,21 +266,21 @@ export default function HomePage() {
                 href="https://apps.apple.com/kr/app/id6801937353"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-colors"
+                className="flex items-center gap-2 bg-white hover:bg-violet-50 border border-violet-200 text-slate-700 font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition-colors"
               >
                  App Store
               </a>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-4">
-              진단평가사 지원은 <Link href="/recruit" className="underline hover:text-zinc-300">평가사 모집</Link>에서 받습니다.
+            <p className="text-[11px] text-slate-400 mt-4">
+              진단평가사 지원은 <Link href="/recruit" className="underline hover:text-violet-600">평가사 모집</Link>에서 받습니다.
             </p>
           </div>
 
           <div className="shrink-0">
-            <div className="w-52 h-96 rounded-[2rem] border-4 border-zinc-700 bg-zinc-800 flex flex-col items-center justify-center gap-3">
+            <div className="hidden sm:flex w-44 h-80 rounded-[2rem] border-4 border-violet-100 bg-white shadow-sm flex-col items-center justify-center gap-3">
               <img src="/logo-icon.svg" alt="" className="w-14 h-14" />
-              <p className="text-white font-black">차바타</p>
-              <p className="text-zinc-500 text-xs">진단평가사 전용 앱</p>
+              <p className="text-slate-900 font-black">차바타</p>
+              <p className="text-slate-400 text-xs">진단평가사 전용 앱</p>
             </div>
           </div>
         </div>
@@ -287,6 +288,9 @@ export default function HomePage() {
 
       {/* 공지·FAQ는 푸터 바로 위 — 거래 사이트에서 제일 자주 찾는 두 가지 */}
       <NoticeAndFaq />
+
+      {/* 최근 본 차량 · 찜 · 맨 위로 — 어느 화면에서나 오른쪽에 붙어 있다 */}
+      <SideRail />
 
       <AppFooter />
     </div>

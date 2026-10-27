@@ -9,8 +9,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import SideRail from '@/components/SideRail';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { isFavorite, pushRecent, toggleFavorite } from '@/lib/garage';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -47,6 +49,7 @@ export default function MarketDetailPage() {
   const [loading, setLoading] = useState(true);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [opening, setOpening] = useState(false);
+  const [fav, setFav] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -84,6 +87,18 @@ export default function MarketDetailPage() {
       .catch(() => setItem(null))
       .finally(() => setLoading(false));
   }, [id]);
+
+  // 본 차를 기록해둔다(오른쪽 '최근 본 차량'에서 다시 찾을 수 있게)
+  useEffect(() => {
+    if (!item) return;
+    pushRecent({
+      id: item.id,
+      title: item.titleKo,
+      photo: item.photos?.exterior?.[0] ?? null,
+      price: item.askingPrice,
+    });
+    setFav(isFavorite(item.id));
+  }, [item]);
 
   if (loading) {
     return <main className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-400">불러오는 중…</main>;
@@ -156,7 +171,16 @@ export default function MarketDetailPage() {
               <h1 className="text-2xl font-black text-gray-900">{item.titleKo}</h1>
               {item.trim && <p className="text-sm text-gray-400 mt-1">{item.trim}</p>}
 
-              <p className="text-3xl font-black text-violet-700 mt-5">{fmtPrice(item.askingPrice)}</p>
+              <div className="flex items-center justify-between gap-3 mt-5">
+                <p className="text-3xl font-black text-violet-700">{fmtPrice(item.askingPrice)}</p>
+                <button
+                  onClick={() => setFav(toggleFavorite({ id: item.id, title: item.titleKo, photo: item.photos?.exterior?.[0] ?? null, price: item.askingPrice }))}
+                  className="shrink-0 w-11 h-11 rounded-full border border-violet-100 hover:bg-violet-50 flex items-center justify-center text-xl transition-colors"
+                  aria-label="찜하기"
+                >
+                  <span className={fav ? "text-violet-600" : "text-slate-300"}>{fav ? "♥" : "♡"}</span>
+                </button>
+              </div>
               <p className="text-xs text-gray-400 mt-1.5">판매자가 정한 가격입니다. 문의로 조정하실 수 있어요.</p>
 
               <div className="mt-6 space-y-2.5">
@@ -211,6 +235,7 @@ export default function MarketDetailPage() {
           </div>
         </div>
       </div>
+      <SideRail />
     </main>
   );
 }

@@ -9,7 +9,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import SideRail from '@/components/SideRail';
 import { clsx } from 'clsx';
+import { isFavorite, toggleFavorite } from '@/lib/garage';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -41,6 +43,9 @@ const fmtPrice = (n: number | null) => {
 function ListingCard({ item }: { item: Listing }) {
   const photo = item.photos?.exterior?.[0];
   const hasReport = !!item.hasReport;
+  const [fav, setFav] = useState(false);
+  // 찜 여부는 브라우저에 있으므로 화면에 붙은 뒤에 읽는다(서버 렌더와 어긋나지 않게)
+  useEffect(() => { setFav(isFavorite(item.id)); }, [item.id]);
 
   return (
     <Link
@@ -59,11 +64,16 @@ function ListingCard({ item }: { item: Listing }) {
             🔍 진단 리포트
           </span>
         )}
-        {!item.accident && (
-          <span className="absolute top-3 right-3 bg-white/90 text-gray-700 text-[11px] font-bold px-2.5 py-1 rounded-full">
-            무사고
-          </span>
-        )}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setFav(toggleFavorite({ id: item.id, title: item.titleKo, photo: photo ?? null, price: item.askingPrice }));
+          }}
+          className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-sm"
+          aria-label="찜하기"
+        >
+          <span className={fav ? "text-violet-600" : "text-slate-300"}>{fav ? "♥" : "♡"}</span>
+        </button>
       </div>
 
       <div className="p-4">
@@ -191,6 +201,7 @@ export default function MarketPage() {
           </Link>
         </div>
       </section>
+      <SideRail />
     </main>
   );
 }
