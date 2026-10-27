@@ -31,7 +31,9 @@ export const authOptions: NextAuthOptions = {
           });
           if (!res.ok) return null;
           const user = await res.json();
-          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role, dealerStatus: user.dealerStatus } as any;
+          // apiToken: 백엔드가 발급한 JWT. 채팅처럼 "남의 것을 보면 안 되는" 기능이
+          // 이 토큰으로 사용자를 확인한다(클라이언트가 보내는 userId는 못 믿는다).
+          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role, dealerStatus: user.dealerStatus, apiToken: user.token } as any;
         } catch { return null; }
       },
     }),
@@ -41,7 +43,7 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user, account }) {
       if (account?.type === 'credentials') return true;
       try {
-        await fetch(`${NEST}/v1/users/social`, {
+        const res = await fetch(`${NEST}/v1/users/social`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -52,6 +54,12 @@ export const authOptions: NextAuthOptions = {
             profileImage: user.image  ?? undefined,
           }),
         });
+        // 소셜 로그인도 백엔드 토큰을 받아둬야 채팅을 쓸 수 있다. 여기서 user에 실어두면
+        // 아래 jwt 콜백이 그대로 세션까지 가져간다(이메일 로그인과 같은 경로).
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.token) (user as { apiToken?: string }).apiToken = data.token;
+        }
       } catch { /* DB 저장 실패해도 로그인 허용 */ }
       return true;
     },
@@ -67,6 +75,7 @@ export const authOptions: NextAuthOptions = {
         token.role         = (user as any).role;
         token.userId       = (user as any).id;
         token.dealerStatus = (user as any).dealerStatus;
+        if ((user as any).apiToken) token.apiToken = (user as any).apiToken;
       }
       // 소셜 로그인 최초 발급 시 DB에서 role 조회
       if (account && account.type !== 'credentials' && token.email) {
@@ -90,6 +99,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role         = token.role;
         (session.user as any).dealerStatus = token.dealerStatus;
         (session.user as any).provider     = token.provider;
+        (session.user as any).apiToken     = token.apiToken;
       }
       return session;
     },

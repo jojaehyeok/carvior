@@ -9,7 +9,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -45,6 +46,35 @@ export default function MarketDetailPage() {
   const [item, setItem] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [opening, setOpening] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  // 문의하기 — 로그인한 사람만. 이미 대화한 적 있으면 그 방으로 들어간다.
+  const openChat = async () => {
+    const apiToken = (session?.user as { apiToken?: string } | undefined)?.apiToken;
+    if (!apiToken) {
+      router.push(`/login?callbackUrl=/market/${id}`);
+      return;
+    }
+    setOpening(true);
+    try {
+      const res = await fetch(`${API}/chat/rooms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
+        body: JSON.stringify({ storeItemId: Number(id) }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        alert(err?.message ?? '문의를 시작하지 못했습니다.');
+        return;
+      }
+      const { roomId } = await res.json();
+      router.push(`/chat/${roomId}`);
+    } finally {
+      setOpening(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -130,13 +160,13 @@ export default function MarketDetailPage() {
               <p className="text-xs text-gray-400 mt-1.5">판매자가 정한 가격입니다. 문의로 조정하실 수 있어요.</p>
 
               <div className="mt-6 space-y-2.5">
-                {/* 2단계에서 채팅방으로 연결된다 — 지금은 준비 중 안내 */}
                 <button
                   type="button"
-                  disabled
-                  className="w-full bg-gray-200 text-gray-400 font-black py-3.5 rounded-xl text-sm cursor-not-allowed"
+                  onClick={openChat}
+                  disabled={opening}
+                  className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-black py-3.5 rounded-xl text-sm transition-colors"
                 >
-                  판매자에게 문의하기 (준비 중)
+                  {opening ? '여는 중…' : '판매자에게 문의하기'}
                 </button>
 
                 {hasReport && item.carHash ? (
