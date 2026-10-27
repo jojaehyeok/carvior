@@ -63,9 +63,10 @@ export default function HomePage() {
       <HomePromoPopups />
 
       {/* ── 히어로 ──
-           배너처럼 높이를 묶어둔다. 전에는 화면 가득 차서 매물을 보려면 한참 내려야 했다.
+           전에는 화면을 가득 채워서 매물을 보려면 한참 내려야 했다. 여백을 줄여서 낮췄다.
+           ⚠ max-height로 자르면 안 된다 — 글자 크기나 줄 수가 바뀌면 버튼부터 잘려나간다.
            배경 사진은 오른쪽에 붙여 배너 비주얼처럼 쓰고, 글자 쪽은 어둡게 덮어 읽히게 한다. */}
-      <section className="relative bg-zinc-900 overflow-hidden max-h-[360px]">
+      <section className="relative bg-zinc-900 overflow-hidden">
         <img
           src="/images/diagnostic-1.jpg"
           alt=""
