@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppFooter from '@/components/footermodal';
 import HomePromoPopups from '@/components/HomePromoPopups';
+import RecentListings from '@/components/home/RecentListings';
+import NoticeAndFaq from '@/components/home/NoticeAndFaq';
 import { brandLogoSlug } from '@/lib/carBrand';
 
 interface Review {
@@ -89,17 +91,49 @@ export default function HomePage() {
               사는 사람과 파는 사람이 안심할 수 있는 시장을 만듭니다.
             </p>
 
+            {/* 들어오는 사람은 둘 중 하나다 — 팔러 왔거나 사러 왔거나.
+                검차는 그 과정에서 자연스럽게 만나게 하고, 히어로에선 두 동선만 보여준다. */}
             <div className="flex flex-wrap gap-3">
-              <Link href="/inspection"
+              <Link href="/sell/register"
                 className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
-                내 차 진단하기 →
+                내 차 팔기 (무료) →
               </Link>
-              <Link href="/vehicles"
+              <Link href="/market"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
-                검차 차량 보기
+                차 사기
+              </Link>
+              <Link href="/inspection"
+                className="bg-transparent hover:bg-white/10 border border-white/20 text-white/80 font-bold px-8 py-4 rounded-xl text-sm transition-colors">
+                검차 신청
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── 최근 올라온 차량 (개인 직거래) ──
+           브랜드 소개보다 실제 매물이 먼저 보여야 거래 사이트로 읽힌다. */}
+      <RecentListings />
+
+      {/* ── 거래 전 검차 안내 — 중개는 무료고 매출은 여기서 난다 ── */}
+      <section className="bg-violet-50 border-y border-violet-100">
+        <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <span className="text-3xl">🔍</span>
+            <div>
+              <h2 className="text-xl font-black text-gray-900">개인 거래, 상태가 제일 불안하시죠</h2>
+              <p className="text-sm text-gray-600 mt-1.5 leading-relaxed">
+                진단평가사가 차 있는 곳으로 직접 가서 확인하고 리포트를 드립니다.<br className="hidden sm:block" />
+                계약 전에 받아보시면 분쟁이 줄어듭니다. 국산 99,000원 · 수입 132,000원
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/inspection"
+            className="shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors"
+          >
+            검차 신청하기 →
+          </Link>
         </div>
       </section>
 
@@ -486,6 +520,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 공지·FAQ는 푸터 바로 위 — 거래 사이트에서 제일 자주 찾는 두 가지 */}
+      <NoticeAndFaq />
 
       <AppFooter />
     </div>
