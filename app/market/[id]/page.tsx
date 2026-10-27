@@ -12,7 +12,8 @@ import Link from 'next/link';
 import SideRail from '@/components/SideRail';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { isFavorite, pushRecent, toggleFavorite } from '@/lib/garage';
+import { pushRecent } from '@/lib/garage';
+import HeartButton from '@/components/HeartButton';
 import { useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
@@ -50,7 +51,6 @@ export default function MarketDetailPage() {
   const [loading, setLoading] = useState(true);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [opening, setOpening] = useState(false);
-  const [fav, setFav] = useState(false);
   const { token: apiToken, ready: tokenReady } = useApiToken();
   const router = useRouter();
 
@@ -99,7 +99,6 @@ export default function MarketDetailPage() {
       photo: item.photos?.exterior?.[0] ?? null,
       price: item.askingPrice,
     });
-    setFav(isFavorite(item.id));
   }, [item]);
 
   if (loading) {
@@ -175,13 +174,10 @@ export default function MarketDetailPage() {
 
               <div className="flex items-center justify-between gap-3 mt-5">
                 <p className="text-3xl font-black text-violet-700">{fmtPrice(item.askingPrice)}</p>
-                <button
-                  onClick={() => setFav(toggleFavorite({ id: item.id, title: item.titleKo, photo: item.photos?.exterior?.[0] ?? null, price: item.askingPrice }))}
-                  className="shrink-0 w-11 h-11 rounded-full border border-violet-100 hover:bg-violet-50 flex items-center justify-center text-xl transition-colors"
-                  aria-label="찜하기"
-                >
-                  <span className={fav ? "text-violet-600" : "text-slate-300"}>{fav ? "♥" : "♡"}</span>
-                </button>
+                <HeartButton
+                  car={{ id: item.id, title: item.titleKo, photo: item.photos?.exterior?.[0] ?? null, price: item.askingPrice }}
+                  className="shrink-0"
+                />
               </div>
               <p className="text-xs text-gray-400 mt-1.5">판매자가 정한 가격입니다. 문의로 조정하실 수 있어요.</p>
 

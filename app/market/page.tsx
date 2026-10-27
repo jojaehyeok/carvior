@@ -15,7 +15,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import SideRail from '@/components/SideRail';
 import { clsx } from 'clsx';
-import { isFavorite, toggleFavorite } from '@/lib/garage';
+import HeartButton from '@/components/HeartButton';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -106,10 +106,6 @@ function Chips({ options, value, onChange }: { options: string[]; value: string;
 
 function ListingRow({ item }: { item: Listing }) {
   const photo = item.photos?.exterior?.[0];
-  const [fav, setFav] = useState(false);
-  useEffect(() => {
-    if (!item.isSample) setFav(isFavorite(item.id));
-  }, [item.id, item.isSample]);
 
   const body = (
     <div
@@ -139,16 +135,11 @@ function ListingRow({ item }: { item: Listing }) {
             {item.trim && <p className="text-xs text-slate-400 truncate mt-0.5">{item.trim}</p>}
           </div>
           {!item.isSample && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setFav(toggleFavorite({ id: item.id, title: item.titleKo, photo: photo ?? null, price: item.askingPrice }));
-              }}
-              className="shrink-0 w-8 h-8 rounded-full hover:bg-violet-50 flex items-center justify-center"
-              aria-label="찜하기"
-            >
-              <span className={fav ? 'text-violet-600' : 'text-slate-300'}>{fav ? '♥' : '♡'}</span>
-            </button>
+            <HeartButton
+              car={{ id: item.id, title: item.titleKo, photo: photo ?? null, price: item.askingPrice }}
+              size="sm"
+              className="shrink-0"
+            />
           )}
         </div>
 
