@@ -92,6 +92,16 @@ export default function ChatListPage() {
                       <span className="text-[10px] font-bold text-gray-400 shrink-0">
                         {room.role === 'buyer' ? '구매 문의' : '판매 문의'}
                       </span>
+                      {room.status === 'closed' && (
+                        <span className="text-[10px] font-black text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded shrink-0">
+                          거래완료
+                        </span>
+                      )}
+                      {room.status === 'blocked' && (
+                        <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">
+                          차단
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-gray-500 truncate mt-0.5">
                       {room.lastMessageText ?? '대화를 시작해보세요'}

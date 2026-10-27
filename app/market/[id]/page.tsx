@@ -14,6 +14,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { pushRecent } from '@/lib/garage';
 import HeartButton from '@/components/HeartButton';
+import ReportModal from '@/components/ReportModal';
 import { useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
@@ -37,6 +38,17 @@ interface Listing {
   hasReport?: boolean | number;
   carHash?: string | null;
   registeredAt?: string;
+  sellerUserId?: number | null;
+  sellerRating?: number | null;
+  sellerReviewCount?: number;
+}
+
+interface SellerReview {
+  id: number;
+  rating: number;
+  text: string | null;
+  createdAt: string;
+  writerName: string;
 }
 
 const fmtPrice = (n: number | null) => {
@@ -51,6 +63,8 @@ export default function MarketDetailPage() {
   const [loading, setLoading] = useState(true);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [opening, setOpening] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [reviews, setReviews] = useState<SellerReview[] | null>(null);
   const { token: apiToken, ready: tokenReady } = useApiToken();
   const router = useRouter();
 
@@ -100,6 +114,15 @@ export default function MarketDetailPage() {
       price: item.askingPrice,
     });
   }, [item]);
+
+  // 판매자 후기 — 평점이 있을 때만 불러온다(없는 사람에게 빈 목록을 조회할 필요가 없다)
+  const loadReviews = async () => {
+    if (!item?.sellerUserId) return;
+    const list = await fetch(`${API}/trade-reviews/users/${item.sellerUserId}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+    setReviews(Array.isArray(list) ? list : []);
+  };
 
   if (loading) {
     return <main className="min-h-screen bg-gray-50 flex items-center justify-center text-sm text-gray-400">불러오는 중…</main>;
@@ -181,6 +204,41 @@ export default function MarketDetailPage() {
               </div>
               <p className="text-xs text-gray-400 mt-1.5">판매자가 정한 가격입니다. 문의로 조정하실 수 있어요.</p>
 
+              {/* 판매자 평점 — 개인 거래는 상대가 어떤 사람인지가 가장 큰 정보다 */}
+              <div className="mt-4 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3">
+                {item.sellerReviewCount ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold text-slate-500">판매자 거래 후기</p>
+                      <p className="text-sm font-black text-slate-800">
+                        <span className="text-amber-500">★</span> {item.sellerRating}
+                        <span className="text-xs font-bold text-slate-400 ml-1">({item.sellerReviewCount})</span>
+                      </p>
+                    </div>
+                    {reviews === null ? (
+                      <button onClick={loadReviews} className="text-[11px] font-bold text-violet-600 hover:underline mt-2">
+                        후기 보기
+                      </button>
+                    ) : (
+                      <ul className="mt-3 space-y-2">
+                        {reviews.map((r) => (
+                          <li key={r.id} className="text-[11px] leading-relaxed">
+                            <span className="text-amber-500">{'★'.repeat(r.rating)}</span>
+                            <span className="text-slate-300">{'★'.repeat(5 - r.rating)}</span>
+                            <span className="text-slate-400 ml-1.5">{r.writerName}</span>
+                            {r.text && <span className="block text-slate-600">{r.text}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-[11px] leading-relaxed text-slate-500">
+                    아직 거래 후기가 없는 판매자입니다. 계약 전에 차량 상태를 꼭 직접 확인하세요.
+                  </p>
+                )}
+              </div>
+
               <div className="mt-6 space-y-2.5">
                 <button
                   type="button"
@@ -230,10 +288,28 @@ export default function MarketDetailPage() {
               카비어는 개인 간 직거래를 연결만 하며 거래 당사자가 아닙니다. 차량 상태·명의이전·대금은
               당사자끼리 확인하셔야 합니다.
             </p>
+
+            <button
+              onClick={() => {
+                // 신고는 로그인한 사람만 — 익명 신고를 받으면 장난 신고를 막을 수 없다
+                if (!tokenReady) return;
+                if (!apiToken) {
+                  router.push(`/login?callbackUrl=/market/${id}`);
+                  return;
+                }
+                setReporting(true);
+              }}
+              className="mt-3 text-[11px] font-bold text-slate-400 hover:text-red-500 transition-colors"
+            >
+              🚩 이 매물 신고하기
+            </button>
           </div>
         </div>
       </div>
       <SideRail />
+      {reporting && (
+        <ReportModal targetType="listing" targetId={item.id} token={apiToken} onClose={() => setReporting(false)} />
+      )}
     </main>
   );
 }
