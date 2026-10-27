@@ -15,7 +15,7 @@ import { useSession } from 'next-auth/react';
 import { pushRecent } from '@/lib/garage';
 import HeartButton from '@/components/HeartButton';
 import ReportModal from '@/components/ReportModal';
-import { useApiToken } from '@/lib/useApiToken';
+import { tokenErrorMessage, useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -65,7 +65,7 @@ export default function MarketDetailPage() {
   const [opening, setOpening] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [reviews, setReviews] = useState<SellerReview[] | null>(null);
-  const { token: apiToken, ready: tokenReady } = useApiToken();
+  const { token: apiToken, ready: tokenReady, status: authStatus, error: tokenError } = useApiToken();
   const router = useRouter();
 
   // 문의하기 — 로그인한 사람만. 이미 대화한 적 있으면 그 방으로 들어간다.
@@ -73,6 +73,8 @@ export default function MarketDetailPage() {
     // 토큰을 아직 받아오는 중이면 아무것도 하지 않는다 — 이미 로그인한 사람을 로그인으로 보내면 안 된다
     if (!tokenReady) return;
     if (!apiToken) {
+      // 로그인 자체가 안 된 사람만 로그인으로 보낸다
+      if (authStatus === 'authenticated') { alert(tokenErrorMessage(tokenError)); return; }
       router.push(`/login?callbackUrl=/market/${id}`);
       return;
     }
@@ -294,6 +296,7 @@ export default function MarketDetailPage() {
                 // 신고는 로그인한 사람만 — 익명 신고를 받으면 장난 신고를 막을 수 없다
                 if (!tokenReady) return;
                 if (!apiToken) {
+                  if (authStatus === 'authenticated') { alert(tokenErrorMessage(tokenError)); return; }
                   router.push(`/login?callbackUrl=/market/${id}`);
                   return;
                 }

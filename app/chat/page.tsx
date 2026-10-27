@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { useApiToken } from '@/lib/useApiToken';
+import { tokenErrorMessage, useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -42,7 +42,7 @@ export default function ChatListPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { token: apiToken, ready: tokenReady } = useApiToken();
+  const { token: apiToken, ready: tokenReady, error: tokenError } = useApiToken();
 
   useEffect(() => {
     if (tokenReady && !apiToken && status === 'unauthenticated') router.replace('/login?callbackUrl=/chat');
@@ -63,7 +63,12 @@ export default function ChatListPage() {
         <h1 className="text-2xl font-black text-gray-900 mb-1">문의 대화</h1>
         <p className="text-sm text-gray-500 mb-7">매물에 대해 주고받은 대화입니다.</p>
 
-        {loading ? (
+        {tokenReady && !apiToken && status === 'authenticated' ? (
+          <div className="bg-white border border-amber-200 rounded-2xl py-14 px-6 text-center">
+            <p className="text-sm font-black text-slate-800 mb-2">대화를 불러올 권한을 받지 못했습니다</p>
+            <p className="text-xs leading-relaxed text-slate-500 whitespace-pre-line">{tokenErrorMessage(tokenError)}</p>
+          </div>
+        ) : loading ? (
           <p className="py-20 text-center text-sm text-gray-400">불러오는 중…</p>
         ) : rooms.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-2xl py-16 text-center">

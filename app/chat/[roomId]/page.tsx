@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { io, type Socket } from 'socket.io-client';
-import { useApiToken } from '@/lib/useApiToken';
+import { tokenErrorMessage, useApiToken } from '@/lib/useApiToken';
 import ReportModal from '@/components/ReportModal';
 import TradeReviewModal from '@/components/TradeReviewModal';
 
@@ -60,7 +60,7 @@ export default function ChatRoomPage() {
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { token: apiToken, ready: tokenReady } = useApiToken();
+  const { token: apiToken, ready: tokenReady, error: tokenError } = useApiToken();
   const myId = Number((session?.user as { id?: string } | undefined)?.id ?? 0);
 
   useEffect(() => {
@@ -244,6 +244,15 @@ export default function ChatRoomPage() {
           </div>
         </div>
       </div>
+
+      {tokenReady && !apiToken && status === 'authenticated' && (
+        <div className="max-w-3xl mx-auto w-full px-5 pt-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <p className="text-xs font-black text-slate-800 mb-1">대화를 불러올 권한을 받지 못했습니다</p>
+            <p className="text-[11px] leading-relaxed text-slate-500 whitespace-pre-line">{tokenErrorMessage(tokenError)}</p>
+          </div>
+        </div>
+      )}
 
       {/* 대화 */}
       <div className="flex-1 overflow-y-auto">

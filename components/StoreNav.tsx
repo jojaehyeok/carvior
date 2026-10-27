@@ -172,6 +172,12 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                 <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
               <button
+                onClick={() => { setOpen(false); router.push('/chat'); }}
+                className="w-full flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
+              >
+                문의 대화
+              </button>
+              <button
                 onClick={() => { setOpen(false); router.push('/mypage'); }}
                 className="w-full flex items-center px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
               >
