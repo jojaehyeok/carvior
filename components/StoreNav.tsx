@@ -7,6 +7,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { clsx } from 'clsx';
 
 const NAV_LINKS = [
+  { label: '내차 사기',   href: '/market' },
   { label: '내차 팔기',   href: '/sell' },
   { label: '수출·폐차 견적받기', href: '/export-scrap' },
   { label: '시세 조회',   href: '/price' },

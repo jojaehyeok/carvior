@@ -62,30 +62,32 @@ export default function HomePage() {
     <div className="min-h-screen bg-white text-gray-900">
       <HomePromoPopups />
 
-      {/* ── 히어로 ── */}
-      <section className="relative bg-zinc-900 overflow-hidden">
+      {/* ── 히어로 ──
+           배너처럼 높이를 묶어둔다. 전에는 화면 가득 차서 매물을 보려면 한참 내려야 했다.
+           배경 사진은 오른쪽에 붙여 배너 비주얼처럼 쓰고, 글자 쪽은 어둡게 덮어 읽히게 한다. */}
+      <section className="relative bg-zinc-900 overflow-hidden max-h-[360px]">
         <img
           src="/images/diagnostic-1.jpg"
           alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-30"
+          className="absolute inset-y-0 right-0 w-full md:w-3/5 h-full object-cover object-center opacity-25"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/60 via-zinc-900/80 to-zinc-900 pointer-events-none" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-900/40 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-violet-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/3 translate-x-1/4" />
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-24">
+        <div className="relative max-w-7xl mx-auto px-6 pt-14 pb-14">
           <div className="max-w-2xl">
-            <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-8">
+            <span className="inline-flex items-center gap-1.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-full mb-5">
               <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-pulse" />
               독립 진단 기반 · 투명한 거래
             </span>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.15] mb-6">
+            <h1 className="text-3xl md:text-4xl font-black text-white leading-[1.2] mb-4">
               중고차 거래,<br />
               이제 <span className="text-violet-400">차량 상태부터</span><br />
               투명하게.
             </h1>
 
-            <p className="text-zinc-300 text-base md:text-lg leading-relaxed mb-10">
+            <p className="text-zinc-300 text-sm md:text-base leading-relaxed mb-7">
               카비어는 차량을 직접 판매하지 않습니다.<br />
               독립된 진단평가와 투명한 거래 정보로<br />
               사는 사람과 파는 사람이 안심할 수 있는 시장을 만듭니다.
@@ -95,15 +97,15 @@ export default function HomePage() {
                 검차는 그 과정에서 자연스럽게 만나게 하고, 히어로에선 두 동선만 보여준다. */}
             <div className="flex flex-wrap gap-3">
               <Link href="/sell/register"
-                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors">
                 내 차 팔기 (무료) →
               </Link>
               <Link href="/market"
-                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-8 py-4 rounded-xl text-sm transition-colors">
-                차 사기
+                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
+                내 차 사기
               </Link>
               <Link href="/inspection"
-                className="bg-transparent hover:bg-white/10 border border-white/20 text-white/80 font-bold px-8 py-4 rounded-xl text-sm transition-colors">
+                className="bg-transparent hover:bg-white/10 border border-white/20 text-white/80 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
                 검차 신청
               </Link>
             </div>
@@ -370,7 +372,7 @@ export default function HomePage() {
 
           <p className="text-center mt-12">
             <Link href="/inspection"
-              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors">
+              className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors">
               검차 신청부터 시작하기
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" />
@@ -409,7 +411,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               <Link href="/auction"
-                className="bg-purple-600 hover:bg-purple-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors text-center">
+                className="bg-purple-600 hover:bg-purple-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors text-center">
                 스마트옥션 살펴보기
               </Link>
               <a href="mailto:partner@carvior.store"
