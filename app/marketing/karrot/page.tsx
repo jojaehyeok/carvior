@@ -433,7 +433,7 @@ export default function CarviorPrivateDealPage() {
                     <div className="p-6 mb-6 text-white bg-zinc-900 rounded-3xl">
                         <p className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest mb-5">카비어를 믿을 수 있는 이유</p>
                         <div className="grid grid-cols-1 gap-5">
-                            <TrustBadge icon="🏢" title="사업자 등록 완료" desc="사업자등록번호 783-24-02190 · 통신판매업 제 2026-경기안산-0474" />
+                            <TrustBadge icon="🏢" title="사업자 등록 완료" desc="사업자등록번호 889-81-03879 · 통신판매업 제 2026-경기안산-0474" />
                             <TrustBadge icon="🎓" title="진단평가사 직접 방문" desc="진단 평가사가 직접 현장에 방문합니다" />
                             <TrustBadge icon="💳" title="진단비 8만원 고정 (이벤트가)" desc="차종·연식 무관 고정가 · 상담은 무료 · ~2026년 8월까지 적용" />
                             <TrustBadge icon="📄" title="공식 진단 리포트 발행" desc="객관적 데이터 기반 리포트 · 구매 후 하자 발생 시 법적 근거로 활용 가능" />

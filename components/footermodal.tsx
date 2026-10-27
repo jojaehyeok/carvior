@@ -38,9 +38,9 @@ export default function AppFooter() {
             <div className="grid grid-cols-1 gap-8 text-sm text-gray-600 sm:grid-cols-2">
               <div className="space-y-2">
                 <p className="mb-3 text-base font-bold text-gray-900">사업자 정보</p>
-                <p><span className="text-gray-400">상호명 :</span> 카비어</p>
-                <p><span className="text-gray-400">대표자 :</span> 조재혁</p>
-                <p><span className="text-gray-400">사업자등록번호 :</span> 783-24-02190</p>
+                <p><span className="text-gray-400">상호명 :</span> 카비어 주식회사</p>
+                <p><span className="text-gray-400">대표자 :</span> 조재혁, 유진욱</p>
+                <p><span className="text-gray-400">사업자등록번호 :</span> 889-81-03879</p>
                 {/* 🌟 통신판매업 신고번호는 심사 필수 항목입니다. */}
                 <p><span className="text-gray-400">통신판매업신고 :</span> 제 2026-경기안산-0474</p>
                 <p><span className="text-gray-400">대표번호 :</span> 070-4138-2017</p>
@@ -58,8 +58,15 @@ export default function AppFooter() {
           </div>
 
           <div className="flex flex-col items-center justify-between gap-4 pt-8 mt-12 border-t border-gray-100 md:flex-row">
-            <p className="text-xs text-gray-400">© 2026 카비어. All Rights Reserved.</p>
+            <p className="text-xs text-gray-400">© 2026 카비어 주식회사. All Rights Reserved.</p>
             <div className="flex gap-6 text-xs text-gray-500">
+              {/* 법인전환 안내처럼 알려야 하는 소식은 여기서 들어간다 */}
+              <button
+                onClick={() => router.push('/notice')}
+                className="transition-colors hover:text-violet-600 hover:underline"
+              >
+                공지사항
+              </button>
               <button onClick={onTermsOpen} className="transition-colors hover:text-violet-600 hover:underline">이용약관</button>
               <button
                 onClick={() => router.push('/policy/privacy')}
@@ -175,7 +182,7 @@ export default function AppFooter() {
                   <div className="pt-4 text-gray-500 border-t border-gray-200">
                     <p>주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)</p>
                     <p>이메일: cs@carvior.com</p>
-                    <p>회사: 카비어 / 사업자등록번호: 783-24-02190</p>
+                    <p>회사: 카비어 주식회사 / 사업자등록번호: 889-81-03879</p>
                     <p>대표: 조재혁</p>
                   </div>
                 </div>

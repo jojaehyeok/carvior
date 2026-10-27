@@ -47,7 +47,7 @@ export default function TermsPage() {
           </section>
 
           <div className="pt-10 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-400">상호명: 카비어 (Carvior)</p>
+            <p className="text-sm text-gray-400">상호명: 카비어 주식회사 (CarVior Corp.)</p>
           </div>
         </div>
       </div>

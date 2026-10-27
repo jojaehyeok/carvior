@@ -224,7 +224,7 @@ export default function CarePolicyPage() {
           {/* 하단 푸터 */}
           <div className="pt-10 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-400">부칙 : 본 약관은 2026년 7월 29일부터 적용됩니다.</p>
-            <p className="text-sm text-gray-400 font-medium">상호명: 카비어 (Cavior)</p>
+            <p className="text-sm text-gray-400 font-medium">상호명: 카비어 주식회사 (CarVior Corp.)</p>
           </div>
         </div>
       </div>

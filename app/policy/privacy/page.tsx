@@ -88,9 +88,9 @@ export default function PrivacyPolicyPage() {
           <Table
             head={["구분", "내용"]}
             rows={[
-              ["상호 및 서비스명", "카비어"],
-              ["대표자", "조재혁"],
-              ["사업자등록번호", "783-24-02190"],
+              ["상호 및 서비스명", "카비어 주식회사 (CarVior Corp.)"],
+              ["대표자", "조재혁, 유진욱"],
+              ["사업자등록번호", "889-81-03879"],
               ["통신판매업 신고번호", "제2026-경기안산-0474호"],
               ["서비스 형태", "차량 진단 예약·거래 통신판매중개 플랫폼"],
               ["공식 홈페이지", "https://carvior.store/"],
@@ -934,7 +934,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="pt-10 mt-10 text-center border-t border-gray-100">
           <p className="text-sm text-gray-400">본 개인정보 처리방침은 2026년 7월 24일부터 시행합니다.</p>
-          <p className="mt-1 text-sm text-gray-400">상호명: 카비어 (Carvior) · 대표: 조재혁</p>
+          <p className="mt-1 text-sm text-gray-400">상호명: 카비어 주식회사 (CarVior Corp.) · 대표: 조재혁, 유진욱</p>
         </div>
       </div>
     </main>
