@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -41,20 +42,20 @@ export default function ChatListPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const apiToken = (session?.user as { apiToken?: string } | undefined)?.apiToken;
+  const { token: apiToken, ready: tokenReady } = useApiToken();
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.replace('/login?callbackUrl=/chat');
-  }, [status, router]);
+    if (tokenReady && !apiToken && status === 'unauthenticated') router.replace('/login?callbackUrl=/chat');
+  }, [tokenReady, apiToken, status, router]);
 
   useEffect(() => {
-    if (!apiToken) return;
+    if (!apiToken) { if (tokenReady) setLoading(false); return; }
     fetch(`${API}/chat/rooms`, { headers: { Authorization: `Bearer ${apiToken}` } })
       .then((r) => (r.ok ? r.json() : []))
       .then((list) => setRooms(Array.isArray(list) ? list : []))
       .catch(() => setRooms([]))
       .finally(() => setLoading(false));
-  }, [apiToken]);
+  }, [apiToken, tokenReady]);
 
   return (
     <main className="min-h-screen bg-gray-50">

@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { io, type Socket } from 'socket.io-client';
+import { useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 const WS_BASE = API.replace(/\/api\/v1\/?$/, '');
@@ -46,12 +47,12 @@ export default function ChatRoomPage() {
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const apiToken = (session?.user as { apiToken?: string } | undefined)?.apiToken;
+  const { token: apiToken, ready: tokenReady } = useApiToken();
   const myId = Number((session?.user as { id?: string } | undefined)?.id ?? 0);
 
   useEffect(() => {
-    if (status === 'unauthenticated') router.replace(`/login?callbackUrl=/chat/${roomId}`);
-  }, [status, roomId, router]);
+    if (tokenReady && !apiToken && status === 'unauthenticated') router.replace(`/login?callbackUrl=/chat/${roomId}`);
+  }, [tokenReady, apiToken, status, roomId, router]);
 
   // 지난 대화 + 방 정보
   const loadHistory = async (token: string) => {

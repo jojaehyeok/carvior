@@ -13,6 +13,7 @@ import SideRail from '@/components/SideRail';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { isFavorite, pushRecent, toggleFavorite } from '@/lib/garage';
+import { useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
 
@@ -50,12 +51,13 @@ export default function MarketDetailPage() {
   const [photoIdx, setPhotoIdx] = useState(0);
   const [opening, setOpening] = useState(false);
   const [fav, setFav] = useState(false);
-  const { data: session } = useSession();
+  const { token: apiToken, ready: tokenReady } = useApiToken();
   const router = useRouter();
 
   // 문의하기 — 로그인한 사람만. 이미 대화한 적 있으면 그 방으로 들어간다.
   const openChat = async () => {
-    const apiToken = (session?.user as { apiToken?: string } | undefined)?.apiToken;
+    // 토큰을 아직 받아오는 중이면 아무것도 하지 않는다 — 이미 로그인한 사람을 로그인으로 보내면 안 된다
+    if (!tokenReady) return;
     if (!apiToken) {
       router.push(`/login?callbackUrl=/market/${id}`);
       return;
