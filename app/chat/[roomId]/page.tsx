@@ -15,6 +15,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { io, type Socket } from 'socket.io-client';
 import { tokenErrorMessage, useApiToken } from '@/lib/useApiToken';
+import ListingPanel, { type ChatListing } from '@/components/chat/ListingPanel';
 import ReportModal from '@/components/ReportModal';
 import TradeReviewModal from '@/components/TradeReviewModal';
 
@@ -37,7 +38,7 @@ interface RoomInfo {
   status: 'active' | 'closed' | 'blocked';
   blockedByUserId: number | null;
   closedReason: 'completed' | 'sold_elsewhere' | null;
-  item: { id: number; titleKo: string; askingPrice: number | null; photo: string | null } | null;
+  item: ChatListing | null;
 }
 
 const fmtTime = (iso: string) =>
@@ -57,6 +58,8 @@ export default function ChatRoomPage() {
   const [reviewing, setReviewing] = useState(false);
   const [myReview, setMyReview] = useState<{ rating: number } | null>(null);
   const [working, setWorking] = useState(false);
+  // 모바일은 가로가 없어서 옆에 못 붙인다 — 머리글을 눌러 펼치게 한다
+  const [itemOpen, setItemOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -152,13 +155,17 @@ export default function ChatRoomPage() {
   const canReview = closed && room?.closedReason === 'completed' && !myReview;
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col">
+    <main className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col min-w-0">
       {/* 매물 정보 — 무슨 차 얘기 중인지 항상 위에 보이게 */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-5 py-3 flex items-center gap-3">
           <Link href="/chat" className="text-gray-400 hover:text-gray-700 text-lg shrink-0">←</Link>
           {room?.item && (
-            <Link href={`/market/${room.item.id}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80">
+            <button
+              onClick={() => setItemOpen((v) => !v)}
+              className="flex items-center gap-3 flex-1 min-w-0 text-left hover:opacity-80 lg:pointer-events-none"
+            >
               <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0">
                 {room.item.photo && (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -171,7 +178,11 @@ export default function ChatRoomPage() {
                   {room.item.askingPrice ? `${Math.round(room.item.askingPrice / 10000).toLocaleString()}만원` : '가격 문의'}
                 </p>
               </div>
-            </Link>
+              {/* 좁은 화면에서만 — 넓은 화면은 옆에 매물이 늘 떠 있다 */}
+              <span className="lg:hidden text-[11px] font-bold text-gray-400 shrink-0 ml-1">
+                {itemOpen ? '접기 ▲' : '차량보기 ▼'}
+              </span>
+            </button>
           )}
 
           <span className={`text-[10px] font-bold shrink-0 ${connected ? 'text-green-500' : 'text-gray-300'}`}>
@@ -244,6 +255,13 @@ export default function ChatRoomPage() {
           </div>
         </div>
       </div>
+
+      {/* 좁은 화면용 — 머리글을 누르면 펼쳐진다 */}
+      {room?.item && itemOpen && (
+        <div className="lg:hidden bg-gray-50 border-b border-gray-200 px-5 py-4">
+          <ListingPanel item={room.item} />
+        </div>
+      )}
 
       {tokenReady && !apiToken && status === 'authenticated' && (
         <div className="max-w-3xl mx-auto w-full px-5 pt-4">
@@ -368,6 +386,17 @@ export default function ChatRoomPage() {
           </>
         )}
       </div>
+
+      </div>
+
+      {/* 넓은 화면 — 대화 옆에 매물을 붙여둔다. 차 보러 나갔다 오면 대화가 끊긴다 */}
+      {room?.item && (
+        <aside className="hidden lg:block w-[340px] shrink-0 border-l border-gray-200 bg-gray-50">
+          <div className="sticky top-0 p-5 max-h-screen overflow-y-auto">
+            <ListingPanel item={room.item} />
+          </div>
+        </aside>
+      )}
 
       {reporting && (
         <ReportModal targetType="chat" targetId={Number(roomId)} token={apiToken} onClose={() => setReporting(false)} />
