@@ -334,7 +334,7 @@ export default function ChatRoomPage() {
             {/* 검차 권유 — 네고 중에 자연스럽게 꺼낼 수 있게 입력창 위에 둔다 */}
             <div className="max-w-3xl mx-auto px-5 pt-3">
               <Link
-                href="/call-evaluator"
+                href="/inspection"
                 className="inline-flex items-center gap-1.5 text-[11px] font-bold text-violet-600 bg-violet-50 border border-violet-100 px-3 py-1.5 rounded-full hover:bg-violet-100 transition-colors"
               >
                 🔍 차량 상태가 궁금하면 평가사 부르기

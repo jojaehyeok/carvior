@@ -19,9 +19,14 @@ const INTERNAL_KEY = process.env.STORE_ITEMS_INTERNAL_KEY ?? '';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  const user = session?.user as { id?: string; email?: string | null } | undefined;
+  const user = session?.user as
+    { id?: string; email?: string | null; provider?: string; providerId?: string } | undefined;
   const userId = user?.id;
   const email = user?.email;
+  // 소셜 계정 되찾기용 — 예전에 로그인해둔 세션은 id에 카카오/네이버 계정번호가
+  // 들어있어서 users.id로는 못 찾는다. 그때 provider+providerId로 다시 찾는다.
+  const provider = user?.provider;
+  const providerId = user?.providerId;
   if (!userId && !email) {
     return NextResponse.json({ message: '로그인이 필요합니다.', reason: 'no-session' }, { status: 401 });
   }
@@ -42,8 +47,9 @@ export async function GET() {
     const res = await fetch(`${NEST}/v1/users/issue-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-internal-key': INTERNAL_KEY },
-      // userId가 먼저 — 이메일이 없는 소셜 계정도 있다
-      body: JSON.stringify(userId ? { userId } : { email }),
+      // 셋 다 보내고 백엔드가 userId → provider+providerId → email 순서로 찾는다.
+      // 하나만 보내면 그 하나가 틀렸을 때 되찾을 방법이 없다.
+      body: JSON.stringify({ userId, email, provider, providerId }),
     });
     if (!res.ok) {
       console.error('[chat-token] 백엔드 응답', res.status);

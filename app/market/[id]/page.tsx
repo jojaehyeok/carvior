@@ -262,7 +262,7 @@ export default function MarketDetailPage() {
                   </Link>
                 ) : (
                   <Link
-                    href="/call-evaluator"
+                    href="/inspection"
                     className="block w-full bg-gray-900 hover:bg-gray-800 text-white font-black py-3.5 rounded-xl text-sm text-center transition-colors"
                   >
                     이 차, 평가사 부르기

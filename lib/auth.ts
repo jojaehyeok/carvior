@@ -56,9 +56,18 @@ export const authOptions: NextAuthOptions = {
         });
         // 소셜 로그인도 백엔드 토큰을 받아둬야 채팅을 쓸 수 있다. 여기서 user에 실어두면
         // 아래 jwt 콜백이 그대로 세션까지 가져간다(이메일 로그인과 같은 경로).
+        //
+        // ⚠ user.id를 백엔드 users.id로 반드시 덮어쓴다.
+        // NextAuth가 넣어둔 기본값은 카카오/네이버가 준 계정번호(예: 4312345678)라
+        // 우리 DB의 id와 전혀 다른 번호다. 그대로 두면 채팅 토큰을 받을 때
+        // "그런 회원 없음(user-not-found)"이 난다. 카카오는 이메일 동의를 안 받은
+        // 계정이 많아서 이메일로 되찾는 경로도 막혀 있다.
         if (res.ok) {
           const data = await res.json();
+          if (data?.id)    (user as { id?: string }).id = String(data.id);
           if (data?.token) (user as { apiToken?: string }).apiToken = data.token;
+          (user as any).role         = data?.role;
+          (user as any).dealerStatus = data?.dealerStatus;
         }
       } catch { /* DB 저장 실패해도 로그인 허용 */ }
       return true;
@@ -77,7 +86,8 @@ export const authOptions: NextAuthOptions = {
         token.dealerStatus = (user as any).dealerStatus;
         if ((user as any).apiToken) token.apiToken = (user as any).apiToken;
       }
-      // 소셜 로그인 최초 발급 시 DB에서 role 조회
+      // 소셜 로그인 최초 발급 시 DB에서 role 조회 — ①에서 이미 채워지지만,
+      // 이메일 계정이 먼저 있던 경우를 위해 한 번 더 맞춰준다.
       if (account && account.type !== 'credentials' && token.email) {
         try {
           const res = await fetch(`${NEST}/v1/users/by-email?email=${encodeURIComponent(token.email as string)}`);
@@ -99,6 +109,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).role         = token.role;
         (session.user as any).dealerStatus = token.dealerStatus;
         (session.user as any).provider     = token.provider;
+        (session.user as any).providerId   = token.sub;
         (session.user as any).apiToken     = token.apiToken;
       }
       return session;

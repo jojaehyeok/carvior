@@ -157,7 +157,7 @@ export default function GuidePage() {
             <div className="border-t border-slate-100 mt-6 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm text-slate-500">국산 99,000원 · 수입 132,000원 · 출장비 없음</p>
               <Link
-                href="/call-evaluator"
+                href="/inspection"
                 className="shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-black px-6 py-3 rounded-xl text-sm transition-colors"
               >
                 평가사 부르기 →
