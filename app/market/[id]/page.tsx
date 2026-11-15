@@ -15,6 +15,7 @@ import { useSession } from 'next-auth/react';
 import { pushRecent } from '@/lib/garage';
 import HeartButton from '@/components/HeartButton';
 import ReportModal from '@/components/ReportModal';
+import CarOptionList from '@/components/CarOptionList';
 import { tokenErrorMessage, useApiToken } from '@/lib/useApiToken';
 
 const API = process.env.NEXT_PUBLIC_API_ENDPOINT ?? 'https://carvior.store/api/v1';
@@ -41,6 +42,7 @@ interface Listing {
   sellerUserId?: number | null;
   sellerRating?: number | null;
   sellerReviewCount?: number;
+  options?: string[];
 }
 
 interface SellerReview {
@@ -285,6 +287,14 @@ export default function MarketDetailPage() {
                 </div>
               ))}
             </div>
+
+            {/* 옵션 — 등록할 때 판매자가 고른 것. 안 고른 매물은 아무것도 안 그린다 */}
+            {item.options && item.options.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 mt-5 p-5">
+                <p className="text-xs font-black text-gray-400 mb-3">옵션</p>
+                <CarOptionList options={item.options} />
+              </div>
+            )}
 
             <p className="text-[11px] leading-relaxed text-gray-400 mt-4">
               카비어는 개인 간 직거래를 연결만 하며 거래 당사자가 아닙니다. 차량 상태·명의이전·대금은
