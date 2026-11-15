@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* 카카오 지도 API (주소 검색용) */}
         <Script
-          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
           strategy="afterInteractive"
         />
 

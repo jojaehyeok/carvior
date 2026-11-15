@@ -56,7 +56,7 @@ function InspectionInner() {
     if (document.getElementById('daum-postcode')) return;
     const s = document.createElement('script');
     s.id = 'daum-postcode';
-    s.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    s.src = '//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
     document.body.appendChild(s);
   }, []);
 
