@@ -184,7 +184,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <RequestCard
-                href="/inspection-request?type=REMOTE_INSPECTION"
+                href="/inspection?type=REMOTE_INSPECTION"
                 badge="비대면"
                 badgeClass="bg-violet-100 text-violet-700"
                 title="비대면 검차"
@@ -195,7 +195,7 @@ export default function HomePage() {
               />
 
               <RequestCard
-                href="/inspection-request?type=PURCHASE_ESCORT"
+                href="/inspection?type=PURCHASE_ESCORT"
                 badge="동행"
                 badgeClass="bg-slate-900 text-white"
                 title="동행 검차"
