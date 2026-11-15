@@ -171,6 +171,22 @@ function InspectionInner() {
           <p className="text-[11px] text-slate-400 leading-relaxed mb-5">
             입금자명은 신청하신 성함으로 보내주시면 확인이 빠릅니다.
           </p>
+
+          {/* 비회원도 접수가 되는데, 그러면 고객은 문자만 기다리고 끝난다.
+              bookings엔 userId가 없어서 "접수한 번호 = 가입한 번호"일 때만 마이페이지에
+              붙으므로, 그 조건을 여기서 분명히 알려준다. */}
+          <div className="rounded-xl bg-violet-50 border border-violet-100 p-4 text-left mb-5">
+            <p className="text-xs font-black text-violet-700 mb-1">진행상황을 직접 보시려면</p>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              방금 적으신 번호(<strong>{form.contact}</strong>)로 가입하시면 마이페이지에서
+              배정·진행상황과 리포트를 바로 보실 수 있습니다. 검차가 끝난 뒤 이 차를 팔고
+              싶으실 때 출품도 거기서 하실 수 있습니다.
+            </p>
+            <Link href="/register" className="inline-block mt-2.5 text-[11px] font-black text-violet-600 hover:underline">
+              회원가입하고 진행상황 보기 →
+            </Link>
+          </div>
+
           <Link href="/" className="block w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3 rounded-xl text-sm">
             홈으로
           </Link>

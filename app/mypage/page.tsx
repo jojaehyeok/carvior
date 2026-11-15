@@ -1008,13 +1008,26 @@ export default function MypagePage() {
                           </p>
                         )}
 
-                        {booking.status === 'COMPLETED' && booking.buyerPurchaseCompleted && (
-                          <button
-                            onClick={() => openListingModal(booking)}
-                            className="block w-full text-center text-[11px] font-black px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-                          >
-                            🚀 스마트옥션에 출품하기
-                          </button>
+                        {/* 검차가 끝난 차는 전부 "팔 수 있는 차"다 —
+                            예전엔 구매완료를 누른 건에만 출품 버튼이 떴는데, 그러면
+                            자기 차를 보려고 검차받은 사람(= 팔려는 사람)에겐 아예 안 보였다.
+                            파는 길이 둘이라 갈라둔다: 딜러 입찰(스마트옥션) / 개인에게 직접. */}
+                        {booking.status === 'COMPLETED' && (
+                          <div className="space-y-1.5">
+                            <p className="text-[10px] text-gray-400">이 차, 파실 계획이 있으신가요?</p>
+                            <button
+                              onClick={() => openListingModal(booking)}
+                              className="block w-full text-center text-[11px] font-black px-3 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+                            >
+                              🚀 스마트옥션 출품 — 딜러들이 입찰해요
+                            </button>
+                            <Link
+                              href={`/sell/register?carNumber=${encodeURIComponent(booking.carNumber ?? '')}`}
+                              className="block w-full text-center text-[11px] font-black px-3 py-2 rounded-lg border border-violet-200 text-violet-700 hover:bg-violet-50 transition-colors"
+                            >
+                              개인 매물로 올리기 — 중개 수수료 없음
+                            </Link>
+                          </div>
                         )}
                       </div>
                     </div>
