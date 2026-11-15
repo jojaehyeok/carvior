@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { CHANNEL_BUTTON_VISIBILITY_EVENT } from '@/components/ChannelTalk';
 import { isApprovedDealer } from '@/lib/dealerAccess';
+import { BANK_INFO } from '@/lib/bank';
 
 const TOSS_CLIENT_KEY = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY ?? 'live_gck_Gv6LjeKD8ajb9274j6mw3wYxAdXy';
-const BANK_INFO   = { bank: '카카오뱅크', number: '3333-35-1997303', holder: '(주)카비어' };
+// 계좌는 lib/bank.ts 한 곳에서만 관리한다(법인 전환으로 바뀜)
 
 // 네이버페이 — 가맹점 승인 전까지는 개발가이드 샘플 값으로 폴백(실결제 불가, 결제창 자체가 안 열림).
 // 승인 완료 후 발급받는 진짜 Client ID/Chain ID를 .env에 넣으면 그대로 적용됨.

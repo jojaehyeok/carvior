@@ -38,7 +38,7 @@ function DealerInspectionContent() {
             전국 어디든 카비어가 갑니다!
           </p>
           <Link
-            href="/inspection?promo=member"
+            href="/dealer-inspection"
             className="inline-block bg-violet-600 hover:bg-violet-500 text-white font-black px-8 py-4 rounded-xl text-sm transition-colors"
           >
             제휴 검차 신청하기 →
@@ -100,7 +100,7 @@ function DealerInspectionContent() {
           <p className="text-violet-200 text-sm mb-8">검차 이용 · 파트너 제휴 · 스마트옥션 연계</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/inspection?promo=member"
+              href="/dealer-inspection"
               className="bg-white text-violet-700 font-black px-8 py-4 rounded-xl text-sm hover:bg-violet-50 transition-colors"
             >
               제휴 검차 신청하기
