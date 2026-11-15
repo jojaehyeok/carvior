@@ -174,43 +174,45 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 신청 경로를 둘로 갈라둔다 — 같은 "검차"지만 사는 사람(구매동행)과
-              딜러(매입 전 출장검차)는 가격·흐름·리포트 받는 사람이 전부 다르다.
-              한 버튼으로 받으면 접수 후에 "이거 그 서비스 아닌데요"가 반드시 생긴다.
-              딜러로 로그인한 경우엔 딜러 쪽을 앞에 놓는다. */}
+          {/* 검차 신청을 둘로 갈라둔다 — 고객이 현장에 같이 가는지(동행) 아닌지(비대면)로
+              흐름이 완전히 다르다. 한 버튼으로 받으면 접수 후에 "같이 가는 건 줄 알았는데요"가
+              반드시 생긴다. 금액은 같고 차급으로만 갈린다.
+              딜러 전용 출장검차는 가격 체계가 달라서 여기 안 섞고 상단 네비로만 들어간다. */}
           <div className="mt-10">
             <p className="text-center text-sm font-black text-slate-700 mb-1">어느 쪽이신가요?</p>
-            <p className="text-center text-xs text-slate-400 mb-6">신청하시는 분에 따라 진행 방식과 비용이 다릅니다.</p>
+            <p className="text-center text-xs text-slate-400 mb-6">현장에 같이 가시는지에 따라 나뉩니다. 금액은 같습니다.</p>
 
-            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isDealer ? 'md:[&>*:first-child]:order-2' : ''}`}>
-              {/* 개인 — 구매동행 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <RequestCard
-                href="/call-evaluator"
-                badge="개인"
+                href="/inspection-request?type=REMOTE_INSPECTION"
+                badge="비대면"
                 badgeClass="bg-violet-100 text-violet-700"
-                title="구매동행 검차"
-                desc="사려는 차, 계약 전에 평가사가 같이 가서 봐드립니다. 리포트는 신청하신 분께 갑니다."
-                points={['개인 간 거래·중고차 구매 전', '원하는 장소로 방문', '리포트 + 현장 사진']}
-                cta="평가사 부르기"
-                highlight={!isDealer}
+                title="비대면 검차"
+                desc="고객님은 안 가셔도 됩니다. 평가사가 차 있는 곳으로 가서 확인하고 리포트를 보내드립니다."
+                points={['타지역 매물·시간이 없을 때', '현장 사진 30장 이상 + 리포트', '국산 10만원 ~ 수입 50만원 (차급별)']}
+                cta="비대면 검차 신청"
+                highlight
               />
 
-              {/* 딜러 — 출장검차 */}
               <RequestCard
-                href="/dealer-inspection"
-                badge="딜러"
+                href="/inspection-request?type=PURCHASE_ESCORT"
+                badge="동행"
                 badgeClass="bg-slate-900 text-white"
-                title="딜러 전용 출장검차"
-                desc="매입 전 차량 상태를 확인합니다. 리포트는 신청하신 딜러님께만 갑니다."
-                points={['국산 100,000원 · 수입 130,000원 (VAT 별도)', '거리 할증 자동 계산', '주말·야간 할증 없음']}
-                cta="출장검차 신청하기"
-                highlight={isDealer}
+                title="동행 검차"
+                desc="계약 자리에 평가사가 같이 갑니다. 차를 보면서 바로 설명을 듣고 판단하실 수 있습니다."
+                points={['계약 직전·흥정이 필요할 때', '현장에서 바로 설명', '국산 10만원 ~ 수입 50만원 (차급별)']}
+                cta="동행 검차 신청"
+                highlight
               />
             </div>
 
             {isDealer && (
               <p className="text-center text-xs text-slate-400 mt-4">
-                딜러 계정으로 로그인하셨습니다 — 딜러 전용 출장검차로 신청하시면 됩니다.
+                딜러 계정으로 로그인하셨습니다 —{' '}
+                <Link href="/dealer-inspection" className="font-bold text-violet-600 hover:underline">
+                  딜러 전용 출장검차
+                </Link>
+                도 이용하실 수 있습니다.
               </p>
             )}
           </div>
