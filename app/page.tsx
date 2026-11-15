@@ -8,6 +8,8 @@ import RecentListings from '@/components/home/RecentListings';
 import NoticeAndFaq from '@/components/home/NoticeAndFaq';
 import SideRail from '@/components/SideRail';
 import { brandLogoSlug } from '@/lib/carBrand';
+import { useSession } from 'next-auth/react';
+import { isApprovedDealer } from '@/lib/dealerAccess';
 
 interface Review {
   id: number;
@@ -59,6 +61,9 @@ const AUCTION_FLOW = [
 export default function HomePage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [expandedReviewId, setExpandedReviewId] = useState<number | null>(null);
+  // 승인된 딜러로 로그인했으면 딜러 쪽 신청을 앞에 놓는다(안 그러면 구매동행으로 잘못 접수된다)
+  const { data: session } = useSession();
+  const isDealer = isApprovedDealer(session ?? null);
 
   useEffect(() => {
     fetch('https://carvior.store/api/v1/reviews')
@@ -169,21 +174,46 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="text-center mt-10">
-            <Link href="/call-evaluator" className="inline-block bg-violet-600 hover:bg-violet-700 text-white font-black px-8 py-3.5 rounded-xl text-sm transition-colors">
-              평가사 부르기 →
-            </Link>
-          </div>
+          {/* 신청 경로를 둘로 갈라둔다 — 같은 "검차"지만 사는 사람(구매동행)과
+              딜러(매입 전 출장검차)는 가격·흐름·리포트 받는 사람이 전부 다르다.
+              한 버튼으로 받으면 접수 후에 "이거 그 서비스 아닌데요"가 반드시 생긴다.
+              딜러로 로그인한 경우엔 딜러 쪽을 앞에 놓는다. */}
+          <div className="mt-10">
+            <p className="text-center text-sm font-black text-slate-700 mb-1">어느 쪽이신가요?</p>
+            <p className="text-center text-xs text-slate-400 mb-6">신청하시는 분에 따라 진행 방식과 비용이 다릅니다.</p>
 
-          {/* 딜러용 진입점 — 일반 고객용 "평가사 부르기" 바로 아래에 한 줄로만 둔다.
-              같은 검차인데 가격·흐름이 달라서 섞이면 안 되고, 홈을 또 길게 만들면 안 된다. */}
-          <Link
-            href="/dealer-inspection"
-            className="mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-slate-500 hover:text-violet-600 transition-colors"
-          >
-            <span className="bg-slate-900 text-white text-[10px] font-black px-2 py-0.5 rounded">딜러</span>
-            매입 전 차량 확인이 필요하신가요? 딜러 전용 출장검차 →
-          </Link>
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isDealer ? 'md:[&>*:first-child]:order-2' : ''}`}>
+              {/* 개인 — 구매동행 */}
+              <RequestCard
+                href="/call-evaluator"
+                badge="개인"
+                badgeClass="bg-violet-100 text-violet-700"
+                title="구매동행 검차"
+                desc="사려는 차, 계약 전에 평가사가 같이 가서 봐드립니다. 리포트는 신청하신 분께 갑니다."
+                points={['개인 간 거래·중고차 구매 전', '원하는 장소로 방문', '리포트 + 현장 사진']}
+                cta="평가사 부르기"
+                highlight={!isDealer}
+              />
+
+              {/* 딜러 — 출장검차 */}
+              <RequestCard
+                href="/dealer-inspection"
+                badge="딜러"
+                badgeClass="bg-slate-900 text-white"
+                title="딜러 전용 출장검차"
+                desc="매입 전 차량 상태를 확인합니다. 리포트는 신청하신 딜러님께만 갑니다."
+                points={['국산 100,000원 · 수입 130,000원 (VAT 별도)', '거리 할증 자동 계산', '주말·야간 할증 없음']}
+                cta="출장검차 신청하기"
+                highlight={isDealer}
+              />
+            </div>
+
+            {isDealer && (
+              <p className="text-center text-xs text-slate-400 mt-4">
+                딜러 계정으로 로그인하셨습니다 — 딜러 전용 출장검차로 신청하시면 됩니다.
+              </p>
+            )}
+          </div>
         </div>
       </section>
       {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}
@@ -309,5 +339,52 @@ export default function HomePage() {
 
       <AppFooter />
     </div>
+  );
+}
+
+// 신청 경로 카드 — 개인(구매동행) / 딜러(출장검차)를 같은 모양으로 나란히 보여준다.
+// 로그인한 쪽을 highlight로 띄워서 "어느 걸 눌러야 하지"를 고민하지 않게 한다.
+function RequestCard({
+  href, badge, badgeClass, title, desc, points, cta, highlight,
+}: {
+  href: string;
+  badge: string;
+  badgeClass: string;
+  title: string;
+  desc: string;
+  points: string[];
+  cta: string;
+  highlight?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`block rounded-2xl border p-6 transition-colors ${
+        highlight
+          ? 'border-violet-400 bg-white shadow-sm hover:border-violet-500'
+          : 'border-slate-200 bg-white/60 hover:border-slate-300'
+      }`}
+    >
+      <span className={`inline-block text-[10px] font-black px-2 py-0.5 rounded ${badgeClass}`}>{badge}</span>
+      <h3 className="text-base font-black text-slate-900 mt-3 mb-1.5">{title}</h3>
+      <p className="text-xs text-slate-500 leading-relaxed mb-4">{desc}</p>
+      <ul className="space-y-1.5 mb-5">
+        {points.map(p => (
+          <li key={p} className="flex items-start gap-1.5 text-xs text-slate-600">
+            <span className="text-violet-400 shrink-0">✓</span>
+            <span className="leading-relaxed">{p}</span>
+          </li>
+        ))}
+      </ul>
+      <span
+        className={`block text-center font-black py-3 rounded-xl text-sm transition-colors ${
+          highlight
+            ? 'bg-violet-600 text-white'
+            : 'bg-slate-100 text-slate-700'
+        }`}
+      >
+        {cta} →
+      </span>
+    </Link>
   );
 }
