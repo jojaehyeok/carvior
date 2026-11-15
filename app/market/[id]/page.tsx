@@ -186,6 +186,14 @@ export default function MarketDetailPage() {
                 ))}
               </div>
             )}
+
+            {/* 옵션 — 사진 아래. 오른쪽 좁은 칸에 두면 "차선이탈 경보 시스템(LDWS)" 같은
+                긴 이름이 전부 잘린다. 안 고른 매물은 아무것도 안 그린다 */}
+            {item.options && item.options.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-200 mt-5 p-6">
+                <CarOptionList options={item.options} />
+              </div>
+            )}
           </div>
 
           {/* 정보 + 행동 */}
@@ -287,14 +295,6 @@ export default function MarketDetailPage() {
                 </div>
               ))}
             </div>
-
-            {/* 옵션 — 등록할 때 판매자가 고른 것. 안 고른 매물은 아무것도 안 그린다 */}
-            {item.options && item.options.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-200 mt-5 p-5">
-                <p className="text-xs font-black text-gray-400 mb-3">옵션</p>
-                <CarOptionList options={item.options} />
-              </div>
-            )}
 
             <p className="text-[11px] leading-relaxed text-gray-400 mt-4">
               카비어는 개인 간 직거래를 연결만 하며 거래 당사자가 아닙니다. 차량 상태·명의이전·대금은
