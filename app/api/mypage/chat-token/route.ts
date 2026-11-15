@@ -59,6 +59,20 @@ export async function GET() {
       );
     }
     const data = await res.json().catch(() => null);
+
+    // 계정은 찾았는데 토큰 서명이 실패한 경우 — 서버 설정 문제다.
+    // "계정을 찾을 수 없습니다"로 뭉뚱그리면 엉뚱한 데를 파게 된다.
+    if (data?.tokenError) {
+      console.error('[chat-token] 백엔드 토큰 서명 실패 —', data.hint ?? data.tokenError);
+      return NextResponse.json(
+        {
+          message: '서버 설정이 빠져 토큰을 발급할 수 없습니다.',
+          reason: `${data.tokenError} (${data.hint ?? ''}) back:${data.build ?? '옛날빌드'}`,
+        },
+        { status: 500 },
+      );
+    }
+
     if (!data?.token) {
       // 어떤 열쇠를 들고 갔는지 사유에 적어둔다. 이게 없으면 "user-not-found"만 보고는
       // 세션이 비었는지, 번호가 틀렸는지, DB에 계정이 없는지를 구분할 수 없다.
