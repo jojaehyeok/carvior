@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { CAR_OPTION_GROUPS } from '@/lib/carOptions';
 
 // ── 상수 ──────────────────────────────────────────────
 const MAX_PHOTOS = 40;
@@ -293,6 +294,8 @@ function SelfRegisterForm() {
   const [priceKRW, setPriceKRW] = useState('');
   // 개인 직거래(정찰제)가 기본 — 중개는 무료고, 딜러 경매는 선택이다
   const [listingType, setListingType] = useState<'personal' | 'auction'>('personal');
+  // 옵션 — 저장은 이름 문자열 배열이라 lib/carOptions의 표기를 그대로 쓴다
+  const [options, setOptions] = useState<string[]>([]);
   const [region, setRegion] = useState('서울');
   const [contact, setContact] = useState('');
   const [description, setDescription] = useState('');
@@ -512,7 +515,7 @@ function SelfRegisterForm() {
           { label: 'Color', value: car.color },
           { label: 'Displacement', value: car.displacement },
         ].filter(s => s.value),
-        options: [],
+        options,
         adminMemo: `[셀프등록] 판매구분:${sellType} / 연락처:${contact} / 설명:${description}\n${memo}`,
         selfRegistered: true,
         sellerContact: contact,
@@ -885,6 +888,42 @@ function SelfRegisterForm() {
                 {REGION_OPTIONS.map(o => <option key={o}>{o}</option>)}
               </select>
             </Field>
+          </div>
+
+          {/* 옵션 — 사는 쪽이 제일 많이 묻는 항목이라 안 적으면 문의가 그만큼 늘어난다 */}
+          <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">옵션</p>
+              <span className="text-xs font-bold text-violet-600">{options.length}개 선택</span>
+            </div>
+            <p className="text-xs text-zinc-400 -mt-2">해당하는 것만 눌러주세요. 안 고르셔도 등록됩니다.</p>
+
+            {CAR_OPTION_GROUPS.map(g => (
+              <div key={g.key}>
+                <p className="text-xs font-bold text-zinc-600 mb-2">{g.label}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {g.options.map(o => {
+                    const on = options.includes(o);
+                    return (
+                      <button
+                        key={o}
+                        type="button"
+                        onClick={() =>
+                          setOptions(prev => (on ? prev.filter(v => v !== o) : [...prev, o]))
+                        }
+                        className={`text-xs font-bold px-3 py-2 rounded-lg border transition-colors ${
+                          on
+                            ? 'border-violet-500 bg-violet-50 text-violet-700'
+                            : 'border-zinc-200 text-zinc-500 hover:border-zinc-300'
+                        }`}
+                      >
+                        {o}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-zinc-100 space-y-4">

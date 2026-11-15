@@ -12,6 +12,7 @@ import Car360Viewer from '@/components/Car360Viewer';
 import VehicleDamageMap from '@/components/VehicleDamageMap';
 import BidModal from '@/components/auction/BidModal';
 import { AuctionItem, Bid, fetchItemBids, fmtKRW, getTimeLeftMs, getUSD, timeLeftLabel, URGENT_MS } from '@/components/auction/shared';
+import CarOptionList from '@/components/CarOptionList';
 
 // ── 사진 수집 (buy/[id]와 동일 패턴, registration은 개인정보 보호로 제외) ──────────
 interface PhotoItem { url?: string; label: string }
@@ -1011,22 +1012,7 @@ function DetailTabs({ item }: { item: AuctionItem }) {
       {/* ── 옵션정보 ── */}
       {tab === 'options' && (
         <div className="max-w-3xl">
-          {(item.options && item.options.length > 0) ? (
-            <div className="flex flex-wrap gap-2">
-              {item.options.map(opt => (
-                <span key={opt} className="flex items-center gap-1.5 text-sm font-bold text-gray-700 bg-gray-50 border border-gray-100 px-3 py-2 rounded-xl">
-                  <svg width="11" height="11" fill="none" stroke="#16a34a" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path d="M20 6 9 17l-5-5"/>
-                  </svg>
-                  {opt}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <div className="py-16 text-center text-gray-400">
-              <p className="text-sm">등록된 옵션 정보가 없습니다.</p>
-            </div>
-          )}
+          <CarOptionList options={item.options} />
         </div>
       )}
     </div>
