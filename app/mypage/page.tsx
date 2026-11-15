@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import LinkPhoneModal from '@/components/LinkPhoneModal';
+import { useApiToken } from '@/lib/useApiToken';
 import SaleStageTimeline from '@/components/SaleStageTimeline';
 import { detectBrand, brandLogoSlug, slugFromBrandLabel } from '@/lib/carBrand';
 
@@ -128,6 +130,12 @@ export default function MypagePage() {
   const [listingModal, setListingModal] = useState<InspectionBooking | null>(null);
   const [listingForm, setListingForm] = useState({ price: '', contact: '' });
   const [listingSubmitting, setListingSubmitting] = useState(false);
+  // 가입 번호 외에 본인 인증을 마친 번호들 — 이 번호로 접수된 검차 건도 같이 불러온다
+  const [linkedPhones, setLinkedPhones] = useState<string[]>([]);
+  const [linkPhoneOpen, setLinkPhoneOpen] = useState(false);
+  // 번호를 새로 연결하면 이 값을 올려서 검차 목록을 다시 불러온다
+  const [reloadKey, setReloadKey] = useState(0);
+  const { token: apiToken } = useApiToken();
 
   const user = session?.user as any;
 
@@ -148,9 +156,28 @@ export default function MypagePage() {
         const u = await uRes.json();
         if (!u?.phone) return;
 
-        const bRes = await fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(u.phone)}`);
-        const bData = bRes.ok ? await bRes.json() : [];
-        setBookings(Array.isArray(bData) ? bData : []);
+        // 가입 번호 + 본인 인증을 마친 추가 번호 전부로 찾는다.
+        // 다른 번호로 접수한 건은 인증 전까지 안 보이는 게 맞다 — 번호만으로 남의
+        // 검차 이력을 볼 수 있으면 안 되기 때문이다(인증은 LinkPhoneModal에서).
+        const phones: string[] = [u.phone, ...(Array.isArray(u.altPhones) ? u.altPhones : [])]
+          .map((p: string) => (p ?? '').replace(/[^0-9]/g, ''))
+          .filter(Boolean);
+        const uniquePhones = Array.from(new Set(phones));
+        setLinkedPhones(uniquePhones);
+
+        const lists = await Promise.all(
+          uniquePhones.map(ph =>
+            fetch(`${API}/external/request/lookup-by-name?contact=${encodeURIComponent(ph)}`)
+              .then(r => (r.ok ? r.json() : []))
+              .catch(() => []),
+          ),
+        );
+        // 번호가 여러 개면 같은 건이 두 번 올 수 있다(가입 번호로도, 추가 번호로도)
+        const merged = new Map<number, InspectionBooking>();
+        for (const list of lists) {
+          if (Array.isArray(list)) for (const b of list) merged.set(b.id, b);
+        }
+        setBookings(Array.from(merged.values()));
 
         const pRes = await fetch(`${API}/external/partner-applications/by-phone?phone=${encodeURIComponent(u.phone)}`);
         if (pRes.ok) {
@@ -161,7 +188,7 @@ export default function MypagePage() {
         setBookings([]);
       }
     })();
-  }, [status, user?.email]);
+  }, [status, user?.email, reloadKey]);
 
   const cancelBooking = async (booking: InspectionBooking) => {
     if (!window.confirm('정말 취소하시겠어요? 취소 후에는 되돌릴 수 없어요.')) return;
@@ -582,6 +609,23 @@ export default function MypagePage() {
             ))}
           </div>
         )}
+
+        {/* 비회원으로 접수한 건은 그때 적은 번호로만 찾을 수 있다.
+            가입 번호와 다르면 아무것도 안 보여서, 고객은 "내 신청이 사라졌다"고 생각한다. */}
+        <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3">
+          <p className="text-[11px] text-gray-400 leading-relaxed">
+            다른 번호로 신청하신 검차 건이 안 보이시나요?
+            {linkedPhones.length > 1 && (
+              <span className="block text-gray-300 mt-0.5">연결된 번호 {linkedPhones.length}개</span>
+            )}
+          </p>
+          <button
+            onClick={() => setLinkPhoneOpen(true)}
+            className="shrink-0 text-[11px] font-black text-violet-600 border border-violet-200 hover:bg-violet-50 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            번호 연결하기
+          </button>
+        </div>
 
         {items.length === 0 && bookings.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100">
@@ -1092,6 +1136,17 @@ export default function MypagePage() {
 
       {/* 차량판매중개 즉시 출품 모달 — 검차리포트가 이미 연결돼있어서 판매가·연락처만 받고
           Vehicle→SaleListing으로 바로 전환(관리자 승인 없이 즉시 딜러 입찰 가능) */}
+      {linkPhoneOpen && (
+        <LinkPhoneModal
+          token={apiToken}
+          onClose={() => setLinkPhoneOpen(false)}
+          onLinked={() => {
+            setLinkPhoneOpen(false);
+            setReloadKey(k => k + 1); // 연결된 번호로 접수된 건을 다시 불러온다
+          }}
+        />
+      )}
+
       {listingModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-4">
