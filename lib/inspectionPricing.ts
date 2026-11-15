@@ -30,7 +30,7 @@ const CLASS_LABELS: { key: string; label: string }[] = [
 
 const HINTS: Record<CarOrigin, Record<string, string>> = {
   DOMESTIC: {
-    light: '모닝 · 스파크 · 레이',
+    light: '모닝 · 레이 · 캐스퍼',
     small: '아반떼 · 베뉴 · 셀토스',
     mid: '쏘나타 · K5 · 투싼',
     semilarge: '그랜저 · K8 · 쏘렌토',
