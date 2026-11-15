@@ -571,7 +571,10 @@ function SelfRegisterForm() {
   const totalPhotos = Object.values(photos).flat().length;
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col">
+    // PC에서 폭 좁은 내용만 화면 전체 높이에 늘어져 보여서, 한가운데 카드로 모아둔다.
+    // 모바일은 원래대로 전체화면(둥근 모서리·그림자 없음).
+    <div className="min-h-screen bg-zinc-100 flex items-stretch md:items-center justify-center md:p-8">
+     <div className="w-full max-w-2xl bg-zinc-50 flex flex-col md:rounded-2xl md:shadow-xl md:overflow-hidden md:max-h-[88vh]">
       {/* 헤더 */}
       <div className="bg-white border-b border-zinc-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-30">
         <button onClick={() => step === 0 ? router.back() : goBack()} className="w-8 h-8 flex items-center justify-center text-zinc-500">
@@ -583,6 +586,7 @@ function SelfRegisterForm() {
 
       <TabBar step={step} />
 
+      <div className="flex-1 overflow-y-auto md:min-h-[420px]">
       {/* ══ STEP 0: 차량정보 ══════════════════════════ */}
       {step === 0 && (
         <div className="flex-1 px-4 py-5 space-y-4 max-w-lg mx-auto w-full">
@@ -1018,9 +1022,11 @@ function SelfRegisterForm() {
         </div>
       )}
 
+      </div>
+
       {/* ── 하단 다음 버튼 ──────────────────────────── */}
       {step < 3 && (
-        <div className="sticky bottom-0 bg-white border-t border-zinc-100 px-4 py-3 safe-area-bottom">
+        <div className="bg-white border-t border-zinc-100 px-4 py-3 safe-area-bottom">
           <div className="max-w-lg mx-auto flex gap-3">
             {step > 0 && (
               <button onClick={goBack} className="w-20 py-3.5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-500">
@@ -1037,6 +1043,7 @@ function SelfRegisterForm() {
           </div>
         </div>
       )}
+     </div>
     </div>
   );
 }
