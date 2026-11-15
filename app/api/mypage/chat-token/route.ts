@@ -60,8 +60,18 @@ export async function GET() {
     }
     const data = await res.json().catch(() => null);
     if (!data?.token) {
+      // 어떤 열쇠를 들고 갔는지 사유에 적어둔다. 이게 없으면 "user-not-found"만 보고는
+      // 세션이 비었는지, 번호가 틀렸는지, DB에 계정이 없는지를 구분할 수 없다.
+      // 이메일은 값 대신 있고 없음만 적는다.
+      const shape = [
+        `id:${userId ?? '없음'}`,
+        `email:${email ? '있음' : '없음'}`,
+        `prov:${provider ?? '없음'}`,
+        `pid:${providerId ?? '없음'}`,
+      ].join(' ');
+      console.error('[chat-token] 계정 못 찾음 —', shape);
       return NextResponse.json(
-        { message: '계정을 찾을 수 없습니다.', reason: 'user-not-found' },
+        { message: '계정을 찾을 수 없습니다.', reason: `user-not-found ${shape}` },
         { status: 404 },
       );
     }
