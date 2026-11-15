@@ -174,6 +174,16 @@ export default function HomePage() {
               평가사 부르기 →
             </Link>
           </div>
+
+          {/* 딜러용 진입점 — 일반 고객용 "평가사 부르기" 바로 아래에 한 줄로만 둔다.
+              같은 검차인데 가격·흐름이 달라서 섞이면 안 되고, 홈을 또 길게 만들면 안 된다. */}
+          <Link
+            href="/dealer-inspection"
+            className="mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-slate-500 hover:text-violet-600 transition-colors"
+          >
+            <span className="bg-slate-900 text-white text-[10px] font-black px-2 py-0.5 rounded">딜러</span>
+            매입 전 차량 확인이 필요하신가요? 딜러 전용 출장검차 →
+          </Link>
         </div>
       </section>
       {/* ── 진단 받아보신 분들의 후기 (실제 리뷰) ── */}

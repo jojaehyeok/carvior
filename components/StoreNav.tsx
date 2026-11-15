@@ -12,6 +12,8 @@ const NAV_LINKS = [
   { label: '수출·폐차 견적받기', href: '/export-scrap' },
   { label: '시세 조회',   href: '/price' },
   { label: '스마트옥션', href: '/auction' },
+  // 딜러 전용 출장검차 — 스마트옥션(딜러 메뉴) 옆에 둬서 딜러 동선으로 묶는다
+  { label: '출장검차', href: '/dealer-inspection' },
 ];
 
 export default function StoreNav({ transparent }: { transparent?: boolean }) {
