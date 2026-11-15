@@ -16,6 +16,8 @@ export interface AuctionItem {
   priceKRW: number;
   priceUSD?: number;
   region?: string;
+  // /buy의 차종 알약 필터와 같은 값 — 경매장도 같은 칸으로 거른다
+  category?: string;
   status: 'active' | 'sold' | 'hidden' | 'pending' | 'closed';
   auctionStartAt?: string;
   auctionEndAt?: string;
