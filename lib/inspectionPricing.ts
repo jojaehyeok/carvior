@@ -15,16 +15,39 @@ export interface CarClass {
   hint?: string;
 }
 
-// 차급 — 사는 분이 자기 차를 바로 찾을 수 있게 대표 차종을 같이 적는다.
-export const CAR_CLASSES: CarClass[] = [
-  { key: 'light',    label: '경형',      hint: '모닝·스파크·레이' },
-  { key: 'small',    label: '소형',      hint: '아반떼·베뉴·셀토스' },
-  { key: 'mid',      label: '준·중형',   hint: '쏘나타·K5·투싼' },
-  { key: 'semilarge',label: '준대형',    hint: '그랜저·K8·쏘렌토' },
-  { key: 'large',    label: '대형',      hint: '제네시스·카니발·팰리세이드' },
-  { key: 'sports',   label: '스포츠카',  hint: '2도어 쿠페·로드스터' },
-  { key: 'super',    label: '슈퍼카',    hint: '페라리·람보르기니 등' },
+// 차급 — 자기 차를 바로 찾을 수 있게 대표 차종을 같이 적는다.
+// ⚠ 예시는 국산/수입이 달라야 한다. 수입차를 골랐는데 "모닝·스파크·레이"가 뜨면
+// 고객은 이 표가 자기와 상관없는 것으로 보고 그 자리에서 나간다.
+const CLASS_LABELS: { key: string; label: string }[] = [
+  { key: 'light',     label: '경형' },
+  { key: 'small',     label: '소형' },
+  { key: 'mid',       label: '준·중형' },
+  { key: 'semilarge', label: '준대형' },
+  { key: 'large',     label: '대형' },
+  { key: 'sports',    label: '스포츠카' },
+  { key: 'super',     label: '슈퍼카' },
 ];
+
+const HINTS: Record<CarOrigin, Record<string, string>> = {
+  DOMESTIC: {
+    light: '모닝 · 스파크 · 레이',
+    small: '아반떼 · 베뉴 · 셀토스',
+    mid: '쏘나타 · K5 · 투싼',
+    semilarge: '그랜저 · K8 · 쏘렌토',
+    large: 'G80 · 카니발 · 팰리세이드',
+  },
+  IMPORTED: {
+    light: '미니 쿠퍼 · 피아트 500',
+    small: 'BMW 1·2시리즈 · 벤츠 A클래스 · 아우디 A3',
+    mid: 'BMW 3·4시리즈 · 벤츠 C클래스 · 아우디 A4',
+    semilarge: 'BMW 5·6시리즈 · 벤츠 E클래스 · 아우디 A6',
+    large: 'BMW 7시리즈 · 벤츠 S클래스 · 아우디 A8',
+    sports: '포르쉐 911 · BMW Z4 · AMG GT',
+    super: '페라리 · 람보르기니 · 맥라렌',
+  },
+};
+
+export const CAR_CLASSES: CarClass[] = CLASS_LABELS;
 
 // 국산은 대형까지만 받는다(스포츠카·슈퍼카 구분이 없다).
 const PRICE: Record<CarOrigin, Record<string, number>> = {
@@ -47,7 +70,9 @@ const PRICE: Record<CarOrigin, Record<string, number>> = {
 };
 
 export function classesFor(origin: CarOrigin): CarClass[] {
-  return CAR_CLASSES.filter(c => PRICE[origin][c.key] != null);
+  return CLASS_LABELS
+    .filter(c => PRICE[origin][c.key] != null)
+    .map(c => ({ ...c, hint: HINTS[origin][c.key] }));
 }
 
 export function priceFor(origin: CarOrigin, classKey: string): number | null {
