@@ -68,6 +68,10 @@ export async function GET() {
         `email:${email ? '있음' : '없음'}`,
         `prov:${provider ?? '없음'}`,
         `pid:${providerId ?? '없음'}`,
+        // 백엔드가 어떤 열쇠를 써봤는지 + 어떤 빌드가 올라가 있는지.
+        // 이 둘이 안 보이면 백엔드가 옛날 코드라는 뜻이다.
+        `tried:${Array.isArray(data?.tried) ? data.tried.join('+') : '알수없음'}`,
+        `back:${data?.build ?? '옛날빌드'}`,
       ].join(' ');
       console.error('[chat-token] 계정 못 찾음 —', shape);
       return NextResponse.json(
