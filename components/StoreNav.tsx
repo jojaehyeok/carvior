@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { label: '수출·폐차 견적받기', href: '/export-scrap' },
   { label: '시세 조회',   href: '/price' },
   { label: '스마트옥션', href: '/auction' },
+  { label: '상사 프로그램', href: '/biz' },
 ];
 
 export default function StoreNav({ transparent }: { transparent?: boolean }) {
@@ -44,6 +45,8 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
           {NAV_LINKS.map(l => {
             const active = pathname?.startsWith(l.href);
             const isDealerMenu = l.href === '/auction';
+            // 상사 프로그램은 '딜러'가 아니라 '무료'가 걸림돌을 없앤다 — 배지 글자를 달리 단다
+            const isBizMenu = l.href === '/biz';
             return (
               <li key={l.href} className="relative">
                 <Link
@@ -56,6 +59,9 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                   {l.label}
                   {isDealerMenu && (
                     <span className="text-[9px] font-black tracking-wide bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full uppercase">딜러</span>
+                  )}
+                  {isBizMenu && (
+                    <span className="text-[9px] font-black tracking-wide bg-violet-100 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full">무료</span>
                   )}
                 </Link>
               </li>
