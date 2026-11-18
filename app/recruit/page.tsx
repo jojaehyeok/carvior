@@ -74,7 +74,7 @@ export default function RecruitPage() {
           <span className="font-bold text-white">{form.name}</span>님, 접수가 완료됐습니다.
         </p>
         <p className="text-zinc-400 text-sm">담당자가 영업일 기준 1~2일 내 연락드립니다.</p>
-        <p className="text-xs text-zinc-600 mt-8">문의 · 010-2285-6017</p>
+        <p className="text-xs text-zinc-600 mt-8">문의 · 070-4138-2017</p>
       </div>
     );
   }
@@ -313,7 +313,7 @@ export default function RecruitPage() {
             >
               {loading ? '제출 중...' : '진단 평가사 파트너 신청하기 →'}
             </button>
-            <p className="text-center text-zinc-600 text-[11px]">상담 무료 · 영업일 1~2일 내 연락 · 010-2285-6017</p>
+            <p className="text-center text-zinc-600 text-[11px]">상담 무료 · 영업일 1~2일 내 연락 · 070-4138-2017</p>
           </form>
         </div>
       </section>

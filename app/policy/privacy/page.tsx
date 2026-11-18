@@ -96,7 +96,7 @@ export default function PrivacyPolicyPage() {
               ["공식 홈페이지", "https://carvior.store/"],
               ["사업장 주소", "경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)"],
               ["대표전화", "070-4138-2017"],
-              ["이메일", "jjhstc2285@naver.com"],
+              ["이메일", "cs@carvior.com"],
               ["시행일", "2026년 7월 24일"],
               ["최종 변경일", "2026년 7월 24일"],
             ]}
@@ -635,7 +635,7 @@ export default function PrivacyPolicyPage() {
               "담당부서: 신사업팀",
               "담당자: 조재혁",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
               "주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)",
             ]}
           />
@@ -694,7 +694,7 @@ export default function PrivacyPolicyPage() {
               "담당부서: 신사업팀",
               "담당자: 조재혁",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
               "주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)",
             ]}
           />
@@ -835,7 +835,7 @@ export default function PrivacyPolicyPage() {
               "담당부서: 신사업팀",
               "담당자: 조재혁",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
             ]}
           />
           <p>회사는 이용자의 이의신청 내용을 확인하고 필요한 경우 담당자가 직접 재검토한 후 그 결과를 안내합니다.</p>
@@ -850,7 +850,7 @@ export default function PrivacyPolicyPage() {
               "성명: 조재혁",
               "직책: 대표",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
             ]}
           />
 
@@ -860,7 +860,7 @@ export default function PrivacyPolicyPage() {
               "부서명: 신사업팀",
               "담당자: 조재혁",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
               "주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)",
               "홈페이지: https://carvior.store/",
             ]}
@@ -876,7 +876,7 @@ export default function PrivacyPolicyPage() {
               "담당부서: 신사업팀",
               "담당자: 조재혁",
               "전화번호: 070-4138-2017",
-              "이메일: jjhstc2285@naver.com",
+              "이메일: cs@carvior.com",
               "주소: 경기도 안산시 단원구 원포공원1로 59, A동 5층 2호(초지동, 신명트윈타워)",
             ]}
           />

@@ -265,8 +265,8 @@ export default function LoginPage() {
             {/* 비밀번호 되찾기 화면은 아직 없다. 없는 걸 있는 것처럼 걸어두지 않는다. */}
             <p className="mt-5 text-center text-[12px] text-slate-400">
               비밀번호를 잊으셨나요? 고객센터{' '}
-              <a href="tel:01022856017" className="font-semibold text-slate-500 underline-offset-2 hover:text-violet-600 hover:underline">
-                010-2285-6017
+              <a href="tel:07041382017" className="font-semibold text-slate-500 underline-offset-2 hover:text-violet-600 hover:underline">
+                070-4138-2017
               </a>
             </p>
 
@@ -311,8 +311,8 @@ function SiteFooter() {
         </a>
         <span className="mx-1.5 text-slate-300">|</span>
         고객센터{' '}
-        <a href="tel:01022856017" className="underline-offset-2 hover:text-slate-600 hover:underline">
-          010-2285-6017
+        <a href="tel:07041382017" className="underline-offset-2 hover:text-slate-600 hover:underline">
+          070-4138-2017
         </a>
       </p>
       <p className="mt-3 text-slate-300">© {new Date().getFullYear()} CARVIOR Corp.</p>

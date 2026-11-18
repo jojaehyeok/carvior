@@ -554,7 +554,7 @@ function SelfRegisterForm() {
         <div className="bg-green-50 border border-green-100 rounded-2xl px-5 py-4 text-xs text-green-800 text-left mb-8 max-w-sm w-full">
           <p className="font-extrabold mb-1.5">등록 접수 완료</p>
           <p>별도 납부 없이 바로 검토가 시작됩니다.<br />
-          문의: <span className="font-bold">010-2285-6017</span></p>
+          문의: <span className="font-bold">070-4138-2017</span></p>
         </div>
         <div className="flex gap-3 w-full max-w-sm">
           <button onClick={() => router.push('/buy')} className="flex-1 py-3.5 rounded-xl border border-zinc-200 text-sm font-semibold text-zinc-600">

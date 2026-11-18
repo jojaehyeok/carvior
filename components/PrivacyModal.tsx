@@ -73,7 +73,7 @@ export default function PrivacyModal({ onClose }: { onClose: () => void }) {
                         <p className="leading-relaxed text-zinc-500">
                             상호: 카비어 <br />
                             담당자 : 조재혁 <br />
-                            담당자 연락처: 010-2285-6017
+                            담당자 연락처: 070-4138-2017
                         </p>
                     </section>
                 </div>

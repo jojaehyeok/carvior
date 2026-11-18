@@ -285,7 +285,7 @@ export default function CarviorPrivateDealPage() {
                         </div>
                     ))}
                 </div>
-                <p className="text-xs text-zinc-400">고객센터 · 010-2285-6017</p>
+                <p className="text-xs text-zinc-400">고객센터 · 070-4138-2017</p>
             </div>
         );
     }

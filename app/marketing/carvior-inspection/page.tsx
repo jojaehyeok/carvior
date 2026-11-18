@@ -345,7 +345,7 @@ export default function CarviorInspectionPage() {
                             href="tel:15882285"
                             className="flex items-center justify-center w-full gap-3 py-4 text-lg font-extrabold text-white transition-all border border-zinc-700 rounded-2xl hover:bg-zinc-900 active:scale-95"
                         >
-                            <span>📞</span> 010-2285-6017
+                            <span>📞</span> 070-4138-2017
                         </a>
                         <p className="mt-2 text-xs text-center text-zinc-700">평일 09:00 – 18:00</p>
                     </div>

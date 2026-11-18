@@ -379,7 +379,7 @@ export default function StorePage() {
             <p className="text-xs text-white/30 leading-relaxed">
               카비어 · 경기도 안산시 단원구 원포공원1로 59<br />
               신명트윈타워 A동 502호<br />
-              대표: 조재혁 · 010-2285-6017
+              대표: 조재혁 · 070-4138-2017
             </p>
             <p className="text-[10px] text-white/15 mt-4">© 2026 CARVIOR. All rights reserved.</p>
           </div>

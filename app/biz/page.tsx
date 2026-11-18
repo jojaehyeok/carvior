@@ -155,7 +155,7 @@ export default function BizPage() {
 
             <p className="text-[11px] text-slate-400 mt-4">
               지금은 상사를 한 곳씩 열고 있습니다. 신청하신 순서대로 연락드립니다.
-              급하시면 바로 전화 주셔도 됩니다 — <a href="tel:01022856017" className="font-semibold text-slate-500 underline underline-offset-2 hover:text-violet-600">010-2285-6017</a>
+              급하시면 바로 전화 주셔도 됩니다 — <a href="tel:07041382017" className="font-semibold text-slate-500 underline underline-offset-2 hover:text-violet-600">070-4138-2017</a>
             </p>
           </div>
         </div>
@@ -316,7 +316,7 @@ export default function BizPage() {
           <p className="text-slate-500 text-sm leading-relaxed">
             계약서도 없고, 약정도 없습니다. 대표님·사무장님이 상사 이름과 연락처만 주시면 열어 드립니다.
             <br />
-            전화가 편하시면 <a href="tel:01022856017" className="font-bold text-slate-600 underline underline-offset-2 hover:text-violet-600">010-2285-6017</a> 로 주셔도 됩니다.
+            전화가 편하시면 <a href="tel:07041382017" className="font-bold text-slate-600 underline underline-offset-2 hover:text-violet-600">070-4138-2017</a> 로 주셔도 됩니다.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-7">
             <a
