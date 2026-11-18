@@ -263,105 +263,120 @@ export default function HomePage() {
 
       <NoticeAndFaq />
 
-      {/* ── 카비어 비즈 (상사 통합관리) ──
-           여기부터는 손님이 아니라 상사 대표님·사무장님을 보는 자리다. 홈에서 설득을
-           다 하려 들면 매물 보러 온 사람만 밀린다 — 띠 하나만 두고 /biz 로 보낸다. */}
-      <section className="bg-slate-900">
-        <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row md:items-center justify-between gap-10">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2.5 mb-4">
-              <img src="/logo-icon.svg" alt="" className="w-8 h-8" />
-              <span className="text-white text-lg font-black">카비어 비즈</span>
-              <span className="text-[10px] font-bold text-violet-300 bg-violet-500/20 border border-violet-500/30 px-2 py-0.5 rounded-full">
-                상사 전용 · 무료
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
-              상사 운영 프로그램,<br className="sm:hidden" /> 사용료 없이 드립니다.
+      {/* ── 카비어가 만드는 것 ──
+           차바타(평가사 앱)와 카비어 비즈(상사 프로그램)를 한 자리에 둔다.
+           따로 떼어 두 번 설득하면 "카비어가 뭐 하는 데냐"가 흐려진다 —
+           쓰는 사람이 다를 뿐 같은 회사의 제품이라는 게 먼저 보여야 한다.
+           제품이 늘면 카드만 하나 더 붙이면 된다. */}
+      <section className="bg-gradient-to-br from-violet-50 to-slate-50 border-y border-violet-100">
+        <div className="max-w-7xl mx-auto px-6 py-16 md:py-20">
+          <div className="text-center mb-10 md:mb-12">
+            <p className="text-xs font-bold tracking-widest uppercase text-violet-500 mb-2">CARVIOR PRODUCTS</p>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight">
+              카비어는 현장에서 쓰는 프로그램을 만듭니다.
             </h2>
-            <p className="text-slate-400 text-sm leading-relaxed mb-7">
-              출퇴근·작업일지·상담 기록·매물 사진·전자결재를 한 곳에서. 매입한 차 옆에서 바로
-              평가사를 부르고, 나온 리포트가 그 차에 붙습니다.<br className="hidden sm:block" />
-              프로그램은 드리고 <b className="text-white">검차로 받습니다.</b>
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link href="/biz"
-                className="bg-violet-600 hover:bg-violet-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors">
-                상사 프로그램 보기 →
-              </Link>
-              <a href="https://biz.carvior.store" target="_blank" rel="noopener noreferrer"
-                className="bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 font-bold px-7 py-3.5 rounded-xl text-sm transition-colors">
-                화면 둘러보기
-              </a>
-            </div>
-            <p className="text-[11px] text-slate-500 mt-4">
-              대표님·사무장님이 신청하시면 상사를 열어 드립니다. 직원 가입은 그다음입니다.
+            <p className="text-slate-500 text-sm mt-3 leading-relaxed">
+              차를 보는 평가사에게는 <b className="text-slate-700">차바타</b>,
+              상사를 꾸리는 대표님에게는 <b className="text-slate-700">카비어 비즈</b>.
             </p>
           </div>
 
-          <div className="shrink-0 w-full md:w-72">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5 space-y-2.5">
-              {['출퇴근·연차', '작업일지', '상담 기록', '매물 사진', '전자결재', '공지·사내 채팅'].map(t => (
-                <div key={t} className="flex items-center gap-2.5 text-sm text-slate-300">
-                  <span className="text-violet-400 font-black">·</span>{t}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* 차바타 — 이미 나와 있는 앱 */}
+            <div className="flex flex-col rounded-2xl bg-white border border-violet-100 shadow-sm p-7 md:p-8">
+              <div className="flex items-center gap-2.5 mb-4">
+                <img src="/logo-icon.svg" alt="" className="w-9 h-9" />
+                <span className="text-slate-900 text-lg font-black">차바타</span>
+                <span className="text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
+                  진단평가사용 앱
+                </span>
+              </div>
+              <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-tight mb-3">
+                현장 진단을 더 쉽고 빠르게.
+              </h3>
+              <p className="text-slate-500 text-sm leading-relaxed mb-5">
+                배정받은 의뢰 확인부터 사진 촬영·리포트 작성·정산 내역까지
+                진단평가사가 현장에서 쓰는 앱입니다.
+              </p>
+
+              <div className="flex flex-wrap gap-1.5 mb-7">
+                {['의뢰 배정', '사진 촬영', '리포트 작성', '정산 내역'].map(t => (
+                  <span key={t} className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="mt-auto">
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="https://play.google.com/store/apps/details?id=com.rabbitjindan.ChavatarApp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-colors"
+                  >
+                    ▶ Google Play
+                  </a>
+                  <a
+                    href="https://apps.apple.com/kr/app/id6801937353"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 bg-white hover:bg-violet-50 border border-violet-200 text-slate-700 font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition-colors"
+                  >
+                     App Store
+                  </a>
                 </div>
-              ))}
-              <div className="flex items-center gap-2.5 text-sm font-bold text-violet-300 pt-2 border-t border-white/10">
-                <span className="font-black">+</span>검차 주문·리포트
+                <p className="text-[11px] text-slate-400 mt-4">
+                  진단평가사 지원은 <Link href="/recruit" className="underline hover:text-violet-600">평가사 모집</Link>에서 받습니다.
+                </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ── 차바타 앱 안내 ──
-           고객용·딜러용 앱은 따로 만들 예정이라, 지금은 실제로 나와 있는
-           진단평가사 앱(차바타)만 소개한다. 앱이 더 나오면 여기에 나란히 붙이면 된다. */}
-      <section className="bg-gradient-to-br from-violet-50 to-slate-50 border-y border-violet-100">
-        <div className="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <img src="/logo-icon.svg" alt="" className="w-9 h-9" />
-              <span className="text-slate-900 text-xl font-black">차바타</span>
-              <span className="text-[10px] font-bold text-violet-700 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-full">
-                진단평가사용
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight mb-3">
-              현장 진단을 더 쉽고 빠르게.
-            </h2>
-            <p className="text-slate-500 text-sm leading-relaxed mb-7">
-              배정받은 의뢰 확인부터 사진 촬영·리포트 작성·정산 내역까지<br className="hidden sm:block" />
-              진단평가사가 현장에서 쓰는 앱입니다.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="https://play.google.com/store/apps/details?id=com.rabbitjindan.ChavatarApp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white hover:bg-violet-50 border border-violet-200 text-slate-700 font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition-colors"
-              >
-                ▶ Google Play
-              </a>
-              <a
-                href="https://apps.apple.com/kr/app/id6801937353"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-white hover:bg-violet-50 border border-violet-200 text-slate-700 font-bold px-6 py-3.5 rounded-xl text-sm shadow-sm transition-colors"
-              >
-                 App Store
-              </a>
-            </div>
-            <p className="text-[11px] text-slate-400 mt-4">
-              진단평가사 지원은 <Link href="/recruit" className="underline hover:text-violet-600">평가사 모집</Link>에서 받습니다.
-            </p>
-          </div>
+            {/* 카비어 비즈 — 상사 대표님을 보는 자리.
+                홈에서 설득을 다 하려 들면 매물 보러 온 사람이 밀린다. 여기선 한 문단만 하고 /biz 로 보낸다. */}
+            <div className="flex flex-col rounded-2xl bg-slate-900 border border-slate-800 shadow-sm p-7 md:p-8">
+              <div className="flex items-center gap-2.5 mb-4">
+                <img src="/logo-icon.svg" alt="" className="w-9 h-9" />
+                <span className="text-white text-lg font-black">카비어 비즈</span>
+                <span className="text-[10px] font-bold text-violet-300 bg-violet-500/20 border border-violet-500/30 px-2 py-0.5 rounded-full">
+                  상사 전용 · 무료
+                </span>
+              </div>
+              <h3 className="text-xl md:text-2xl font-black text-white leading-tight mb-3">
+                상사 운영 프로그램, 사용료 없이 드립니다.
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-5">
+                출퇴근·작업일지·상담 기록·매물 사진·전자결재를 한 곳에서. 매입한 차 옆에서 바로
+                평가사를 부르고, 나온 리포트가 그 차에 붙습니다.
+                프로그램은 드리고 <b className="text-white">검차로 받습니다.</b>
+              </p>
 
-          <div className="shrink-0">
-            <div className="hidden sm:flex w-44 h-80 rounded-[2rem] border-4 border-violet-100 bg-white shadow-sm flex-col items-center justify-center gap-3">
-              <img src="/logo-icon.svg" alt="" className="w-14 h-14" />
-              <p className="text-slate-900 font-black">차바타</p>
-              <p className="text-slate-400 text-xs">진단평가사 전용 앱</p>
+              <div className="flex flex-wrap gap-1.5 mb-7">
+                {['출퇴근·연차', '작업일지', '상담 기록', '매물 사진', '전자결재', '공지·사내 채팅'].map(t => (
+                  <span key={t} className="text-[11px] font-bold text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded-lg">
+                    {t}
+                  </span>
+                ))}
+                <span className="text-[11px] font-bold text-violet-300 bg-violet-500/15 border border-violet-500/30 px-2.5 py-1 rounded-lg">
+                  + 검차 주문·리포트
+                </span>
+              </div>
+
+              <div className="mt-auto">
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/biz"
+                    className="bg-violet-600 hover:bg-violet-500 text-white font-black px-6 py-3.5 rounded-xl text-sm transition-colors">
+                    상사 프로그램 보기 →
+                  </Link>
+                  <a href="https://biz.carvior.store" target="_blank" rel="noopener noreferrer"
+                    className="bg-white/5 hover:bg-white/10 border border-white/15 text-slate-200 font-bold px-6 py-3.5 rounded-xl text-sm transition-colors">
+                    화면 둘러보기
+                  </a>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-4">
+                  대표님·사무장님이 신청하시면 상사를 열어 드립니다. 직원 가입은 그다음입니다.
+                </p>
+              </div>
             </div>
           </div>
         </div>
