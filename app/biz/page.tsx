@@ -15,7 +15,8 @@ import AppFooter from '@/components/footermodal';
   그 답을 맨 위에서 먼저 한다.
 
   ⚠ 지금은 상사를 한 곳씩 연다(테넌트 분리가 Employee까지만 돼 있다). 그래서 버튼이
-  "바로 시작"이 아니라 "사전 신청"이다. 열 수 없는 걸 열린 것처럼 적으면 안 된다.
+  "바로 시작"이 아니라 "개설 신청"이다. 신청은 biz.carvior.store 로그인 화면에서 폼으로 받고,
+  상사는 사람이 확인하고 연다. 열 수 없는 걸 열린 것처럼 적으면 안 된다.
 */
 
 export const metadata = {
@@ -135,10 +136,12 @@ export default function BizPage() {
 
             <div className="flex flex-wrap gap-3">
               <a
-                href="tel:01022856017"
+                href="https://biz.carvior.store"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-violet-600 hover:bg-violet-500 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors"
               >
-                사전 신청하기 (010-2285-6017)
+                상사 개설 신청하기 →
               </a>
               <a
                 href="https://biz.carvior.store"
@@ -152,6 +155,7 @@ export default function BizPage() {
 
             <p className="text-[11px] text-slate-400 mt-4">
               지금은 상사를 한 곳씩 열고 있습니다. 신청하신 순서대로 연락드립니다.
+              급하시면 바로 전화 주셔도 됩니다 — <a href="tel:01022856017" className="font-semibold text-slate-500 underline underline-offset-2 hover:text-violet-600">010-2285-6017</a>
             </p>
           </div>
         </div>
@@ -311,13 +315,17 @@ export default function BizPage() {
           </h2>
           <p className="text-slate-500 text-sm leading-relaxed">
             계약서도 없고, 약정도 없습니다. 대표님·사무장님이 상사 이름과 연락처만 주시면 열어 드립니다.
+            <br />
+            전화가 편하시면 <a href="tel:01022856017" className="font-bold text-slate-600 underline underline-offset-2 hover:text-violet-600">010-2285-6017</a> 로 주셔도 됩니다.
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-7">
             <a
-              href="tel:01022856017"
+              href="https://biz.carvior.store"
+              target="_blank"
+              rel="noopener noreferrer"
               className="bg-violet-600 hover:bg-violet-700 text-white font-black px-7 py-3.5 rounded-xl text-sm transition-colors"
             >
-              010-2285-6017
+              상사 개설 신청하기 →
             </a>
             <Link
               href="/inspection"
