@@ -24,3 +24,36 @@ export function NaverMark({ className }: MarkProps) {
     </svg>
   );
 }
+
+/* ── 유저 구분 탭에 쓰는 작은 표시 ──
+   이 사이트에는 아이콘 꾸러미가 없다. 셋 때문에 하나를 더 받을 이유가 없어서 직접 그린다. */
+
+export function UserIcon({ className }: MarkProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+export function StoreIcon({ className }: MarkProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M3 9 4.5 4h15L21 9" />
+      <path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />
+      <path d="M9 21v-6h6v6" />
+    </svg>
+  );
+}
+
+export function BuildingIcon({ className }: MarkProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden>
+      <path d="M6 22V4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v18" />
+      <path d="M15 9h3a1 1 0 0 1 1 1v12" />
+      <path d="M3 22h18" />
+      <path d="M9.5 7h2M9.5 11h2M9.5 15h2" />
+    </svg>
+  );
+}
