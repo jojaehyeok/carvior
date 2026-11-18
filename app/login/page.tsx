@@ -1,11 +1,22 @@
 'use client';
 
+import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { KakaoMark, NaverMark } from '@/components/BrandMarks';
 
 type Tab = 'user' | 'dealer';
 
+/**
+ * 로그인 화면.
+ *
+ * 비즈(biz.carvior.store) 로그인과 같은 결로 맞춰 둔다 — 로고 하나, 태그라인 한 줄,
+ * 탭, 그리고 들어가는 길. 한 회사의 두 제품인데 문이 따로 놀면 안 된다.
+ *
+ * 카카오·네이버는 실제로 붙어 있어서 꽉 찬 버튼으로 둔다. 비즈 쪽이 동그란 아이콘인 건
+ * 거기선 아직 못 쓰기 때문이지 취향이 아니다 — 되는 것과 안 되는 것은 다르게 보여야 한다.
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('user');
@@ -16,87 +27,148 @@ export default function LoginPage() {
     await signIn(provider, { callbackUrl: '/' });
   };
 
+  const busy = !!loading;
+
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-5 py-12">
+      <main className="w-full max-w-[400px]">
 
-        <div className="text-center mb-8">
-          <span className="text-2xl font-black text-gray-900 tracking-tight">CARVIOR</span>
-          <p className="text-sm text-gray-400 mt-1">로그인 후 더 많은 서비스를 이용하세요</p>
-        </div>
+        <header className="mb-7 text-center">
+          <Link href="/" className="inline-block">
+            <img src="/logo.png" alt="카비어" className="mx-auto h-9 w-auto" />
+          </Link>
+          <p className="mt-3 text-[13px] font-medium text-slate-400">
+            중고차 거래, 차량 상태부터 투명하게
+          </p>
+        </header>
 
-        {/* 탭 */}
-        <div className="flex border-b border-gray-200 mb-8">
+        {/* 탭 — 들어오는 길을 고른다 */}
+        <div className="flex gap-1 rounded-2xl bg-slate-100 p-1">
           {([['user', '일반 회원'], ['dealer', '딜러']] as [Tab, string][]).map(([t, label]) => (
             <button
               key={t}
+              type="button"
               onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-bold transition-colors ${
-                tab === t
-                  ? 'text-violet-600 border-b-2 border-violet-600 -mb-px'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              aria-pressed={tab === t}
+              className={
+                'flex-1 rounded-xl py-2.5 text-[13px] transition ' +
+                (tab === t
+                  ? 'bg-white font-bold text-slate-900 shadow-[0_1px_3px_rgba(15,23,42,0.08)]'
+                  : 'font-medium text-slate-500 hover:text-slate-700')
+              }
             >
               {label}
             </button>
           ))}
         </div>
 
-        {tab === 'dealer' && (
-          <div className="mb-6 p-4 bg-violet-50 rounded-xl border border-violet-100">
-            <p className="text-xs text-violet-700 font-semibold">딜러 회원 안내</p>
-            <p className="text-xs text-violet-500 mt-1">딜러로 가입하면 스마트옥션 및 매매 관리 기능을 이용할 수 있습니다.</p>
+        <div className="mt-6 rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+          {tab === 'dealer' && (
+            <div className="mb-5 rounded-xl border border-violet-100 bg-violet-50/70 px-4 py-3">
+              <p className="text-[12px] font-bold text-violet-700">딜러 회원 안내</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-violet-500">
+                딜러로 가입하시면 스마트옥션과 매매 관리를 쓰실 수 있습니다.
+                로그인은 일반 회원과 같은 방법입니다.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-2.5">
+            <button
+              onClick={() => handleSocial('kakao')}
+              disabled={busy}
+              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#FEE500] text-[14px] font-bold text-[#191600] transition hover:brightness-[0.97] disabled:opacity-50"
+            >
+              {loading === 'kakao' ? (
+                <span className="size-4 animate-spin rounded-full border-2 border-[#191600]/25 border-t-[#191600]" />
+              ) : (
+                <KakaoMark className="size-[18px]" />
+              )}
+              카카오로 로그인
+            </button>
+
+            <button
+              onClick={() => handleSocial('naver')}
+              disabled={busy}
+              className="flex h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-[#03C75A] text-[14px] font-bold text-white transition hover:brightness-95 disabled:opacity-50"
+            >
+              {loading === 'naver' ? (
+                <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              ) : (
+                <NaverMark className="size-[15px]" />
+              )}
+              네이버로 로그인
+            </button>
           </div>
-        )}
 
-        {/* 소셜 로그인 */}
-        <div className="space-y-3">
-          <button
-            onClick={() => handleSocial('kakao')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#191919] font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading === 'kakao' ? (
-              <span className="w-5 h-5 border-2 border-[#191919]/30 border-t-[#191919] rounded-full animate-spin" />
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path fillRule="evenodd" clipRule="evenodd" d="M10 2C5.582 2 2 4.837 2 8.333c0 2.27 1.427 4.261 3.574 5.395L4.74 17.01a.25.25 0 0 0 .366.271L9.1 14.63c.296.03.597.037.9.037 4.418 0 8-2.836 8-6.334C18 4.837 14.418 2 10 2z" fill="#191919"/>
-              </svg>
-            )}
-            카카오로 로그인
-          </button>
-
-          <button
-            onClick={() => handleSocial('naver')}
-            disabled={!!loading}
-            className="w-full flex items-center justify-center gap-3 bg-[#03C75A] text-white font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {loading === 'naver' ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <span className="text-white font-black text-lg leading-none">N</span>
-            )}
-            네이버로 로그인
-          </button>
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-slate-100" />
+            <span className="text-[11px] font-medium text-slate-300">또는</span>
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
 
           <button
             onClick={() => router.push('/login/email')}
-            className="w-full py-3.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:border-gray-400 hover:text-gray-900 transition-colors"
+            disabled={busy}
+            className="flex h-12 w-full items-center justify-center rounded-xl border border-slate-200 text-[14px] font-bold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
           >
             이메일로 로그인
           </button>
+
+          <p className="mt-5 text-center text-[12px] text-slate-400">
+            계정이 없으신가요?{' '}
+            <button
+              onClick={() => router.push(tab === 'dealer' ? '/register?role=dealer' : '/register')}
+              className="font-bold text-violet-600 underline-offset-2 hover:underline"
+            >
+              {tab === 'dealer' ? '딜러로 가입' : '회원가입'}
+            </button>
+          </p>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-8">
-          계정이 없으신가요?{' '}
-          <button
-            onClick={() => router.push(tab === 'dealer' ? '/register?role=dealer' : '/register')}
-            className="text-violet-600 font-bold"
-          >
-            {tab === 'dealer' ? '딜러로 가입' : '회원가입'}
-          </button>
+        {/* 상사 대표님은 여기가 아니라 비즈로 가신다 — 두 제품의 계정이 아직 따로다 */}
+        <p className="mt-5 text-center text-[12px] leading-relaxed text-slate-400">
+          상사를 운영하시나요?{' '}
+          <Link href="/biz" className="font-bold text-slate-600 underline-offset-2 hover:text-violet-600 hover:underline">
+            카비어 비즈
+          </Link>
+          는 따로 로그인합니다.
         </p>
-      </div>
+
+        <SiteFooter />
+      </main>
     </div>
+  );
+}
+
+/**
+ * 사업자 정보.
+ *
+ * 로그인 화면은 로그인 안 한 사람이 보는 자리라 여기에 둔다. 전화번호는 눌러서 바로 걸리게 한다.
+ */
+function SiteFooter() {
+  return (
+    <footer className="mt-10 border-t border-slate-100 pt-6 text-center text-[11px] leading-relaxed text-slate-400">
+      <p className="font-semibold text-slate-500">카비어 주식회사</p>
+      <p className="mt-1.5">
+        대표자 : 조재혁, 유진욱
+        <span className="mx-1.5 text-slate-300">|</span>
+        사업자등록번호 : 889-81-03879
+      </p>
+      <p className="mt-0.5">통신판매업신고 : 제 2026-경기안산-0474</p>
+      <p className="mt-0.5">경기도 안산시 단원구 원포공원1로 59, A동 5층 2호 (초지동, 신명트윈타워)</p>
+      <p className="mt-1.5">
+        대표번호{' '}
+        <a href="tel:07041382017" className="underline-offset-2 hover:text-slate-600 hover:underline">
+          070-4138-2017
+        </a>
+        <span className="mx-1.5 text-slate-300">|</span>
+        고객센터{' '}
+        <a href="tel:01022856017" className="underline-offset-2 hover:text-slate-600 hover:underline">
+          010-2285-6017
+        </a>
+      </p>
+      <p className="mt-3 text-slate-300">© {new Date().getFullYear()} CARVIOR Corp.</p>
+    </footer>
   );
 }
