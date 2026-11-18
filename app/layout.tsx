@@ -6,6 +6,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import StoreNav from "@/components/StoreNav";
 import ChannelTalk from "@/components/ChannelTalk";
+import ProfileGate from "@/components/ProfileGate";
 import clsx from "clsx";
 import Script from "next/script"; // 카카오 지도 위해 추가
 
@@ -22,6 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={clsx("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
           <div className="relative flex flex-col h-screen">
+            {/* 빈 칸(번호·이메일)이 있는 분을 한 번 /welcome 으로 모신다 */}
+            <ProfileGate />
             <StoreNav />
             <main className="flex-grow">
               {children}

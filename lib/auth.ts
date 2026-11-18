@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
           const user = await res.json();
           // apiToken: 백엔드가 발급한 JWT. 채팅처럼 "남의 것을 보면 안 되는" 기능이
           // 이 토큰으로 사용자를 확인한다(클라이언트가 보내는 userId는 못 믿는다).
-          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role, dealerStatus: user.dealerStatus, apiToken: user.token } as any;
+          return { id: String(user.id), email: user.email, name: user.name, image: user.profileImage, role: user.role, dealerStatus: user.dealerStatus, apiToken: user.token, needsProfile: !user.phone } as any;
         } catch { return null; }
       },
     }),
@@ -68,6 +68,10 @@ export const authOptions: NextAuthOptions = {
           if (data?.token) (user as { apiToken?: string }).apiToken = data.token;
           (user as any).role         = data?.role;
           (user as any).dealerStatus = data?.dealerStatus;
+          // 소셜로 들어오면 번호가 없다. 마이페이지는 번호로 검차 신청을 찾으므로
+          // (bookings 에 userId 가 없다) 번호가 비면 자기 신청을 못 본다.
+          // 카카오는 이메일 동의를 안 받은 계정도 많다 — 둘 중 하나라도 비면 한 번 받는다.
+          (user as any).needsProfile = !data?.phone || !data?.email;
         }
       } catch { /* DB 저장 실패해도 로그인 허용 */ }
       return true;
@@ -79,12 +83,16 @@ export const authOptions: NextAuthOptions = {
       if (trigger === 'update' && session) {
         if (session.name) token.name = session.name;
         if (session.image) token.picture = session.image;
+        if (session.email) token.email = session.email;
+        // 온보딩을 마치면 재로그인 없이 바로 꺼준다 — 안 꺼지면 계속 그 화면으로 끌려간다
+        if (session.needsProfile === false) token.needsProfile = false;
       }
       if (user) {
         token.role         = (user as any).role;
         token.userId       = (user as any).id;
         token.dealerStatus = (user as any).dealerStatus;
         if ((user as any).apiToken) token.apiToken = (user as any).apiToken;
+        token.needsProfile = !!(user as any).needsProfile;
       }
       // 소셜 로그인 최초 발급 시 DB에서 role 조회 — ①에서 이미 채워지지만,
       // 이메일 계정이 먼저 있던 경우를 위해 한 번 더 맞춰준다.
@@ -111,6 +119,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).provider     = token.provider;
         (session.user as any).providerId   = token.sub;
         (session.user as any).apiToken     = token.apiToken;
+        (session.user as any).needsProfile = !!token.needsProfile;
       }
       return session;
     },
