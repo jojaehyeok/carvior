@@ -19,7 +19,8 @@ const API = 'https://carvior.store/api/v1';
 //
 // 화물 — 1톤·1.2톤(봉고·포터)은 수입차와 같은 기준으로 받고, 3.5톤은 15만원.
 // 5톤 초과는 차마다 손이 많이 달라서 가격을 못 박는다 — 선택지로 두지 않고
-// OVER_5T_TEL로 협의하도록 돌린다(선택지로 두면 금액이 0원으로 접수된다).
+// NEGOTIATION_TEL로 협의하도록 돌린다(선택지로 두면 금액이 0원으로 접수된다).
+// 중고 시세 8천만원 초과 차량도 같은 이유로 온라인 접수를 받지 않는다.
 const CAR_PRICING = {
   DOMESTIC: { label: '국산차', sub: null, base: 100_000 },
   IMPORTED: { label: '수입차', sub: null, base: 130_000 },
@@ -28,8 +29,14 @@ const CAR_PRICING = {
 } as const;
 type CarOrigin = keyof typeof CAR_PRICING;
 
-// 5톤 초과 화물 — 전화로 협의한다
-const OVER_5T_TEL = '070-4138-2017';
+// 온라인으로 금액을 못 박는 건들 — 전화로 협의한다.
+// ① 5톤 초과 화물 ② 중고 시세 8천만원 초과 차량.
+// 둘 다 차마다 손이 달라서 정찰로 받으면 손해를 보거나 못 가는 건이 생긴다.
+// 선택지로 만들면 금액 0원으로 접수되므로 아예 받지 않고 전화로 돌린다.
+const NEGOTIATION_TEL = '070-4138-2017';
+// 이 시세를 넘으면 온라인 접수를 받지 않는다. 폼에 시세를 받는 칸이 없어서
+// 지금은 '안내'일 뿐 막지는 못한다 — 막으려면 시세 입력칸이 먼저 필요하다.
+const HIGH_VALUE_LIMIT_LABEL = '8천만원';
 
 const FEATURES = [
   { title: '100+ 항목 점검', desc: '사고·교환·판금·누유·하부 등' },
@@ -277,6 +284,17 @@ export default function DealerInspectionPage() {
             </div>
           </div>
 
+          {/* 고가 차량 — 톤수와 같은 이유로 온라인 정찰에서 뺀다 */}
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 px-5 py-3.5">
+            <span className="text-sm text-slate-700">
+              중고 시세 {HIGH_VALUE_LIMIT_LABEL} 초과 차량
+              <span className="block text-[11px] text-slate-400 mt-0.5">차량 상태·점검 범위에 따라 달라집니다</span>
+            </span>
+            <a href={`tel:${NEGOTIATION_TEL}`} className="text-sm font-black text-violet-600 hover:text-violet-700 shrink-0">
+              별도 협의 <span className="font-bold">{NEGOTIATION_TEL}</span>
+            </a>
+          </div>
+
           {/* 화물 — 톤수로 갈린다. 5톤 초과는 금액을 못 박아서 협의로 보낸다. */}
           <div className="mt-3 rounded-2xl border border-slate-200 overflow-hidden">
             <div className="flex items-center gap-2 px-5 py-3 bg-slate-50 border-b border-slate-200">
@@ -303,8 +321,8 @@ export default function DealerInspectionPage() {
                   5톤 초과
                   <span className="block text-[11px] text-slate-400 mt-0.5">차량 상태·작업량에 따라 달라집니다</span>
                 </span>
-                <a href={`tel:${OVER_5T_TEL}`} className="text-sm font-black text-violet-600 hover:text-violet-700 shrink-0">
-                  별도 협의 <span className="font-bold">{OVER_5T_TEL}</span>
+                <a href={`tel:${NEGOTIATION_TEL}`} className="text-sm font-black text-violet-600 hover:text-violet-700 shrink-0">
+                  별도 협의 <span className="font-bold">{NEGOTIATION_TEL}</span>
                 </a>
               </li>
             </ul>
@@ -356,9 +374,10 @@ export default function DealerInspectionPage() {
                 ))}
               </div>
               <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                5톤 초과 화물은 금액이 차량마다 달라 온라인 접수를 받지 않습니다 —{' '}
-                <a href={`tel:${OVER_5T_TEL}`} className="font-bold text-violet-600 hover:text-violet-700">
-                  {OVER_5T_TEL}
+                5톤 초과 화물과 중고 시세 {HIGH_VALUE_LIMIT_LABEL}이 넘는 차량은
+                금액이 차량마다 달라 온라인 접수를 받지 않습니다 —{' '}
+                <a href={`tel:${NEGOTIATION_TEL}`} className="font-bold text-violet-600 hover:text-violet-700">
+                  {NEGOTIATION_TEL}
                 </a>
                 로 연락 주시면 협의해 드립니다.
               </p>
