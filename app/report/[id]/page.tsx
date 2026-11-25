@@ -473,6 +473,11 @@ export default function PublicReportPage() {
   // 검차 차량 보기(/vehicles) 공개 갤러리에서 넘어온 경우 딜러명·보험이력(헤이딜러 등으로
   // 개별 조회한 스크린샷이라 매물마다 신뢰도가 다름)은 노출하지 않는다.
   const isPublicGallery = useSearchParams().get("public") === "1";
+  // ?sample=1 — 결제 전 고객에게 "리포트가 이렇게 생겼다"를 보여주는 예시 모드.
+  // 실제 고객 차 리포트를 그대로 쓰므로 그 차와 거래를 특정할 수 있는 것은 전부 가린다:
+  // 차량번호 · 딜러명 · 검차일 · 보험이력. (등록증 사진은 원래 어느 모드에서도 안 나온다.)
+  // PDF·사진 zip도 막는다 — 받아보면 파일 안에 차량번호가 그대로 들어 있다.
+  const isSample = useSearchParams().get("sample") === "1";
   const [data, setData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -631,13 +636,21 @@ export default function PublicReportPage() {
           <span>🔍</span> {t("reportBadge", lang)}
         </div>
         <h1 className="mt-1 text-3xl font-bold text-gray-900">
-          {car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
+          {isSample
+            ? (car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? car_info.type : "예시 차량")
+            : car_info.type && car_info.type !== "알수없음" && car_info.type !== "미정" ? `${car_info.type} ${car_info.number}` : car_info.number}
         </h1>
-        {dealerName && !isPublicGallery && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
+        {dealerName && !isPublicGallery && !isSample && <p className="mt-1 text-sm text-gray-400">{t("dealer", lang)}: {dealerName}</p>}
         {/* 검차일 — 언제 본 차인지가 리포트에 없어서 나중에 "이거 언제 찍은 거냐"는 문의가 있었다.
             최초 완료 시각(firstCompletedAt)을 쓴다. 이후 수정해도 검차한 날은 그대로다. */}
-        {inspectedDate && (
+        {inspectedDate && !isSample && (
           <p className="mt-1 text-sm text-gray-400">{t("inspectedAt", lang)}: {inspectedDate}</p>
+        )}
+        {isSample && (
+          <p className="max-w-xl mx-auto mt-4 text-xs leading-relaxed text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            실제 발행된 진단 리포트의 <strong>예시</strong>입니다. 차량번호·판매점·검차일 등
+            차량을 특정할 수 있는 정보는 가렸습니다. 나머지 점검 내용과 사진은 실제 그대로입니다.
+          </p>
         )}
         {driverName && (
           <div className="mt-3 inline-flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5">
@@ -705,7 +718,7 @@ export default function PublicReportPage() {
         )}
 
         {/* 계기판 / 등록증 / 보험이력 — 보험이력(vin)은 검차 차량 보기 갤러리에서는 숨김 */}
-        {(() => { const visibleDocImages = isPublicGallery ? DOC_IMAGES.filter((d) => d.key !== "vin") : DOC_IMAGES; return visibleDocImages.some((d) => images[d.key]?.length) && (
+        {(() => { const visibleDocImages = (isPublicGallery || isSample) ? DOC_IMAGES.filter((d) => d.key !== "vin") : DOC_IMAGES; return visibleDocImages.some((d) => images[d.key]?.length) && (
           <div className="mt-4">
             <p className="mb-2 text-xs text-gray-400">{t("docs", lang)}</p>
             <LightGallery plugins={[lgZoom]} speed={400} selector="a" controls={false} elementClassNames="flex gap-3 flex-wrap">
@@ -962,7 +975,11 @@ export default function PublicReportPage() {
           {fabOpen ? "✕" : "☰"}
         </button>
 
-        {/* PDF 다운로드 */}
+        {/* PDF 다운로드 — 예시 모드에선 아예 렌더하지 않는다. 파일 안에 차량번호가
+            그대로 박히고, 파일명도 `카비어_안심리포트_{차량번호}.pdf`다.
+            ⚠ hidden 속성으로는 안 가려진다 — 아래 className의 Tailwind `flex`가
+               display:flex로 덮어써서 그대로 보인다. */}
+        {!isSample && (
         <button
           onClick={downloadPDF}
           disabled={pdfLoading}
@@ -979,6 +996,7 @@ export default function PublicReportPage() {
             <>⬇️ {t("pdfDownload", lang)}</>
           )}
         </button>
+        )}
 
         {/* 링크 복사 */}
         <button
@@ -992,6 +1010,7 @@ export default function PublicReportPage() {
 
         {/* 사진 전체 다운로드(zip) — 등록증/차대번호 등 개인정보 사진은 리포트 화면과 동일하게
             제외되고 1,2,3...번 순서로 이름 붙여 압축됨 */}
+        {!isSample && (
         <a
           href={`https://carvior.store/api/v1/external/inspection/report/by-hash/${id}/zip`}
           className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition-all duration-150 bg-emerald-700 rounded-full shadow-lg hover:bg-emerald-800 ${
@@ -1000,6 +1019,7 @@ export default function PublicReportPage() {
         >
           📦 {t("photoZip", lang)}
         </a>
+        )}
       </div>
 
       {/* PDF 클릭 시에만 마운트 → 평소엔 이미지 이중 요청 없음 */}

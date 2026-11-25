@@ -549,6 +549,19 @@ export default function DealerInspectionPage() {
           </div>
         </section>
 
+        {/* 결제 전에 결과물을 먼저 보여준다 — 실제 리포트에서 차량번호·판매점·검차일·
+            보험이력을 가린 예시다(?sample=1). */}
+        <section className="rounded-2xl border border-slate-200 px-5 py-5 text-center">
+          <p className="text-sm font-black text-slate-800 mb-1">어떤 리포트를 받으시나요?</p>
+          <p className="text-xs text-slate-400 mb-4">실제 발행된 진단 리포트를 그대로 보실 수 있습니다.</p>
+          <Link
+            href="/report/51b264c50c552e5a?sample=1"
+            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+          >
+            📄 검차 리포트 예시 보기
+          </Link>
+        </section>
+
         {/* 혜택 */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {BENEFITS.map(b => (

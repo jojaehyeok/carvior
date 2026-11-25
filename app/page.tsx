@@ -206,6 +206,19 @@ export default function HomePage() {
               />
             </div>
 
+            {/* 결제 전에 결과물을 먼저 보여준다 — 실제 발행된 리포트에 차량번호·판매점·
+                검차일·보험이력을 가린 예시다(?sample=1). 전엔 "샘플 리포트"를 말만 하고
+                열어볼 데가 없었다. */}
+            <div className="mt-6 text-center">
+              <Link
+                href="/report/51b264c50c552e5a?sample=1"
+                className="inline-flex items-center gap-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+              >
+                📄 검차 리포트 예시 보기
+              </Link>
+              <p className="text-[11px] text-slate-400 mt-2">신청 전에 어떤 결과를 받으시는지 먼저 확인해 보세요.</p>
+            </div>
+
             {isDealer && (
               <p className="text-center text-xs text-slate-400 mt-4">
                 딜러 계정으로 로그인하셨습니다 —{' '}
