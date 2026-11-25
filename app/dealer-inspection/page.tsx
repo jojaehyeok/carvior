@@ -16,11 +16,20 @@ import { BANK_INFO } from '@/lib/bank';
 const API = 'https://carvior.store/api/v1';
 
 // 안내문과 같은 값이어야 한다. 거리 할증은 백엔드(distance-estimate)가 계산한다.
+//
+// 화물 — 1톤·1.2톤(봉고·포터)은 수입차와 같은 기준으로 받고, 3.5톤은 15만원.
+// 5톤 초과는 차마다 손이 많이 달라서 가격을 못 박는다 — 선택지로 두지 않고
+// OVER_5T_TEL로 협의하도록 돌린다(선택지로 두면 금액이 0원으로 접수된다).
 const CAR_PRICING = {
-  DOMESTIC: { label: '국산차', base: 100_000 },
-  IMPORTED: { label: '수입차', base: 130_000 },
+  DOMESTIC: { label: '국산차', sub: null, base: 100_000 },
+  IMPORTED: { label: '수입차', sub: null, base: 130_000 },
+  CARGO_SMALL: { label: '화물 1~1.2톤', sub: '봉고 · 포터', base: 130_000 },
+  CARGO_3_5T: { label: '화물 3.5톤', sub: '5톤까지', base: 150_000 },
 } as const;
 type CarOrigin = keyof typeof CAR_PRICING;
+
+// 5톤 초과 화물 — 전화로 협의한다
+const OVER_5T_TEL = '070-4138-2017';
 
 const FEATURES = [
   { title: '100+ 항목 점검', desc: '사고·교환·판금·누유·하부 등' },
@@ -149,6 +158,7 @@ export default function DealerInspectionPage() {
           amount: total,
           listingUrl: form.listingUrl.trim() || '',
           additionalMemo: [
+            `[차량 구분] ${CAR_PRICING[carOrigin].label}${CAR_PRICING[carOrigin].sub ? ` (${CAR_PRICING[carOrigin].sub})` : ''}`,
             form.memo.trim(),
             estimate?.roundTripKm != null ? `[출장비] 왕복 약 ${estimate.roundTripKm}km · 할증 ${won(surcharge)}` : null,
           ].filter(Boolean).join('\n'),
@@ -266,6 +276,39 @@ export default function DealerInspectionPage() {
               <p className="text-[11px] text-violet-400 mt-2 text-right">VAT 별도</p>
             </div>
           </div>
+
+          {/* 화물 — 톤수로 갈린다. 5톤 초과는 금액을 못 박아서 협의로 보낸다. */}
+          <div className="mt-3 rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-3 bg-slate-50 border-b border-slate-200">
+              <span className="text-xs font-black text-slate-700">화물차</span>
+              <span className="text-[11px] text-slate-400">톤수 기준 · VAT 별도</span>
+            </div>
+            <ul className="divide-y divide-slate-100">
+              <li className="flex items-center justify-between gap-3 px-5 py-3.5">
+                <span className="text-sm text-slate-700">
+                  1톤 · 1.2톤
+                  <span className="block text-[11px] text-slate-400 mt-0.5">봉고 · 포터 등 — 수입차와 동일 기준</span>
+                </span>
+                <span className="text-lg font-black text-slate-900 shrink-0">130,000<span className="text-xs font-bold text-slate-400">원</span></span>
+              </li>
+              <li className="flex items-center justify-between gap-3 px-5 py-3.5">
+                <span className="text-sm text-slate-700">
+                  3.5톤
+                  <span className="block text-[11px] text-slate-400 mt-0.5">5톤까지</span>
+                </span>
+                <span className="text-lg font-black text-slate-900 shrink-0">150,000<span className="text-xs font-bold text-slate-400">원</span></span>
+              </li>
+              <li className="flex items-center justify-between gap-3 px-5 py-3.5 bg-slate-50/60">
+                <span className="text-sm text-slate-700">
+                  5톤 초과
+                  <span className="block text-[11px] text-slate-400 mt-0.5">차량 상태·작업량에 따라 달라집니다</span>
+                </span>
+                <a href={`tel:${OVER_5T_TEL}`} className="text-sm font-black text-violet-600 hover:text-violet-700 shrink-0">
+                  별도 협의 <span className="font-bold">{OVER_5T_TEL}</span>
+                </a>
+              </li>
+            </ul>
+          </div>
           <div className="mt-3 rounded-2xl border border-slate-200 p-5">
             <p className="text-xs font-black text-slate-700 mb-3">
               거리 할증 <span className="font-normal text-slate-400">(평가사 기준 직선거리, 왕복)</span>
@@ -301,12 +344,24 @@ export default function DealerInspectionPage() {
                     }`}
                   >
                     {CAR_PRICING[key].label}
+                    {CAR_PRICING[key].sub && (
+                      <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
+                        {CAR_PRICING[key].sub}
+                      </span>
+                    )}
                     <span className="block text-[11px] font-normal text-slate-400 mt-0.5">
                       {won(CAR_PRICING[key].base)} (VAT 별도)
                     </span>
                   </button>
                 ))}
               </div>
+              <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                5톤 초과 화물은 금액이 차량마다 달라 온라인 접수를 받지 않습니다 —{' '}
+                <a href={`tel:${OVER_5T_TEL}`} className="font-bold text-violet-600 hover:text-violet-700">
+                  {OVER_5T_TEL}
+                </a>
+                로 연락 주시면 협의해 드립니다.
+              </p>
             </div>
 
             {/* 딜러 정보 */}
