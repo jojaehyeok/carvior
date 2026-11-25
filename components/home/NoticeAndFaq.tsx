@@ -10,7 +10,7 @@ const NOTICES = [
   { title: '카비어 법인전환 안내', date: '2026.10.28', href: '/notice' },
 ];
 
-const FAQS = [
+const FAQS: { tag: string; q: string; a: string; href?: string }[] = [
   {
     tag: '거래',
     q: '중개 수수료가 정말 없나요?',
@@ -27,9 +27,16 @@ const FAQS = [
     a: '차량번호와 사진을 올리면 카비어가 검토한 뒤 매물로 공개됩니다. 등록비는 없습니다.',
   },
   {
+    // 태그가 이미 "검차"라 질문에 또 "검차"를 넣으면 화면에서 두 번 겹쳐 보인다.
     tag: '검차',
-    q: '검차 비용은 얼마인가요?',
-    a: '국산 99,000원 / 수입 132,000원입니다. 진단평가사가 차량이 있는 곳으로 직접 방문합니다.',
+    q: '비용은 얼마인가요?',
+    a: '차급에 따라 달라집니다. 국산차는 10만원부터, 수입차는 12만원부터이고 출장비는 따로 받지 않습니다. 진단평가사가 차량이 있는 곳으로 직접 방문합니다.',
+  },
+  {
+    tag: '검차',
+    q: '딜러·상사도 같은 요금인가요?',
+    a: '아니요. 딜러 출장검차는 별도 요금표입니다 — 국산 10만원 / 수입·화물 13만원(1~1.2톤) / 화물 3.5톤 15만원이고 VAT는 별도, 거리에 따라 50km 이상 +2만원, 100km 이상 +4만원이 붙습니다. 자세한 내용은 딜러 출장검차 페이지에서 확인해 주세요.',
+    href: '/dealer-inspection',
   },
 ];
 
@@ -78,7 +85,14 @@ export default function NoticeAndFaq() {
                   <span className="text-gray-300 shrink-0">{openIdx === i ? '−' : '+'}</span>
                 </button>
                 {openIdx === i && (
-                  <p className="px-6 pb-4 pl-[4.25rem] text-[13px] leading-relaxed text-gray-500">{f.a}</p>
+                  <div className="px-6 pb-4 pl-[4.25rem] text-[13px] leading-relaxed text-gray-500">
+                    <p>{f.a}</p>
+                    {f.href && (
+                      <Link href={f.href} className="inline-block mt-2 font-bold text-violet-600 hover:underline">
+                        요금표 보기 →
+                      </Link>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

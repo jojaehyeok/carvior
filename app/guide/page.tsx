@@ -155,7 +155,9 @@ export default function GuidePage() {
               </div>
             </div>
             <div className="border-t border-slate-100 mt-6 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-sm text-slate-500">국산 99,000원 · 수입 132,000원 · 출장비 없음</p>
+              {/* 요금은 차급별 변동가격이다 — lib/inspectionPricing의 PRICE가 원본이고
+                여기는 "부터" 하한만 적는다. 정찰가를 적으면 또 구요금이 남는다. */}
+            <p className="text-sm text-slate-500">국산 10만원부터 · 수입 12만원부터 · 출장비 없음</p>
               <Link
                 href="/inspection"
                 className="shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-black px-6 py-3 rounded-xl text-sm transition-colors"
