@@ -568,9 +568,18 @@ export default function DealerInspectionPage() {
           </div>
         </section>
 
-        {/* 🔴 검차 리포트 예시 버튼은 내려뒀다(2026-11-25) — 리포트 사진에 번호판이
-            그대로 보인다(옆 차 번호판 포함). 블러 적용 후 다시 건다.
-            자세한 경위는 app/page.tsx의 같은 자리 주석 참고. */}
+        {/* 실제 발행된 리포트에서 차량번호·판매점·검차일·보험이력을 가린 예시(?sample=1).
+            외관 사진의 번호판도 전부 수동으로 가려 뒀다 — app/page.tsx 주석 참고. */}
+        <section className="rounded-2xl border border-slate-200 px-5 py-5 text-center">
+          <p className="text-sm font-black text-slate-800 mb-1">어떤 리포트를 받으시나요?</p>
+          <p className="text-xs text-slate-400 mb-4">실제 발행된 진단 리포트를 그대로 보실 수 있습니다.</p>
+          <Link
+            href="/report/51b264c50c552e5a?sample=1"
+            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+          >
+            📄 검차 리포트 예시 보기
+          </Link>
+        </section>
 
         {/* 혜택 */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">

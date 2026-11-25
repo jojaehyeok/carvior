@@ -206,12 +206,20 @@ export default function HomePage() {
               />
             </div>
 
-            {/* 🔴 검차 리포트 예시 버튼은 내려뒀다(2026-11-25).
-                리포트 사진에 번호판이 그대로 보인다 — 그 차뿐 아니라 옆에 주차된
-                남의 차 번호판까지 읽힌다. 검차 리포트 사진은 블러 파이프라인을
-                한 번도 거치지 않는다(BlurService를 쓰는 곳은 store-items뿐).
-                번호판 블러를 적용한 뒤에 다시 건다. 리포트 쪽 ?sample=1 가리기
-                코드는 그대로 두었으니 링크만 다시 붙이면 된다. */}
+            {/* 결제 전에 결과물을 먼저 보여준다 — 실제 발행된 리포트에 차량번호·판매점·
+                검차일·보험이력을 가린 예시다(?sample=1).
+                ⚠ 이 리포트의 외관 6장은 번호판을 전부 수동으로 가려 뒀다(2026-11-26).
+                다른 리포트로 바꿀 거면 사진부터 확인할 것 — 리포트 사진은 자동 블러
+                파이프라인을 거치지 않아 기본적으로 번호판이 다 보인다. */}
+            <div className="mt-6 text-center">
+              <Link
+                href="/report/51b264c50c552e5a?sample=1"
+                className="inline-flex items-center gap-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm px-5 py-3 rounded-xl transition-colors"
+              >
+                📄 검차 리포트 예시 보기
+              </Link>
+              <p className="text-[11px] text-slate-400 mt-2">신청 전에 어떤 결과를 받으시는지 먼저 확인해 보세요.</p>
+            </div>
 
             {isDealer && (
               <p className="text-center text-xs text-slate-400 mt-4">
