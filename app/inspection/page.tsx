@@ -250,16 +250,9 @@ function InspectionInner() {
         {/* 차급 → 금액 */}
         <section>
           <h2 className="text-sm font-black text-slate-900 mb-1">차급을 선택해주세요</h2>
-          {/* 요금 기준이 두 개 있다 — 여기(개인 구매동행·비대면)는 차급별이고 거리 할증이 없다.
-              딜러 출장검차(/dealer-inspection)는 정찰 + 거리 할증이다. 기준이 다르다고
-              적어두지 않으면 두 페이지를 본 사람에겐 서로 모순된 안내로 읽힌다. */}
-          <p className="text-xs text-slate-400 mb-1">차급에 따라 금액이 달라집니다. 거리에 따른 추가 요금은 없습니다.</p>
-          <p className="text-xs text-slate-400 mb-4">
-            딜러·상사에서 의뢰하시는 출장검차는 요금 기준이 다릅니다 —{' '}
-            <Link href="/dealer-inspection" className="font-bold text-violet-600 hover:underline">
-              딜러 출장검차 요금표 보기 →
-            </Link>
-          </p>
+          {/* ⚠ 딜러 출장검차(/dealer-inspection)로 가는 링크를 여기 걸지 말 것 —
+              그쪽은 딜러 전용 요금표라 일반 고객에게 보이면 안 된다(2026-11-25 유저 지시). */}
+          <p className="text-xs text-slate-400 mb-4">차급에 따라 금액이 달라집니다. 거리에 따른 추가 요금은 없습니다.</p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
             {([['DOMESTIC', '국산차'], ['IMPORTED', '수입차']] as [CarOrigin, string][]).map(([key, label]) => (

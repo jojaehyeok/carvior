@@ -6,15 +6,17 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { clsx } from 'clsx';
 
-// ⚠ 이게 실제 전역 헤더다(app/layout.tsx에서 렌더). 돈을 쓰는 화면이 여기 없으면
-// URL을 직접 치는 사람만 찾아간다 — 검차 신청·딜러 출장검차가 빠져 있었다.
+// ⚠ 이게 실제 전역 헤더다(app/layout.tsx에서 렌더).
+//
+// 여기 올리지 않기로 한 것들 (2026-11-25 유저 지시) —
+//  · /dealer-inspection : 딜러 전용 요금표다. 일반 고객에게 보이면 안 된다.
+//    딜러에게는 로그인 후 홈(app/page.tsx의 isDealer 블록)에서만 안내한다.
+//  · /price : 시세 조회가 지금 동작하지 않는다(EnCarAPI 구독 끊김).
+//  · /inspection : 검차 신청은 메뉴에 걸지 않는다.
 const NAV_LINKS: { label: string; href: string; badge?: string }[] = [
-  { label: '검차 신청',   href: '/inspection' },
-  { label: '딜러 출장검차', href: '/dealer-inspection', badge: '딜러' },
   { label: '내차 사기',   href: '/market' },
   { label: '내차 팔기',   href: '/sell' },
   { label: '수출·폐차 견적받기', href: '/export-scrap' },
-  { label: '시세 조회',   href: '/price' },
   { label: '스마트옥션', href: '/auction', badge: '딜러' },
 ];
 

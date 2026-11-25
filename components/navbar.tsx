@@ -86,14 +86,7 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">
-          <NextLink
-            href="/inspection"
-            className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors"
-          >
-            검차 신청
-          </NextLink>
-        </NavbarItem>
+        <NavbarItem className="hidden md:flex" />
       </NavbarContent>
 
       {/* 모바일 우측: 깃헙 + 테마 + 햄버거 */}

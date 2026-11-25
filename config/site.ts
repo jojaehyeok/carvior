@@ -8,37 +8,6 @@ export const siteConfig = {
   description: "중고차 검차·진단 리포트, 개인 직거래, 수출·폐차 견적까지 — 카비어",
   navItems: [
     {
-      label: "검차 신청",
-      href: "/inspection",
-    },
-    {
-      label: "딜러 출장검차",
-      href: "/dealer-inspection",
-    },
-    {
-      label: "내 차 사기",
-      href: "/market",
-    },
-    {
-      label: "시세 조회",
-      href: "/price",
-    },
-    {
-      label: "이용가이드",
-      href: "/guide",
-    },
-  ],
-  // 모바일 햄버거 메뉴 — 위 항목에 로그인 뒤에 쓰는 것들을 더 붙인다.
-  navMenuItems: [
-    {
-      label: "검차 신청",
-      href: "/inspection",
-    },
-    {
-      label: "딜러 출장검차",
-      href: "/dealer-inspection",
-    },
-    {
       label: "내 차 사기",
       href: "/market",
     },
@@ -47,8 +16,24 @@ export const siteConfig = {
       href: "/sell",
     },
     {
-      label: "시세 조회",
-      href: "/price",
+      label: "수출 · 폐차 견적",
+      href: "/export-scrap",
+    },
+    {
+      label: "이용가이드",
+      href: "/guide",
+    },
+  ],
+  // 모바일 햄버거 메뉴 — 위 항목에 로그인 뒤에 쓰는 것들을 더 붙인다.
+  // ⚠ /dealer-inspection·/price·/inspection은 메뉴에 올리지 않는다(2026-11-25 유저 지시).
+  navMenuItems: [
+    {
+      label: "내 차 사기",
+      href: "/market",
+    },
+    {
+      label: "내 차 팔기",
+      href: "/sell",
     },
     {
       label: "수출 · 폐차 견적",
