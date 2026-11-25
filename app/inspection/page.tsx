@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { BANK_INFO } from '@/lib/bank';
+import PrivacyModal from '@/components/PrivacyModal';
 import {
   CarOrigin, INSPECTION_TYPES, InspectionType, classesFor, priceFor,
 } from '@/lib/inspectionPricing';
@@ -51,6 +52,10 @@ function InspectionInner() {
   const [time, setTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ amount: number } | null>(null);
+  // 개인정보 동의 — 접수하면 평가사·담당자에게 연락처와 주소가 넘어간다.
+  // 동의 없이 받으면 안 되고, 받은 값을 서버에 같이 보낸다(privacyAgreed).
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   useEffect(() => {
     if (document.getElementById('daum-postcode')) return;
@@ -104,6 +109,7 @@ function InspectionInner() {
     if (!form.contact.trim()) return alert('연락처를 입력해주세요.');
     if (!form.address.trim()) return alert('차량이 있는 주소를 입력해주세요.');
     if (!date || !time) return alert('희망 방문 날짜와 시간을 선택해주세요.');
+    if (!privacyAgreed) return alert('개인정보 수집 및 이용에 동의해주세요.');
 
     setSubmitting(true);
     try {
@@ -123,6 +129,7 @@ function InspectionInner() {
           address: `${form.address} ${form.addressDetail}`.trim(),
           preferredDateTime: `${date} ${time}`,
           paymentMethod: 'BANK_TRANSFER',
+          privacyAgreed,
           carOrigin: origin,
           amount,
           listingUrl: form.listingUrl.trim() || '',
@@ -243,7 +250,16 @@ function InspectionInner() {
         {/* 차급 → 금액 */}
         <section>
           <h2 className="text-sm font-black text-slate-900 mb-1">차급을 선택해주세요</h2>
-          <p className="text-xs text-slate-400 mb-4">차급에 따라 금액이 달라집니다. 거리에 따른 추가 요금은 없습니다.</p>
+          {/* 요금 기준이 두 개 있다 — 여기(개인 구매동행·비대면)는 차급별이고 거리 할증이 없다.
+              딜러 출장검차(/dealer-inspection)는 정찰 + 거리 할증이다. 기준이 다르다고
+              적어두지 않으면 두 페이지를 본 사람에겐 서로 모순된 안내로 읽힌다. */}
+          <p className="text-xs text-slate-400 mb-1">차급에 따라 금액이 달라집니다. 거리에 따른 추가 요금은 없습니다.</p>
+          <p className="text-xs text-slate-400 mb-4">
+            딜러·상사에서 의뢰하시는 출장검차는 요금 기준이 다릅니다 —{' '}
+            <Link href="/dealer-inspection" className="font-bold text-violet-600 hover:underline">
+              딜러 출장검차 요금표 보기 →
+            </Link>
+          </p>
 
           <div className="grid grid-cols-2 gap-2 mb-4">
             {([['DOMESTIC', '국산차'], ['IMPORTED', '수입차']] as [CarOrigin, string][]).map(([key, label]) => (
@@ -345,6 +361,9 @@ function InspectionInner() {
 
             <label className="block text-xs font-black text-slate-500 mt-4 mb-2">
               희망 방문 시간 <span className="text-violet-500">*</span>
+              {/* 날짜를 안 고르면 시간 버튼이 전부 흐려지는데, 이유를 안 적으면
+                  "전부 마감"으로 읽고 그 자리에서 나간다. */}
+              {!date && <span className="font-bold text-slate-400 ml-1.5">— 날짜를 먼저 선택해 주세요</span>}
             </label>
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {TIME_SLOTS.map(t => (
@@ -396,13 +415,40 @@ function InspectionInner() {
             </p>
           </div>
 
+          {/* 개인정보 동의 — 동의 전에는 신청 버튼을 못 누르게 막는다 */}
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3.5">
+            <div className="flex items-start gap-2.5">
+              <input
+                type="checkbox"
+                id="privacy-agree"
+                checked={privacyAgreed}
+                onChange={e => setPrivacyAgreed(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-violet-600 cursor-pointer shrink-0"
+              />
+              <label htmlFor="privacy-agree" className="text-[11px] leading-relaxed text-slate-500 cursor-pointer select-none">
+                <span className="font-black text-slate-900">[필수] </span>
+                개인정보 수집 및 이용에 동의합니다. 접수하신 연락처·주소는 평가사 배정과 방문 일정 안내에만 사용됩니다.{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className="font-bold underline underline-offset-2 text-slate-600 hover:text-slate-900"
+                >
+                  내용 보기
+                </button>
+              </label>
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={submit}
-            disabled={submitting || !amount}
-            className="w-full mt-4 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-4 rounded-xl text-sm transition-colors"
+            disabled={submitting || !amount || !privacyAgreed}
+            className="w-full mt-3 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-4 rounded-xl text-sm transition-colors"
           >
-            {submitting ? '접수 중…' : amount ? `${typeInfo.label} 신청하기 (${won(amount)})` : '차급을 선택해주세요'}
+            {submitting ? '접수 중…'
+              : !amount ? '차급을 선택해주세요'
+              : !privacyAgreed ? '개인정보 수집 동의가 필요합니다'
+              : `${typeInfo.label} 신청하기 (${won(amount)})`}
           </button>
         </section>
 
@@ -410,6 +456,8 @@ function InspectionInner() {
           평가사 일정에 따라 희망 시간이 조정될 수 있습니다. 주말·야간 할증은 없습니다.
         </p>
       </div>
+
+      {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
     </main>
   );
 }

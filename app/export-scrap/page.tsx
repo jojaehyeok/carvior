@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PrivacyModal from '@/components/PrivacyModal';
 
 const REASONS = [
   { icon: '🌏', title: '수출업자에게 직접 연결', desc: '해외 바이어 네트워크를 보유한 수출업자에게 차량 정보를 전달, 국내 시세보다 높은 매입가를 받을 수 있어요.' },
@@ -12,10 +13,15 @@ const TYPE_OPTIONS = ['수출', '폐차', '둘 다 상관없이 높은 곳으로
 
 export default function ExportScrapPage() {
   const [form, setForm] = useState({
-    name: '', contact: '', carModel: '', year: '', mileage: '', region: '', type: TYPE_OPTIONS[2], memo: '',
+    name: '', contact: '', carNumber: '', carModel: '', year: '', mileage: '', region: '', type: TYPE_OPTIONS[2], memo: '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  // 이 폼은 받은 정보를 제휴 수출업자·폐차업체(제3자)에게 넘긴다.
+  // 전엔 privacyAgreed를 묻지 않고 true로 박아 보냈다 — 동의를 받은 적이 없는데
+  // 받았다고 기록되던 것이라 반드시 실제 체크값을 보낸다.
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -27,6 +33,10 @@ export default function ExportScrapPage() {
       alert('이름, 연락처, 차종은 필수입니다.');
       return;
     }
+    if (!privacyAgreed) {
+      alert('개인정보 수집·이용 및 제3자 제공에 동의해주세요.');
+      return;
+    }
     setLoading(true);
     try {
       await fetch('https://carvior.store/api/v1/external/buyer-request', {
@@ -36,9 +46,10 @@ export default function ExportScrapPage() {
           ...form,
           source: 'EXPORT_SCRAP_QUOTE',
           carOwner: form.name,
+          carNumber: form.carNumber.trim() || '미정',
           address: form.region,
           preferredDateTime: '-',
-          privacyAgreed: true,
+          privacyAgreed,
         }),
       });
       setSubmitted(true);
@@ -147,6 +158,20 @@ export default function ExportScrapPage() {
                 />
               </div>
 
+              {/* 차량번호 — 있으면 수출업자가 연식·배기량을 바로 조회해서 견적이 빨라진다.
+                  모르는 분도 많아서 필수로는 받지 않는다. */}
+              <div>
+                <label className="text-xs text-zinc-400 font-bold mb-1.5 block">
+                  차량번호 <span className="text-zinc-600 font-normal">모르시면 비워두세요</span>
+                </label>
+                <input
+                  name="carNumber" value={form.carNumber}
+                  onChange={e => setForm(prev => ({ ...prev, carNumber: e.target.value.split(' ').join('') }))}
+                  placeholder="12가3456"
+                  className="w-full p-3 bg-transparent border-b-2 border-zinc-700 focus:border-violet-500 outline-none text-white font-bold placeholder:text-zinc-600 transition-colors"
+                />
+              </div>
+
               <div>
                 <label className="text-xs text-zinc-400 font-bold mb-1.5 block">
                   차종 <span className="text-red-400">*</span>
@@ -207,18 +232,44 @@ export default function ExportScrapPage() {
               </div>
             </div>
 
+            {/* 개인정보 동의 — 제휴업체에 넘기는 폼이라 수집·이용과 제3자 제공을 같이 받는다 */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="privacy-agree"
+                  checked={privacyAgreed}
+                  onChange={e => setPrivacyAgreed(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-violet-500 cursor-pointer shrink-0"
+                />
+                <label htmlFor="privacy-agree" className="text-[11px] leading-relaxed text-zinc-400 cursor-pointer select-none">
+                  <span className="font-black text-white">[필수] </span>
+                  개인정보 수집·이용 및 제3자 제공에 동의합니다. 남겨주신 이름·연락처·차량 정보는
+                  견적 산정을 위해 카비어 제휴 수출업자·폐차업체에 제공되며, 제공받은 업체가 직접 연락드립니다.{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="font-bold underline underline-offset-2 text-zinc-300 hover:text-white"
+                  >
+                    내용 보기
+                  </button>
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-5 rounded-2xl text-base font-black transition-all bg-violet-600 text-white hover:bg-violet-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-2xl shadow-violet-900/30"
+              disabled={loading || !privacyAgreed}
+              className="w-full py-5 rounded-2xl text-base font-black transition-all bg-violet-600 text-white hover:bg-violet-700 active:scale-[0.98] disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed shadow-2xl shadow-violet-900/30"
             >
-              {loading ? '제출 중...' : '무료 견적 신청하기 →'}
+              {loading ? '제출 중...' : !privacyAgreed ? '개인정보 제공 동의가 필요합니다' : '무료 견적 신청하기 →'}
             </button>
             <p className="text-center text-zinc-600 text-[11px]">상담 무료 · 영업일 1~2일 내 연락 · 070-4138-2017</p>
           </form>
         </div>
       </section>
 
+      {showPrivacyModal && <PrivacyModal onClose={() => setShowPrivacyModal(false)} />}
     </main>
   );
 }
