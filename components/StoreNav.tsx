@@ -6,23 +6,40 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { clsx } from 'clsx';
 
-const NAV_LINKS = [
+// ⚠ 이게 실제 전역 헤더다(app/layout.tsx에서 렌더). 돈을 쓰는 화면이 여기 없으면
+// URL을 직접 치는 사람만 찾아간다 — 검차 신청·딜러 출장검차가 빠져 있었다.
+const NAV_LINKS: { label: string; href: string; badge?: string }[] = [
+  { label: '검차 신청',   href: '/inspection' },
+  { label: '딜러 출장검차', href: '/dealer-inspection', badge: '딜러' },
   { label: '내차 사기',   href: '/market' },
   { label: '내차 팔기',   href: '/sell' },
   { label: '수출·폐차 견적받기', href: '/export-scrap' },
   { label: '시세 조회',   href: '/price' },
-  { label: '스마트옥션', href: '/auction' },
+  { label: '스마트옥션', href: '/auction', badge: '딜러' },
 ];
 
 export default function StoreNav({ transparent }: { transparent?: boolean }) {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  // 돋보기 — 전엔 onClick이 없는 장식이라 눌러도 아무 일이 없었다.
+  // 누르면 입력칸이 열리고, 넣은 말로 매물을 찾아 /market으로 보낸다.
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
 
   const user = session?.user as any;
   const isDealer = user?.role === 'dealer';
+
+  const runSearch = () => {
+    const q = searchText.trim();
+    if (!q) return;
+    setSearchOpen(false);
+    setSearchText('');
+    setOpen(false);
+    router.push(`/market?q=${encodeURIComponent(q)}`);
+  };
 
   // 로그인 화면은 비즈처럼 한 장으로 둔다 — 로고를 눌러 홈으로 나간다
   const HIDE_NAV_PATHS = ['/marketing/simple-request', '/login'];
@@ -44,7 +61,6 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
         <ul className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map(l => {
             const active = pathname?.startsWith(l.href);
-            const isDealerMenu = l.href === '/auction';
             return (
               <li key={l.href} className="relative">
                 <Link
@@ -55,8 +71,8 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                   )}
                 >
                   {l.label}
-                  {isDealerMenu && (
-                    <span className="text-[9px] font-black tracking-wide bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full uppercase">딜러</span>
+                  {l.badge && (
+                    <span className="text-[9px] font-black tracking-wide bg-purple-500/20 text-purple-600 border border-purple-500/30 px-1.5 py-0.5 rounded-full uppercase">{l.badge}</span>
                   )}
                 </Link>
               </li>
@@ -128,9 +144,17 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
             </>
           )}
 
-          <button className="p-2.5 text-gray-400 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-50" aria-label="검색">
+          <button
+            onClick={() => setSearchOpen(v => !v)}
+            className="p-2.5 text-gray-400 hover:text-gray-800 transition-colors rounded-lg hover:bg-gray-50"
+            aria-label="검색"
+            aria-expanded={searchOpen}
+          >
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              {searchOpen
+                ? <><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>
+                : <><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></>
+              }
             </svg>
           </button>
           <button
@@ -148,6 +172,29 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
         </div>
       </div>
 
+      {/* 검색창 — 돋보기를 누르면 열린다 */}
+      {searchOpen && (
+        <div className="bg-white border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 py-3 flex gap-2">
+            <input
+              autoFocus
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') runSearch(); }}
+              placeholder="찾는 차를 적어주세요 — 예) 그랜저 / 카니발 / 아반떼"
+              className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-violet-500"
+            />
+            <button
+              onClick={runSearch}
+              disabled={!searchText.trim()}
+              className="shrink-0 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-bold px-5 rounded-xl transition-colors"
+            >
+              검색
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 모바일 메뉴 */}
       {open && (
         <div className="lg:hidden bg-white border-t border-gray-100">
@@ -160,8 +207,8 @@ export default function StoreNav({ transparent }: { transparent?: boolean }) {
                 className="flex items-center justify-between px-6 py-4 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-b border-gray-100 transition-colors"
               >
                 <span>{l.label}</span>
-                {l.href === '/auction' && (
-                  <span className="text-[9px] font-black tracking-wide bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full uppercase">딜러</span>
+                {l.badge && (
+                  <span className="text-[9px] font-black tracking-wide bg-purple-500/20 text-purple-600 border border-purple-500/30 px-1.5 py-0.5 rounded-full uppercase">{l.badge}</span>
                 )}
               </Link>
             );

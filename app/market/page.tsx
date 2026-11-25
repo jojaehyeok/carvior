@@ -188,6 +188,14 @@ export default function MarketPage() {
   const [sort, setSort] = useState<(typeof SORTS)[number]>('최근등록순');
   const [filterOpen, setFilterOpen] = useState(false);
 
+  // 헤더 돋보기에서 /market?q=... 로 넘어온 검색어를 받는다.
+  // useSearchParams를 쓰면 이 페이지를 Suspense로 감싸야 해서, 마운트 때 한 번
+  // 주소에서 직접 읽는다(뒤로가기로 q가 바뀌는 경우는 없는 화면이다).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) setKeyword(q);
+  }, []);
+
   useEffect(() => {
     fetch(`${API}/public/personal-listings`)
       .then((r) => (r.ok ? r.json() : []))

@@ -9,9 +9,7 @@ import {
   NavbarItem,
   NavbarMenuItem,
 } from "@nextui-org/navbar";
-import { Kbd } from "@nextui-org/kbd";
 import { Link } from "@nextui-org/link";
-import { Input } from "@nextui-org/input";
 import { link as linkStyles } from "@nextui-org/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
@@ -19,11 +17,7 @@ import { usePathname } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  GithubIcon,
-  SearchIcon,
-  Logo,
-} from "@/components/icons";
+import { Logo } from "@/components/icons";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -48,26 +42,9 @@ export const Navbar = () => {
     return null;
   }
 
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-gray-100 border border-gray-300",
-        input: "text-sm text-gray-800",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <SearchIcon className="text-base text-gray-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
+  // 전엔 여기 NextUI 템플릿의 "Search..." 입력칸이 있었다. onChange도 onSubmit도 없는
+  // 장식이라 눌러도 아무 일이 안 일어났다 — 되는 것처럼 보이는 게 없는 것보다 나쁘다.
+  // 차종 검색은 /price가 하는 일이라 메뉴의 "시세 조회"로 보낸다.
 
   return (
     <NextUINavbar
@@ -109,36 +86,29 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-2">
           <ThemeSwitch />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex" />
+        <NavbarItem className="hidden lg:flex">
+          <NextLink
+            href="/inspection"
+            className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-bold px-4 py-2 rounded-xl transition-colors"
+          >
+            검차 신청
+          </NextLink>
+        </NavbarItem>
       </NavbarContent>
 
       {/* 모바일 우측: 깃헙 + 테마 + 햄버거 */}
+      {/* 모바일 우측 — 템플릿에 딸려온 깃헙 아이콘(NextUI 저작자 레포로 가던 것)을 뺐다 */}
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
         <ThemeSwitch />
         <NavbarMenuToggle />
       </NavbarContent>
 
       {/* 모바일 메뉴 */}
       <NavbarMenu className="bg-white">
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
+        <div className="mx-4 mt-4 flex flex-col gap-2">
           {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
-              <Link
-                color={
-                  index === 2
-                    ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
-                }
-                href={item.href}
-                size="lg"
-              >
+            <NavbarMenuItem key={`${item.href}-${index}`}>
+              <Link color="foreground" href={item.href} size="lg">
                 {item.label}
               </Link>
             </NavbarMenuItem>

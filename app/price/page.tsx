@@ -151,7 +151,31 @@ function PricePageInner() {
         {/* 1단계: 등급 선택 */}
         {!loading && step === 'search' && searched && (
           matches.length === 0 ? (
-            <div className="text-center text-gray-400 py-10">일치하는 차종을 찾지 못했어요.</div>
+            // ⚠ 백엔드(car-spec)는 EnCarAPI 프록시다. 키가 없거나 구독이 끊기면
+            // 호출이 실패해도 똑같이 빈 배열을 돌려준다 — 그래서 전엔 어떤 차를 넣어도
+            // "일치하는 차종을 찾지 못했어요"가 떴고, 고객은 자기 차가 없는 줄 알았다.
+            // 둘을 구분할 방법이 없으니 둘 다 맞는 문구를 쓰고 나갈 길을 같이 둔다.
+            <div className="text-center py-10 px-6">
+              <p className="text-sm text-gray-500 font-bold mb-1.5">시세를 불러오지 못했어요</p>
+              <p className="text-xs text-gray-400 leading-relaxed mb-5">
+                차종명을 다르게 적어보시거나(예: &ldquo;그랜저&rdquo;처럼 짧게), 잠시 후 다시 시도해 주세요.<br />
+                조회가 계속 안 되면 시세 데이터 연동에 문제가 있는 경우입니다 — 문의 주시면 바로 확인해 드립니다.
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <a
+                  href="tel:070-4138-2017"
+                  className="text-xs font-bold text-gray-600 border border-gray-200 rounded-xl px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                >
+                  070-4138-2017
+                </a>
+                <a
+                  href="/market"
+                  className="text-xs font-bold text-white bg-black rounded-xl px-4 py-2.5 hover:bg-gray-800 transition-colors"
+                >
+                  등록된 매물 보기 →
+                </a>
+              </div>
+            </div>
           ) : (
             <div className="border border-gray-100 rounded-2xl divide-y divide-gray-100 overflow-hidden">
               {matches.map((m, i) => (
