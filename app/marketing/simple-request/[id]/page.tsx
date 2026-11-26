@@ -158,6 +158,33 @@ export default function SimpleRequestByCompanyPage() {
     const [showPlaceResults, setShowPlaceResults] = useState(false);
     const [searchingPlace, setSearchingPlace] = useState(false);
 
+    // 장소를 고르면 그 지역에 배정 가능한 진단사가 실제로 있는지 바로 확인한다.
+    // 서버의 available-slots는 자동배정(tryAutoAssign)과 같은 기준으로 판단하므로,
+    // 여기서 "없음"이 뜨면 접수해도 자동배정이 안 붙고 관리자가 직접 배정해야 한다.
+    // 접수 자체는 막지 않는다 — 수동 배정으로 처리되는 건이 실제로 있다.
+    const [coverage, setCoverage] = useState<{
+        regionCovered: boolean;
+        slots: { time: string; available: boolean }[];
+        activeDrivers: { name: string }[];
+    } | null>(null);
+    const [coverageLoading, setCoverageLoading] = useState(false);
+
+    useEffect(() => {
+        const address = formData.address.trim();
+        if (!address) { setCoverage(null); return; }
+        // 날짜를 아직 안 골랐으면 오늘로 조회한다 — regionCovered·activeDrivers는
+        // 날짜와 무관한 값이라 "담당자 유무"는 날짜 없이도 바로 알 수 있다.
+        const date = formData.preferredDateTime.split(' ')[0] || new Date().toISOString().split('T')[0];
+        let cancelled = false;
+        setCoverageLoading(true);
+        fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/external/request/available-slots?address=${encodeURIComponent(address)}&date=${encodeURIComponent(date)}`)
+            .then(r => (r.ok ? r.json() : null))
+            .then(d => { if (!cancelled) setCoverage(d); })
+            .catch(() => { if (!cancelled) setCoverage(null); })
+            .finally(() => { if (!cancelled) setCoverageLoading(false); });
+        return () => { cancelled = true; };
+    }, [formData.address, formData.preferredDateTime]);
+
     const checkDuplicateCar = async (carNum: string) => {
         if (carNum.length < 7) return;
         try {
@@ -677,6 +704,51 @@ export default function SimpleRequestByCompanyPage() {
                                 className="w-full border-b-2 border-violet-100 pb-2 focus:border-violet-500 outline-none transition-colors placeholder:text-zinc-300 text-zinc-900 font-medium"
                                 onChange={handleChange}
                             />
+
+                            {/* 배정 가능 여부 — 자동배정과 같은 기준이라 여기 경고가 뜨면 실제로도 안 붙는다 */}
+                            {formData.address && (
+                                coverageLoading ? (
+                                    <p className="text-[11px] text-zinc-400">배정 가능한 진단사를 확인하는 중…</p>
+                                ) : !coverage ? null : !coverage.regionCovered ? (
+                                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
+                                        <p className="text-xs font-extrabold text-rose-700 mb-1">⚠️ 이 지역을 담당하는 진단사가 없습니다</p>
+                                        <p className="text-[11px] leading-relaxed text-rose-600">
+                                            접수는 되지만 자동배정이 되지 않아 관리자가 직접 배정해야 합니다.
+                                            급한 건이면 070-4138-2017로 알려주세요.
+                                        </p>
+                                    </div>
+                                ) : coverage.activeDrivers.length === 0 ? (
+                                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                        <p className="text-xs font-extrabold text-amber-700 mb-1">⚠️ 지금은 활동 중인 진단사가 없습니다</p>
+                                        <p className="text-[11px] leading-relaxed text-amber-700/80">
+                                            이 지역 담당 진단사가 전부 활동중지 상태예요. 접수는 되지만 배정이 늦어질 수 있습니다.
+                                        </p>
+                                    </div>
+                                ) : (() => {
+                                    const chosenTime = formData.preferredDateTime.split(' ')[1] || '';
+                                    const chosenSlot = coverage.slots.find(s => s.time === chosenTime);
+                                    const openTimes = coverage.slots.filter(s => s.available).map(s => s.time);
+                                    // 서버가 안 돌려주는 시간(17:30·18:00 등)은 chosenSlot이 undefined —
+                                    // "불가"가 아니라 "확인 안 됨"이라 경고하지 않는다.
+                                    if (chosenSlot && !chosenSlot.available) {
+                                        return (
+                                            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                                                <p className="text-xs font-extrabold text-amber-700 mb-1">⚠️ 선택하신 시간에 가능한 진단사가 없습니다</p>
+                                                <p className="text-[11px] leading-relaxed text-amber-700/80">
+                                                    {openTimes.length > 0
+                                                        ? `이 날짜에 가능한 시간: ${openTimes.join(', ')}`
+                                                        : '이 날짜는 종일 일정이 찼습니다. 다른 날짜를 선택해 주세요.'}
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-extrabold text-emerald-700">
+                                            ✅ 이 지역 담당 진단사 {coverage.activeDrivers.length}명 — 배정 가능합니다
+                                        </p>
+                                    );
+                                })()
+                            )}
                         </div>
                     </div>
 

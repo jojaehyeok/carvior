@@ -57,6 +57,51 @@ function InspectionInner() {
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
+  // 방문 주소+날짜로 "그 시간에 실제로 뛸 수 있는 평가사가 있는지"를 서버에 물어본다.
+  // 2026-07(27aab50)에 넣었던 기능인데 11/15 결제화면 교체(439f150) 때 같이 날아갔다 —
+  // 백엔드(available-slots)는 그대로 살아 있어서 화면만 다시 붙인 것이다.
+  // 판정 기준이 자동배정(tryAutoAssign)과 같아서, 여기서 "가능"이면 접수 후에도 실제로 붙는다.
+  const [slotMap, setSlotMap] = useState<Record<string, boolean> | null>(null);
+  const [regionCovered, setRegionCovered] = useState<boolean | null>(null);
+  const [areaDrivers, setAreaDrivers] = useState<{ name: string }[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  // 배정이 안 되는 지역·날짜에서 그냥 막아버리면 손님이 그 자리에서 나간다 —
+  // 입력해둔 내용을 상담(buyer_requests)으로 넘겨 대시보드에 남긴다.
+  const [consultSent, setConsultSent] = useState(false);
+  const [consultSending, setConsultSending] = useState(false);
+
+  useEffect(() => {
+    if (!form.address || !date) {
+      setSlotMap(null);
+      setRegionCovered(null);
+      setAreaDrivers([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingSlots(true);
+    fetch(`${API}/external/request/available-slots?address=${encodeURIComponent(form.address)}&date=${date}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (cancelled || !data) return;
+        const map: Record<string, boolean> = {};
+        (Array.isArray(data.slots) ? data.slots : []).forEach((x: { time: string; available: boolean }) => {
+          map[x.time] = x.available;
+        });
+        setSlotMap(map);
+        setRegionCovered(data.regionCovered ?? true);
+        setAreaDrivers(Array.isArray(data.activeDrivers) ? data.activeDrivers : []);
+        // 이미 골라둔 시간이 이번 조회에서 불가로 바뀌면 선택을 풀어준다 —
+        // 안 풀면 화면엔 비활성인데 값은 남아 그대로 접수된다.
+        setTime(prev => (prev && map[prev] === false ? '' : prev));
+      })
+      .catch(() => {
+        // 조회 실패는 "가능/불가 모름"이지 "불가"가 아니다 — 폼을 막지 않고 원래대로 둔다.
+        if (!cancelled) { setSlotMap(null); setRegionCovered(null); setAreaDrivers([]); }
+      })
+      .finally(() => { if (!cancelled) setLoadingSlots(false); });
+    return () => { cancelled = true; };
+  }, [form.address, date]);
+
   useEffect(() => {
     if (document.getElementById('daum-postcode')) return;
     const s = document.createElement('script');
@@ -102,6 +147,49 @@ function InspectionInner() {
 
   const amount = carClass ? priceFor(origin, carClass) : null;
   const typeInfo = INSPECTION_TYPES.find(t => t.key === type)!;
+
+  // 배정이 안 되는 지역/날짜에서 "접수 불가"로 끝내지 않고 상담으로 넘긴다.
+  // 저장되는 곳은 검차 접수(bookings)가 아니라 상담(buyer_requests)이라
+  // 대시보드 "상담" 목록에 뜨고, 평가사 배정·알림톡은 타지 않는다.
+  const sendConsult = async () => {
+    if (!form.name.trim()) return alert('성함을 입력해주세요.');
+    if (!form.contact.trim()) return alert('연락처를 입력해주세요.');
+    if (!privacyAgreed) return alert('개인정보 수집 및 이용에 동의해주세요.');
+
+    setConsultSending(true);
+    try {
+      const memo = [
+        `상담 전환 사유: ${regionCovered === false ? '담당 평가사 없는 지역' : '희망 날짜 배정 불가'}`,
+        `상품: ${typeInfo.label}`,
+        carClass ? `차급: ${origin === 'DOMESTIC' ? '국산' : '수입'} ${carClass}` : null,
+        form.carNumber ? `차량번호: ${form.carNumber}` : null,
+        form.carModel ? `차량명: ${form.carModel}` : null,
+        form.listingUrl ? `매물: ${form.listingUrl}` : null,
+        form.memo ? `전달사항: ${form.memo}` : null,
+      ].filter(Boolean).join(' / ');
+
+      const res = await fetch(`${API}/external/buyer-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'INSPECTION_CONSULT',
+          buyerName: form.name.trim(),
+          contact: form.contact.trim(),
+          address: form.address.trim(),
+          detailAddress: form.addressDetail.trim(),
+          preferredDateTime: date ? `${date} ${time || ''}`.trim() : '미정',
+          additionalMemo: memo,
+          privacyAgreed,
+        }),
+      });
+      if (!res.ok) throw new Error('상담 접수 실패');
+      setConsultSent(true);
+    } catch {
+      alert('상담 신청 중 오류가 발생했습니다. 070-4138-2017로 연락 주세요.');
+    } finally {
+      setConsultSending(false);
+    }
+  };
 
   const submit = async () => {
     if (!carClass || !amount) return alert('차급을 선택해주세요.');
@@ -357,23 +445,92 @@ function InspectionInner() {
               {/* 날짜를 안 고르면 시간 버튼이 전부 흐려지는데, 이유를 안 적으면
                   "전부 마감"으로 읽고 그 자리에서 나간다. */}
               {!date && <span className="font-bold text-slate-400 ml-1.5">— 날짜를 먼저 선택해 주세요</span>}
+              {date && !form.address && <span className="font-bold text-slate-400 ml-1.5">— 주소를 넣으면 가능한 시간만 남습니다</span>}
             </label>
+
+            {loadingSlots && <p className="text-xs text-slate-400 mb-2">방문 가능한 평가사를 확인하는 중…</p>}
+
+            {/* ① 담당 평가사가 아예 없는 지역 — 날짜를 바꿔도 소용없으니 상담으로 넘긴다 */}
+            {!loadingSlots && regionCovered === false && (
+              <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+                <p className="text-xs font-black text-rose-700 mb-1">이 지역은 아직 방문 가능한 평가사가 없습니다</p>
+                <p className="text-[11px] text-rose-600 leading-relaxed mb-3">
+                  날짜를 바꿔도 바로 배정이 어렵습니다. 상담으로 남겨주시면 가까운 평가사를 찾아 연락드리겠습니다.
+                </p>
+                {consultSent ? (
+                  <p className="text-xs font-black text-rose-700">상담이 접수되었습니다. 곧 연락드리겠습니다.</p>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={sendConsult}
+                      disabled={consultSending}
+                      className="flex-1 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white text-xs font-black py-2.5 rounded-lg transition-colors"
+                    >
+                      {consultSending ? '접수 중…' : '상담으로 신청하기'}
+                    </button>
+                    <a
+                      href="tel:07041382017"
+                      className="shrink-0 border border-rose-300 text-rose-700 text-xs font-black px-4 py-2.5 rounded-lg hover:bg-rose-100 transition-colors"
+                    >
+                      전화
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ② 담당자는 있는데 그 날짜가 전부 찬 경우 — 먼저 다른 날짜를 권하고, 그래도 안 되면 상담 */}
+            {!loadingSlots && regionCovered !== false && slotMap && Object.values(slotMap).every(v => !v) && (
+              <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-xs font-black text-amber-700 mb-1">이 날짜는 방문 가능한 평가사가 없습니다</p>
+                <p className="text-[11px] text-amber-700/80 leading-relaxed mb-3">
+                  다른 날짜를 선택해 주세요. 날짜를 바꾸기 어려우시면 상담으로 남겨주시면 일정을 조율해 드립니다.
+                </p>
+                {consultSent ? (
+                  <p className="text-xs font-black text-amber-700">상담이 접수되었습니다. 곧 연락드리겠습니다.</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={sendConsult}
+                    disabled={consultSending}
+                    className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-200 text-white text-xs font-black py-2.5 rounded-lg transition-colors"
+                  >
+                    {consultSending ? '접수 중…' : '상담으로 신청하기'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ③ 가능할 때 — 빈 시간표만 보여주는 것보다 "몇 명이 뛰고 있다"가 훨씬 믿음이 간다 */}
+            {!loadingSlots && regionCovered && areaDrivers.length > 0 && (
+              <p className="mb-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-bold text-emerald-700">
+                이 지역에서 활동 중인 평가사 {areaDrivers.length}명 — 아래 선택 가능한 시간에 방문할 수 있습니다.
+              </p>
+            )}
+
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-              {TIME_SLOTS.map(t => (
-                <button
-                  key={t}
-                  type="button"
-                  disabled={!date}
-                  onClick={() => setTime(t)}
-                  className={`py-2.5 rounded-lg border text-xs font-bold transition-colors ${
-                    !date ? 'opacity-30 border-slate-200'
-                    : time === t ? 'border-violet-500 bg-violet-50 text-violet-700'
-                    : 'border-slate-200 text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
+              {TIME_SLOTS.map(t => {
+                // 서버가 안 돌려주는 시간(17:30·18:00)은 "불가"가 아니라 "확인 안 됨"이라 열어둔다 —
+                // 평가사 일정에 따라 조정될 수 있다는 안내가 폼 아래에 이미 있다.
+                const slotClosed = !!slotMap && slotMap[t] === false;
+                const disabled = !date || loadingSlots || slotClosed || regionCovered === false;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => setTime(t)}
+                    className={`py-2.5 rounded-lg border text-xs font-bold transition-colors ${
+                      disabled ? 'opacity-30 border-slate-200'
+                      : time === t ? 'border-violet-500 bg-violet-50 text-violet-700'
+                      : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
