@@ -185,6 +185,18 @@ export default function SimpleRequestByCompanyPage() {
         return () => { cancelled = true; };
     }, [formData.address, formData.preferredDateTime]);
 
+    // 배정 가능 여부 판정은 여기 한 곳에서만 한다 — 화면 문구와 접수 시 "미확정" 표시가
+    // 같은 값을 쓰게 하기 위함이다. 둘이 갈리면 경고는 떴는데 확정으로 접수되는 일이 생긴다.
+    const coverageIssue: string | null = (() => {
+        if (!formData.address || !coverage) return null;
+        if (!coverage.regionCovered) return '담당 진단사 없는 지역';
+        if (coverage.activeDrivers.length === 0) return '담당 진단사 전원 활동중지';
+        const t = formData.preferredDateTime.split(' ')[1] || '';
+        const slot = coverage.slots.find(x => x.time === t);
+        // 서버가 안 돌려주는 시간(17:30·18:00 등)은 undefined — "불가"가 아니라 "확인 안 됨"이다.
+        return slot && !slot.available ? '희망 시간 배정 불가' : null;
+    })();
+
     const checkDuplicateCar = async (carNum: string) => {
         if (carNum.length < 7) return;
         try {
@@ -385,7 +397,16 @@ export default function SimpleRequestByCompanyPage() {
             const dbResponse = await fetch('https://carvior.store/api/v1/external/request', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...submitData, source: isSelfOwned ? `self-${companyId}` : companyId, additionalMemo: formData.additionalMemo.trim(), privacyAgreed }),
+                body: JSON.stringify({
+                    ...submitData,
+                    source: isSelfOwned ? `self-${companyId}` : companyId,
+                    additionalMemo: formData.additionalMemo.trim(),
+                    privacyAgreed,
+                    // 배정이 안 붙을 걸 알면서 받은 건은 "미확정"으로 들어간다 —
+                    // 상담 목록은 발주사 계정에서 안 보여서, 같은 신청 목록 안에 남겨야 한다.
+                    unconfirmed: !!coverageIssue,
+                    unconfirmedReason: coverageIssue,
+                }),
             });
 
             const dbResult = await dbResponse.json();
@@ -405,7 +426,9 @@ export default function SimpleRequestByCompanyPage() {
                 alert(
                     dbResult.restricted
                         ? `✅ 접수 완료!\n${dbResult.message}`
-                        : `✅ 신청 완료!\n정상적으로 접수되었습니다.`
+                        : coverageIssue
+                            ? `✅ 접수 완료 (미확정)\n${coverageIssue} — 담당자가 일정을 잡아 연락드립니다.`
+                            : `✅ 신청 완료!\n정상적으로 접수되었습니다.`
                 );
                 window.location.reload();
             } else {
@@ -705,49 +728,39 @@ export default function SimpleRequestByCompanyPage() {
                                 onChange={handleChange}
                             />
 
-                            {/* 배정 가능 여부 — 자동배정과 같은 기준이라 여기 경고가 뜨면 실제로도 안 붙는다 */}
+                            {/* 배정 가능 여부 — 자동배정과 같은 기준이라 여기 경고가 뜨면 실제로도 안 붙는다.
+                                접수를 막지는 않는다. 대신 그 건은 "미확정"으로 들어가서
+                                대시보드 신청 목록에 표시된다(상담 목록은 발주사 계정에서 안 보인다). */}
                             {formData.address && (
                                 coverageLoading ? (
                                     <p className="text-[11px] text-zinc-400">배정 가능한 진단사를 확인하는 중…</p>
-                                ) : !coverage ? null : !coverage.regionCovered ? (
-                                    <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3">
-                                        <p className="text-xs font-extrabold text-rose-700 mb-1">⚠️ 이 지역을 담당하는 진단사가 없습니다</p>
-                                        <p className="text-[11px] leading-relaxed text-rose-600">
-                                            접수는 되지만 자동배정이 되지 않아 관리자가 직접 배정해야 합니다.
-                                            급한 건이면 070-4138-2017로 알려주세요.
+                                ) : !coverage ? null : coverageIssue ? (
+                                    <div className={clsx(
+                                        'rounded-2xl border px-4 py-3',
+                                        coverageIssue === '담당 진단사 없는 지역' ? 'border-rose-200 bg-rose-50' : 'border-amber-200 bg-amber-50',
+                                    )}>
+                                        <p className={clsx(
+                                            'text-xs font-extrabold mb-1',
+                                            coverageIssue === '담당 진단사 없는 지역' ? 'text-rose-700' : 'text-amber-700',
+                                        )}>
+                                            ⚠️ {coverageIssue === '담당 진단사 없는 지역' ? '이 지역을 담당하는 진단사가 없습니다'
+                                                : coverageIssue === '담당 진단사 전원 활동중지' ? '지금은 활동 중인 진단사가 없습니다'
+                                                : '선택하신 시간에 가능한 진단사가 없습니다'}
+                                        </p>
+                                        <p className={clsx(
+                                            'text-[11px] leading-relaxed',
+                                            coverageIssue === '담당 진단사 없는 지역' ? 'text-rose-600' : 'text-amber-700/80',
+                                        )}>
+                                            {coverageIssue === '희망 시간 배정 불가' && coverage.slots.some(x => x.available)
+                                                ? `이 날짜에 가능한 시간: ${coverage.slots.filter(x => x.available).map(x => x.time).join(', ')}`
+                                                : '그대로 접수하면 "미확정 예약"으로 들어가고 담당자가 일정을 잡아 연락합니다. 급하면 070-4138-2017.'}
                                         </p>
                                     </div>
-                                ) : coverage.activeDrivers.length === 0 ? (
-                                    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                                        <p className="text-xs font-extrabold text-amber-700 mb-1">⚠️ 지금은 활동 중인 진단사가 없습니다</p>
-                                        <p className="text-[11px] leading-relaxed text-amber-700/80">
-                                            이 지역 담당 진단사가 전부 활동중지 상태예요. 접수는 되지만 배정이 늦어질 수 있습니다.
-                                        </p>
-                                    </div>
-                                ) : (() => {
-                                    const chosenTime = formData.preferredDateTime.split(' ')[1] || '';
-                                    const chosenSlot = coverage.slots.find(s => s.time === chosenTime);
-                                    const openTimes = coverage.slots.filter(s => s.available).map(s => s.time);
-                                    // 서버가 안 돌려주는 시간(17:30·18:00 등)은 chosenSlot이 undefined —
-                                    // "불가"가 아니라 "확인 안 됨"이라 경고하지 않는다.
-                                    if (chosenSlot && !chosenSlot.available) {
-                                        return (
-                                            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-                                                <p className="text-xs font-extrabold text-amber-700 mb-1">⚠️ 선택하신 시간에 가능한 진단사가 없습니다</p>
-                                                <p className="text-[11px] leading-relaxed text-amber-700/80">
-                                                    {openTimes.length > 0
-                                                        ? `이 날짜에 가능한 시간: ${openTimes.join(', ')}`
-                                                        : '이 날짜는 종일 일정이 찼습니다. 다른 날짜를 선택해 주세요.'}
-                                                </p>
-                                            </div>
-                                        );
-                                    }
-                                    return (
-                                        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-extrabold text-emerald-700">
-                                            ✅ 이 지역 담당 진단사 {coverage.activeDrivers.length}명 — 배정 가능합니다
-                                        </p>
-                                    );
-                                })()
+                                ) : (
+                                    <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-extrabold text-emerald-700">
+                                        ✅ 이 지역 담당 진단사 {coverage.activeDrivers.length}명 — 배정 가능합니다
+                                    </p>
+                                )
                             )}
                         </div>
                     </div>

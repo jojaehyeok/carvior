@@ -51,7 +51,7 @@ function InspectionInner() {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState<{ amount: number } | null>(null);
+  const [done, setDone] = useState<{ amount: number; unconfirmed?: boolean } | null>(null);
   // 개인정보 동의 — 접수하면 평가사·담당자에게 연락처와 주소가 넘어간다.
   // 동의 없이 받으면 안 되고, 받은 값을 서버에 같이 보낸다(privacyAgreed).
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
@@ -148,57 +148,24 @@ function InspectionInner() {
   const amount = carClass ? priceFor(origin, carClass) : null;
   const typeInfo = INSPECTION_TYPES.find(t => t.key === type)!;
 
-  // 배정이 안 되는 지역/날짜에서 "접수 불가"로 끝내지 않고 상담으로 넘긴다.
-  // 저장되는 곳은 검차 접수(bookings)가 아니라 상담(buyer_requests)이라
-  // 대시보드 "상담" 목록에 뜨고, 평가사 배정·알림톡은 타지 않는다.
-  const sendConsult = async () => {
-    if (!form.name.trim()) return alert('성함을 입력해주세요.');
-    if (!form.contact.trim()) return alert('연락처를 입력해주세요.');
-    if (!privacyAgreed) return alert('개인정보 수집 및 이용에 동의해주세요.');
+  // 배정이 안 되는 지역/날짜라고 접수를 막아버리면 손님은 그 자리에서 나간다.
+  // 그렇다고 상담(buyer_requests)으로 빼면 발주사 계정에서는 상담 목록 자체가 안 보여서
+  // 묻힌다 — 그냥 예약으로 받고 "미확정"으로 표시한다(2026-11-26 유저 지시).
+  // 담당자가 일정을 잡아 연락한 뒤 대시보드에서 확정으로 바꾼다.
+  const unconfirmedReason = regionCovered === false ? '담당 평가사 없는 지역' : '희망 날짜 배정 불가';
 
-    setConsultSending(true);
-    try {
-      const memo = [
-        `상담 전환 사유: ${regionCovered === false ? '담당 평가사 없는 지역' : '희망 날짜 배정 불가'}`,
-        `상품: ${typeInfo.label}`,
-        carClass ? `차급: ${origin === 'DOMESTIC' ? '국산' : '수입'} ${carClass}` : null,
-        form.carNumber ? `차량번호: ${form.carNumber}` : null,
-        form.carModel ? `차량명: ${form.carModel}` : null,
-        form.listingUrl ? `매물: ${form.listingUrl}` : null,
-        form.memo ? `전달사항: ${form.memo}` : null,
-      ].filter(Boolean).join(' / ');
-
-      const res = await fetch(`${API}/external/buyer-request`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source: 'INSPECTION_CONSULT',
-          buyerName: form.name.trim(),
-          contact: form.contact.trim(),
-          address: form.address.trim(),
-          detailAddress: form.addressDetail.trim(),
-          preferredDateTime: date ? `${date} ${time || ''}`.trim() : '미정',
-          additionalMemo: memo,
-          privacyAgreed,
-        }),
-      });
-      if (!res.ok) throw new Error('상담 접수 실패');
-      setConsultSent(true);
-    } catch {
-      alert('상담 신청 중 오류가 발생했습니다. 070-4138-2017로 연락 주세요.');
-    } finally {
-      setConsultSending(false);
-    }
-  };
-
-  const submit = async () => {
+  // unconfirmed=true면 시간 선택을 요구하지 않는다 — 어차피 그 날짜엔 고를 수 있는
+  // 시간이 없어서 들어온 경로다. 날짜는 "희망일"로 받아 두고 담당자가 조율한다.
+  const submit = async (unconfirmed = false) => {
     if (!carClass || !amount) return alert('차급을 선택해주세요.');
     if (!form.name.trim()) return alert('성함을 입력해주세요.');
     if (!form.contact.trim()) return alert('연락처를 입력해주세요.');
     if (!form.address.trim()) return alert('차량이 있는 주소를 입력해주세요.');
-    if (!date || !time) return alert('희망 방문 날짜와 시간을 선택해주세요.');
+    if (!date) return alert('희망 방문 날짜를 선택해주세요.');
+    if (!unconfirmed && !time) return alert('희망 방문 시간을 선택해주세요.');
     if (!privacyAgreed) return alert('개인정보 수집 및 이용에 동의해주세요.');
 
+    if (unconfirmed) setConsultSending(true);
     setSubmitting(true);
     try {
       const res = await fetch(`${API}/external/request`, {
@@ -215,13 +182,17 @@ function InspectionInner() {
           contact: form.contact.replace(/-/g, '').trim(),
           dealerName: form.name.trim(),
           address: `${form.address} ${form.addressDetail}`.trim(),
-          preferredDateTime: `${date} ${time}`,
+          preferredDateTime: `${date} ${time || ''}`.trim(),
+          // 일정이 안 잡힌 채로 받은 건이라는 표시 — 대시보드 신청 목록에 "미확정"으로 뜬다.
+          unconfirmed,
+          unconfirmedReason: unconfirmed ? unconfirmedReason : null,
           paymentMethod: 'BANK_TRANSFER',
           privacyAgreed,
           carOrigin: origin,
           amount,
           listingUrl: form.listingUrl.trim() || '',
           additionalMemo: [
+            unconfirmed ? `[일정 미확정] ${unconfirmedReason} — 담당자 일정 조율 필요` : null,
             `[검차 종류] ${typeInfo.label}`,
             `[차급] ${origin === 'DOMESTIC' ? '국산' : '수입'} · ${classesFor(origin).find(c => c.key === carClass)?.label}`,
             form.memo.trim(),
@@ -232,12 +203,14 @@ function InspectionInner() {
         const err = await res.json().catch(() => null);
         throw new Error(err?.message ?? '접수에 실패했습니다.');
       }
-      setDone({ amount });
+      if (unconfirmed) setConsultSent(true);
+      setDone({ amount, unconfirmed });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e: any) {
       alert(e?.message ?? '접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
+      setConsultSending(false);
     }
   };
 
@@ -246,11 +219,22 @@ function InspectionInner() {
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-5 py-16">
         <div className="bg-white rounded-2xl border border-slate-200 p-8 max-w-md w-full text-center">
           <div className="w-14 h-14 bg-violet-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">🏦</div>
-          <h1 className="text-xl font-black text-slate-900 mb-1.5">신청이 접수되었습니다</h1>
-          <p className="text-sm text-slate-500 leading-relaxed mb-6">
-            아래 계좌로 <strong className="text-slate-800">{won(done.amount)}</strong>을 입금해주세요.<br />
-            입금이 확인되면 평가사가 배정되고 담당자가 연락드립니다.
-          </p>
+          <h1 className="text-xl font-black text-slate-900 mb-1.5">
+            {done.unconfirmed ? '접수되었습니다 (일정 미확정)' : '신청이 접수되었습니다'}
+          </h1>
+          {done.unconfirmed ? (
+            // 일정이 안 잡힌 건에 "입금하세요"부터 띄우면 안 된다 —
+            // 방문 날짜가 정해지기도 전에 돈부터 받는 꼴이 된다.
+            <p className="text-sm text-slate-500 leading-relaxed mb-6">
+              선택하신 날짜에는 방문 가능한 평가사가 없어 <strong className="text-slate-800">일정을 조율한 뒤</strong> 연락드립니다.<br />
+              입금은 방문 일정이 확정된 다음에 하셔도 됩니다.
+            </p>
+          ) : (
+            <p className="text-sm text-slate-500 leading-relaxed mb-6">
+              아래 계좌로 <strong className="text-slate-800">{won(done.amount)}</strong>을 입금해주세요.<br />
+              입금이 확인되면 평가사가 배정되고 담당자가 연락드립니다.
+            </p>
+          )}
           <div className="bg-slate-50 rounded-xl p-4 text-left space-y-2 mb-6">
             {[['은행', BANK_INFO.bank], ['계좌번호', BANK_INFO.number], ['예금주', BANK_INFO.holder]].map(([l, v]) => (
               <div key={l} className="flex justify-between text-sm">
@@ -455,19 +439,19 @@ function InspectionInner() {
               <div className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
                 <p className="text-xs font-black text-rose-700 mb-1">이 지역은 아직 방문 가능한 평가사가 없습니다</p>
                 <p className="text-[11px] text-rose-600 leading-relaxed mb-3">
-                  날짜를 바꿔도 바로 배정이 어렵습니다. 상담으로 남겨주시면 가까운 평가사를 찾아 연락드리겠습니다.
+                  날짜를 바꿔도 바로 배정이 어렵습니다. 그대로 접수해 두시면 가까운 평가사를 찾아 일정을 잡고 연락드리겠습니다.
                 </p>
                 {consultSent ? (
-                  <p className="text-xs font-black text-rose-700">상담이 접수되었습니다. 곧 연락드리겠습니다.</p>
+                  <p className="text-xs font-black text-rose-700">접수되었습니다. 일정을 잡아 연락드리겠습니다.</p>
                 ) : (
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      onClick={sendConsult}
-                      disabled={consultSending}
+                      onClick={() => submit(true)}
+                      disabled={consultSending || submitting}
                       className="flex-1 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white text-xs font-black py-2.5 rounded-lg transition-colors"
                     >
-                      {consultSending ? '접수 중…' : '상담으로 신청하기'}
+                      {consultSending ? '접수 중…' : '일정 협의로 접수하기'}
                     </button>
                     <a
                       href="tel:07041382017"
@@ -485,18 +469,18 @@ function InspectionInner() {
               <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
                 <p className="text-xs font-black text-amber-700 mb-1">이 날짜는 방문 가능한 평가사가 없습니다</p>
                 <p className="text-[11px] text-amber-700/80 leading-relaxed mb-3">
-                  다른 날짜를 선택해 주세요. 날짜를 바꾸기 어려우시면 상담으로 남겨주시면 일정을 조율해 드립니다.
+                  다른 날짜를 선택해 주세요. 날짜를 바꾸기 어려우시면 그대로 접수해 두시면 담당자가 일정을 조율해 드립니다.
                 </p>
                 {consultSent ? (
-                  <p className="text-xs font-black text-amber-700">상담이 접수되었습니다. 곧 연락드리겠습니다.</p>
+                  <p className="text-xs font-black text-amber-700">접수되었습니다. 일정을 잡아 연락드리겠습니다.</p>
                 ) : (
                   <button
                     type="button"
-                    onClick={sendConsult}
-                    disabled={consultSending}
+                    onClick={() => submit(true)}
+                    disabled={consultSending || submitting}
                     className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-200 text-white text-xs font-black py-2.5 rounded-lg transition-colors"
                   >
-                    {consultSending ? '접수 중…' : '상담으로 신청하기'}
+                    {consultSending ? '접수 중…' : '일정 협의로 접수하기'}
                   </button>
                 )}
               </div>
@@ -591,7 +575,7 @@ function InspectionInner() {
 
           <button
             type="button"
-            onClick={submit}
+            onClick={() => submit()}
             disabled={submitting || !amount || !privacyAgreed}
             className="w-full mt-3 bg-violet-600 hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-black py-4 rounded-xl text-sm transition-colors"
           >
