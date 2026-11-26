@@ -30,7 +30,7 @@ const API = 'https://carvior.store/api/v1';
 const TIME_SLOTS = [
   '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
   '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-  '17:00', '17:30', '18:00',
+  '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00',
 ];
 
 const won = (n: number) => `${n.toLocaleString()}원`;
@@ -495,8 +495,9 @@ function InspectionInner() {
 
             <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
               {TIME_SLOTS.map(t => {
-                // 서버가 안 돌려주는 시간(17:30·18:00)은 "불가"가 아니라 "확인 안 됨"이라 열어둔다 —
-                // 평가사 일정에 따라 조정될 수 있다는 안내가 폼 아래에 이미 있다.
+                // 서버 목록(PUBLIC_BOOKING_TIME_SLOTS)과 여기 TIME_SLOTS는 같아야 한다.
+                // 한쪽이 짧으면 그 뒤 시간대는 slotMap에 아예 안 들어와서(undefined)
+                // 검증 없이 열린 채로 접수된다. 둘 다 09:00~20:00이다.
                 const slotClosed = !!slotMap && slotMap[t] === false;
                 const disabled = !date || loadingSlots || slotClosed || regionCovered === false;
                 return (

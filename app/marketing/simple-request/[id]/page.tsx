@@ -26,7 +26,7 @@ function DateTimeSelector({ onDateTimeSelect }: { onDateTimeSelect: (date: strin
         };
     });
 
-    const timeSlots = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00'];
+    const timeSlots = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00'];
 
     useEffect(() => {
         if (selectedDate && selectedTime) {
@@ -193,7 +193,9 @@ export default function SimpleRequestByCompanyPage() {
         if (coverage.activeDrivers.length === 0) return '담당 진단사 전원 활동중지';
         const t = formData.preferredDateTime.split(' ')[1] || '';
         const slot = coverage.slots.find(x => x.time === t);
-        // 서버가 안 돌려주는 시간(17:30·18:00 등)은 undefined — "불가"가 아니라 "확인 안 됨"이다.
+        // 서버 목록(PUBLIC_BOOKING_TIME_SLOTS)에 없는 시간은 undefined로 나온다 —
+        // "불가"가 아니라 "확인 안 됨"이라 경고하지 않는다. 지금은 양쪽 다 09:00~20:00이라
+        // 그런 칸이 없지만, 한쪽만 늘리면 다시 생긴다.
         return slot && !slot.available ? '희망 시간 배정 불가' : null;
     })();
 
